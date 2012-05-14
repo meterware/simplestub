@@ -8,6 +8,34 @@
     <artifactId>simplestub</artifactId>
     <version>1.0.b001</version>
 
+    <developers>
+        <developer>
+            <id>russgold</id>
+            <name>Russell Gold</name>
+            <organization>Oracle, Inc.</organization>
+            <roles>
+                <role>lead</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <licenses>
+      <license>
+          <name>CDDL+GPL</name>
+          <url>https://glassfish.java.net/public/CDDL+GPL.html</url>
+      </license>
+    </licenses>
+
+    <scm>
+      <url>https://hg.java.net/hg/simplestub~hg</url>
+    </scm>
+
+    <issueManagement>
+        <system>JIRA</system>
+        <url>http://java.net/jira/browse/SIMPLESTUB</url>
+    </issueManagement>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -16,7 +44,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
