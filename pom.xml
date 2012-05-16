@@ -7,6 +7,23 @@
     <groupId>org.glassfish.simplestub</groupId>
     <artifactId>simplestub</artifactId>
     <version>1.0.b001</version>
+    <packaging>jar</packaging>
+    <name>SimpleStub</name>
+    <description>A tool to generate stub classes from abstract classes</description>
+
+    <url>http://java.net/projects/simplestub</url>
+
+    <licenses>
+        <license>
+          <name>CDDL+GPL</name>
+          <url>https://glassfish.java.net/public/CDDL+GPL.html</url>
+      </license>
+    </licenses>
+
+    <scm>
+        <url>http://java.net/projects/simplestub/sources/hg/show</url>
+        <connection>scm:hg:https://hg.java.net/hg/simplestub~hg</connection>
+    </scm>
 
     <developers>
         <developer>
@@ -19,17 +36,6 @@
             </roles>
         </developer>
     </developers>
-
-    <licenses>
-      <license>
-          <name>CDDL+GPL</name>
-          <url>https://glassfish.java.net/public/CDDL+GPL.html</url>
-      </license>
-    </licenses>
-
-    <scm>
-      <url>https://hg.java.net/hg/simplestub~hg</url>
-    </scm>
 
     <issueManagement>
         <system>JIRA</system>
