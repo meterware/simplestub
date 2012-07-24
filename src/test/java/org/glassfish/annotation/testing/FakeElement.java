@@ -138,7 +138,7 @@ abstract class FakeExecutableElement extends FakeElement implements ExecutableEl
         super(name, enclosingClass);
         modifierSet = createModifierSet(modifiers);
         for (Class parameterType: parameterTypes) {
-            parameters.add(new FakeVariableElement( "arg" + parameters.size(), this, parameterType));
+            parameters.add(new FakeVariableElement( "argument" + parameters.size(), this, parameterType));
         }
     }
 

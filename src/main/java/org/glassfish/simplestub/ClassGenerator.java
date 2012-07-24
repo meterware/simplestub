@@ -146,9 +146,11 @@ class ClassGenerator {
 
     private String createConstructorBody(ExecutableElement constructor) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < constructor.getParameters().size(); i++) {
-            if (i != 0) sb.append(", ");
-            sb.append("arg").append(i);
+        boolean isFirstArg = true;
+        for (VariableElement element : constructor.getParameters()) {
+            if (!isFirstArg) sb.append(", ");
+            sb.append(element.getSimpleName());
+            isFirstArg = false;
         }
         return " { super(" + sb.toString() + "); }";
     }

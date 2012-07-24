@@ -20,7 +20,7 @@ public class Stub {
         try {
             return tryToCreate(aClass, parameters);
         } catch (ClassNotFoundException e) {
-            throw new SimpleStubException("No stub defined for " + aClass.getName());
+            throw new SimpleStubException("No stub defined for " + aClass.getName() + ". Possibly the @SimpleStub annotation was omitted.");
         } catch (Exception e) {
             throw new SimpleStubException("Unable to create stub for " + aClass.getName(), e);
         }

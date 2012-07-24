@@ -179,31 +179,31 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void givenClassElement_generateOneArgProtectedStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething, false,
-                "protected int doSomething(int arg0) { return 0; }");
+                "protected int doSomething(int argument0) { return 0; }");
     }
 
     @Test
     public void givenClassElement_generateStrictOneArgProtectedStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething, true,
-                "protected int doSomething(int arg0) { throw new RuntimeException( \"Unexpected call to doSomething(int)\" ); }");
+                "protected int doSomething(int argument0) { throw new RuntimeException( \"Unexpected call to doSomething(int)\" ); }");
     }
 
     @Test
     public void givenClassElement_generateTwoArgPackageStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething2, false,
-                "java.lang.String doSomething2(int arg0, java.util.List arg1) { return null; }");
+                "java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }");
     }
 
     @Test
     public void givenClassElement_generateStrictTwoArgPackageStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething2, true,
-                "java.lang.String doSomething2(int arg0, java.util.List arg1) { throw new RuntimeException( \"Unexpected call to doSomething2(int,java.util.List)\" ); }");
+                "java.lang.String doSomething2(int argument0, java.util.List argument1) { throw new RuntimeException( \"Unexpected call to doSomething2(int,java.util.List)\" ); }");
     }
 
     @Test
     public void givenClassElement_generateBooleanStubMethodWithParameterizedArgument() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething3, false,
-                "boolean doSomething3(java.util.List arg0) { return false; }");
+                "boolean doSomething3(java.util.List argument0) { return false; }");
     }
 
     @Test
@@ -233,7 +233,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void createTwoArgConstructor() throws ClassNotFoundException {
         shouldGenerateConstructor(ExtendingClass.class, twoArgConstructor,
-                "public ExtendingClass__org_glassfish_SimpleStub(java.math.BigInteger arg0, java.util.List arg1) { super(arg0, arg1); }");
+                "public ExtendingClass__org_glassfish_SimpleStub(java.math.BigInteger argument0, java.util.List argument1) { super(argument0, argument1); }");
     }
 
     @Test
@@ -249,10 +249,10 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
                 "public class ExtendingClass__org_glassfish_SimpleStub extends ExtendingClass {",
                 "",
                 "    public ExtendingClass__org_glassfish_SimpleStub() { super(); }",
-                "    public ExtendingClass__org_glassfish_SimpleStub(java.math.BigInteger arg0, java.util.List arg1) { super(arg0, arg1); }",
+                "    public ExtendingClass__org_glassfish_SimpleStub(java.math.BigInteger argument0, java.util.List argument1) { super(argument0, argument1); }",
                 "",
-                "    java.lang.String doSomething2(int arg0, java.util.List arg1) { return null; }",
-                "    boolean doSomething3(java.util.List arg0) { return false; }",
+                "    java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }",
+                "    boolean doSomething3(java.util.List argument0) { return false; }",
                 "    public java.lang.Boolean[] getSwitches() { return null; }",
                 "    java.net.CookiePolicy getPolicy() { return null; }",
                 "",
@@ -272,9 +272,9 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
                 "    public SimpleAbstractTestClass__org_glassfish_SimpleStub() { super(); }",
                 "",
                 "    public void method1() {}",
-                "    protected int doSomething(int arg0) { return 0; }",
-                "    java.lang.String doSomething2(int arg0, java.util.List arg1) { return null; }",
-                "    boolean doSomething3(java.util.List arg0) { return false; }",
+                "    protected int doSomething(int argument0) { return 0; }",
+                "    java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }",
+                "    boolean doSomething3(java.util.List argument0) { return false; }",
                 "    java.net.CookiePolicy getPolicy() { return null; }",
                 "",
                 "}");
