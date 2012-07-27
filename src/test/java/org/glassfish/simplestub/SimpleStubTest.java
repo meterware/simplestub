@@ -64,9 +64,9 @@ public class SimpleStubTest extends SimpleStubTestBase {
     }
 
     @Test
-    public void annotationStringParameter_defaultsToFalse() throws NoSuchMethodException {
+    public void annotationStringParameter_defaultsToTrue() throws NoSuchMethodException {
         Method strict = SimpleStub.class.getMethod("strict");
-        assertEquals(Boolean.FALSE, strict.getDefaultValue());
+        assertEquals(Boolean.TRUE, strict.getDefaultValue());
     }
 
     @Test
@@ -77,6 +77,13 @@ public class SimpleStubTest extends SimpleStubTestBase {
     private void assertProcessorSupportsAnnotation(Class<?> aClass, Class<?> anAnnotationClass) {
         SupportedAnnotationTypes annotation = aClass.getAnnotation(SupportedAnnotationTypes.class);
         assertTrue(Arrays.asList(annotation.value()).contains(anAnnotationClass.getName()));
+    }
+
+    @Test
+    public void process_supportsRelease6Source() {
+        SupportedSourceVersion annotation = StubProcessor.class.getAnnotation(SupportedSourceVersion.class);
+        assertNotNull(annotation );
+        assertEquals(SourceVersion.RELEASE_6, annotation.value());
     }
 
     @Test
