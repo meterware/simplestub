@@ -204,7 +204,7 @@ class ClassGenerator {
             firstParameter = false;
             sb.append(getType(parameterType.asType()));
         }
-        return " { throw new RuntimeException( \"Unexpected call to " + method.getSimpleName().toString() + '(' + sb + ")\" ); }";
+        return " { throw new org.glassfish.simplestub.SimpleStubException( \"Unexpected call to " + method.getSimpleName().toString() + '(' + sb + ")\" ); }";
     }
 
 

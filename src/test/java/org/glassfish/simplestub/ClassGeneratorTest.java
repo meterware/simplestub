@@ -150,7 +150,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void findAccessibleConstructorElements() throws ClassNotFoundException, NoSuchMethodException {
         parseClass(ExtendingClass.class);
-        checkConstructors(new Class[]{}, new Class[]{BigInteger.class, List.class});
+        checkConstructors(new Class[]{BigInteger.class, List.class}, new Class[]{int.class, List.class}, new Class[]{});
     }
 
     @Test
@@ -173,7 +173,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void givenClassElement_generateStrictNoArgStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, method1, true,
-                "public void method1() { throw new RuntimeException( \"Unexpected call to method1()\" ); }");
+                "public void method1() { throw new org.glassfish.simplestub.SimpleStubException( \"Unexpected call to method1()\" ); }");
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void givenClassElement_generateStrictOneArgProtectedStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething, true,
-                "protected int doSomething(int argument0) { throw new RuntimeException( \"Unexpected call to doSomething(int)\" ); }");
+                "protected int doSomething(int argument0) { throw new org.glassfish.simplestub.SimpleStubException( \"Unexpected call to doSomething(int)\" ); }");
     }
 
     @Test
@@ -197,7 +197,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void givenClassElement_generateStrictTwoArgPackageStubMethod() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething2, true,
-                "java.lang.String doSomething2(int argument0, java.util.List argument1) { throw new RuntimeException( \"Unexpected call to doSomething2(int,java.util.List)\" ); }");
+                "java.lang.String doSomething2(int argument0, java.util.List argument1) { throw new org.glassfish.simplestub.SimpleStubException( \"Unexpected call to doSomething2(int,java.util.List)\" ); }");
     }
 
     @Test
@@ -250,6 +250,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
                 "",
                 "    public ExtendingClass__org_glassfish_SimpleStub() { super(); }",
                 "    public ExtendingClass__org_glassfish_SimpleStub(java.math.BigInteger argument0, java.util.List argument1) { super(argument0, argument1); }",
+                "    public ExtendingClass__org_glassfish_SimpleStub(int argument0, java.util.List argument1) { super(argument0, argument1); }",
                 "",
                 "    java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }",
                 "    boolean doSomething3(java.util.List argument0) { return false; }",

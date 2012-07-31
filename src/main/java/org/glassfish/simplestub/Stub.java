@@ -2,6 +2,7 @@ package org.glassfish.simplestub;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes annotated with
@@ -26,6 +27,7 @@ public class Stub {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T tryToCreate(Class<T> aClass, Object[] parameters) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Class<?> stubClass = Class.forName(getStubClassName(aClass));
         if (parameters.length == 0)
@@ -36,7 +38,14 @@ public class Stub {
                 if (isCompatible(constructor.getParameterTypes(), actualParameterTypes))
                     return (T) constructor.newInstance(parameters);
             }
-            throw new SimpleStubException("No matching constructor found for generated stub");
+            StringBuilder sb = new StringBuilder();
+            sb.append("\nactual parameters: ").append(toString(actualParameterTypes));
+            sb.append("\ntried to match constructors with:");
+            for (Constructor<?> constructor : stubClass.getDeclaredConstructors()) {
+                sb.append('\n').append(toString(constructor.getParameterTypes()));
+            }
+
+            throw new SimpleStubException("No matching constructor found for generated stub" + sb);
         }
     }
 
@@ -62,8 +71,39 @@ public class Stub {
         if (actualParameterTypes.length != constructorParameterTypes.length) return false;
 
         for (int i = 0; i < actualParameterTypes.length; i++) {
-            if (!constructorParameterTypes[i].isAssignableFrom(actualParameterTypes[i])) return false;
+            Class<?> constructorParameterType = constructorParameterTypes[i];
+            Class<?> actualParameterType = actualParameterTypes[i];
+            if (!isAssignableFrom(constructorParameterType, actualParameterType)) return false;
         }
         return true;
+    }
+
+    private static boolean isAssignableFrom(Class<?> constructorParameterType, Class<?> actualParameterType) {
+        return constructorParameterType.isAssignableFrom(actualParameterType) ||
+                constructorParameterType.isPrimitive() && getBoxedType(constructorParameterType).isAssignableFrom(actualParameterType);
+    }
+
+    private static Class<?> getBoxedType(Class<?> type) {
+        if (type.equals(Byte.TYPE)) return Byte.class;
+        if (type.equals(Short.TYPE)) return Short.class;
+        if (type.equals(Integer.TYPE)) return Integer.class;
+        if (type.equals(Long.TYPE)) return Long.class;
+        if (type.equals(Boolean.TYPE)) return Boolean.class;
+        if (type.equals(Float.TYPE)) return Float.class;
+        if (type.equals(Double.TYPE)) return Double.class;
+        if (type.equals(Character.TYPE)) return Character.class;
+        if (type.equals(Void.TYPE)) return Void.class;
+        return null;
+    }
+
+    private static String toString(Class<?>[] parameterTypes) {
+        StringBuilder sb = new StringBuilder("(");
+        boolean first = true;
+        for (Class<?> parameterType : parameterTypes) {
+            if (!first) sb.append(", ");
+            first = false;
+            sb.append(parameterType.getName());
+        }
+        return sb.append(')').toString();
     }
 }

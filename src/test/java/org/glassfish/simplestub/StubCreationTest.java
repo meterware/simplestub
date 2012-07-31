@@ -34,6 +34,12 @@ public class StubCreationTest {
     }
 
     @Test
+    public void whenStubConstructorParametersIncludePrimitiveType_matchBoxedType() {
+        ExtendingClass extendingClass = Stub.create(ExtendingClass.class, 15, Arrays.asList(1, 2, 3));
+        assertEquals(25, extendingClass.doSomething(10));
+    }
+
+    @Test
     public void whenStubIsStaticNestedClass_computeStubClassName() {
         AbstractClass2.InnerClass1 innerClass = Stub.create(AbstractClass2.InnerClass1.class);
         assertEquals(3,innerClass.version());
