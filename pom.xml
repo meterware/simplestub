@@ -27,7 +27,7 @@
     <scm>
         <url>http://java.net/projects/simplestub/sources/hg/show</url>
         <developerConnection>scm:hg:https://hg.java.net/hg/simplestub~hg</developerConnection>
-        <connection>https://hg.java.net/hg/simplestub~hg</connection>
+        <connection>scm:hg:https://hg.java.net/hg/simplestub~hg</connection>
     </scm>
 
     <developers>

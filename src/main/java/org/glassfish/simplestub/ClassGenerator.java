@@ -25,7 +25,7 @@ class ClassGenerator {
     private Elements elementUtils;
     private static final List<TypeKind> NUMERIC_KINDS = Arrays.asList(INT, CHAR, SHORT, LONG, FLOAT, DOUBLE);
 
-    ClassGenerator(TypeElement annotatedClass, Elements elementUtils) throws ClassNotFoundException {
+    ClassGenerator(TypeElement annotatedClass, Elements elementUtils) {
         classElement = annotatedClass;
         this.elementUtils = elementUtils;
         simpleStub = annotatedClass.getAnnotation(SimpleStub.class);
@@ -69,7 +69,7 @@ class ClassGenerator {
         return packageElement.isUnnamed() ? "" : packageElement.getQualifiedName().toString();
     }
 
-    void generateStub(Writer writer) throws IOException, ClassNotFoundException {
+    void generateStub(Writer writer) throws IOException {
         BufferedWriter br = new BufferedWriter(writer);
         writePackageHeader(br);
         writeClassHeader(br);
@@ -92,7 +92,7 @@ class ClassGenerator {
             writeLine(br, "    " + generateConstructor(constructor) );
     }
 
-    private void writeMethods(BufferedWriter br) throws ClassNotFoundException, IOException {
+    private void writeMethods(BufferedWriter br) throws IOException {
         for (ExecutableElement abstractMethod : getAbstractMethodElements())
             writeLine(br, "    " + generateMethod(abstractMethod));
     }

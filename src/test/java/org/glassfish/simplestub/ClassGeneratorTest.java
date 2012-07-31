@@ -22,6 +22,7 @@ import java.net.CookiePolicy;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ClassGeneratorTest extends SimpleStubTestBase {
 
@@ -134,17 +135,38 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     private void checkConstructors(Class[]... parameters) {
         ExecutableElement[] constructors = generator.getConstructorElements();
         assertEquals(parameters.length, constructors.length);
-        for (int i = 0; i < parameters.length; i++)
-            checkConstructor(constructors[i], parameters[i]);
+        for (Class[] parameter : parameters)
+            constructors = removeMatchingConstructor(constructors, parameter);
+        assertEquals(0, constructors.length);
     }
 
-    private void checkConstructor(ExecutableElement constructor, Class... parameters) {
-        assertEquals(ElementKind.CONSTRUCTOR, constructor.getKind());
-        assertEquals(parameters.length, constructor.getParameters().size());
+    private ExecutableElement[] removeMatchingConstructor(ExecutableElement[] constructors, Class[] parameters) {
+        for (int i = 0, constructorsLength = constructors.length; i < constructorsLength; i++) {
+            ExecutableElement constructor = constructors[i];
+            assertEquals(ElementKind.CONSTRUCTOR, constructor.getKind());
+            if (parametersMatch(constructor, parameters))
+                return removeElement( constructors, i);
+        }
+        fail( "No matching constructor with parameters (" + Arrays.asList(parameters));
+        return null;
+    }
+
+    private boolean parametersMatch(ExecutableElement constructor, Class[] parameters) {
+        if (constructor.getParameters().size() != parameters.length) return false;
+
         for (int i = 0; i < parameters.length; i++) {
             VariableElement variableElement = constructor.getParameters().get(i);
-            assertEquals(parameters[i].getName(), variableElement.asType().toString());
+            if (!parameters[i].getName().equals(variableElement.asType().toString()))
+                return false;
         }
+        return true;
+    }
+
+    private ExecutableElement[] removeElement(ExecutableElement[] array, int i) {
+        ExecutableElement[] result = new ExecutableElement[array.length-1];
+        System.arraycopy(array, 0, result, 0, i);
+        System.arraycopy(array, i+1, result, i, array.length-i-1);
+        return result;
     }
 
     @Test

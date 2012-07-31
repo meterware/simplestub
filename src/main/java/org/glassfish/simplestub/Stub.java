@@ -3,12 +3,29 @@ package org.glassfish.simplestub;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes annotated with
  * the @SimpleStub annotation.
  */
 public class Stub {
+
+    private final static Map<Class<?>, Class<?>> PRIMITIVE_TYPES;
+
+    static {
+        PRIMITIVE_TYPES = new HashMap<Class<?>, Class<?>>();
+        PRIMITIVE_TYPES.put(Void.TYPE,      Void.class);
+        PRIMITIVE_TYPES.put(Character.TYPE, Character.class);
+        PRIMITIVE_TYPES.put(Byte.TYPE,      Byte.class);
+        PRIMITIVE_TYPES.put(Short.TYPE,     Short.class);
+        PRIMITIVE_TYPES.put(Integer.TYPE,   Integer.class);
+        PRIMITIVE_TYPES.put(Long.TYPE,      Long.class);
+        PRIMITIVE_TYPES.put(Boolean.TYPE,   Boolean.class);
+        PRIMITIVE_TYPES.put(Float.TYPE,     Float.class);
+        PRIMITIVE_TYPES.put(Double.TYPE,    Double.class);
+    }
     /**
      * Instantiates a stub from an abstract class. The class must have been marked with the @SimpleStub annotation.
      * @param aClass the class from which a stub should be generated.
@@ -80,20 +97,7 @@ public class Stub {
 
     private static boolean isAssignableFrom(Class<?> constructorParameterType, Class<?> actualParameterType) {
         return constructorParameterType.isAssignableFrom(actualParameterType) ||
-                constructorParameterType.isPrimitive() && getBoxedType(constructorParameterType).isAssignableFrom(actualParameterType);
-    }
-
-    private static Class<?> getBoxedType(Class<?> type) {
-        if (type.equals(Byte.TYPE)) return Byte.class;
-        if (type.equals(Short.TYPE)) return Short.class;
-        if (type.equals(Integer.TYPE)) return Integer.class;
-        if (type.equals(Long.TYPE)) return Long.class;
-        if (type.equals(Boolean.TYPE)) return Boolean.class;
-        if (type.equals(Float.TYPE)) return Float.class;
-        if (type.equals(Double.TYPE)) return Double.class;
-        if (type.equals(Character.TYPE)) return Character.class;
-        if (type.equals(Void.TYPE)) return Void.class;
-        return null;
+                constructorParameterType.isPrimitive() && PRIMITIVE_TYPES.get(constructorParameterType).isAssignableFrom(actualParameterType);
     }
 
     private static String toString(Class<?>[] parameterTypes) {

@@ -30,15 +30,13 @@ public class StubProcessor extends AbstractProcessor {
 
     private void generateStubClass(Element classElement) {
         try {
-//            dump(classElement);
             writeClassFile(new ClassGenerator(((TypeElement) classElement), processingEnv.getElementUtils()));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException( "Unable to process annotated class " + classElement, e );
         } catch (IOException e) {
             throw new RuntimeException( "Unable to write stub for " + classElement, e );
         }
     }
 
+/*
     private void dump(Element classElement) {
         System.out.println( "REG-> checking " + classElement );
         System.out.println("       package is " + processingEnv.getElementUtils().getPackageOf(classElement));
@@ -47,7 +45,6 @@ public class StubProcessor extends AbstractProcessor {
             System.out.println("    " + member);
         }
 
-/*
         for (Element element : classElement.getEnclosedElements()) {
             System.out.println("   encloses: " + element);
             if (element instanceof ExecutableElement) {
@@ -63,10 +60,10 @@ public class StubProcessor extends AbstractProcessor {
                 }
             }
         }
-*/
     }
+*/
 
-    private void writeClassFile(ClassGenerator generator) throws IOException, ClassNotFoundException {
+    private void writeClassFile(ClassGenerator generator) throws IOException {
         JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(generator.getStubClassName());
         generator.generateStub(sourceFile.openWriter());
     }
