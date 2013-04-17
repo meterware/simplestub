@@ -18,7 +18,6 @@ public class StubProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment roundEnvironment) {
-        System.out.println("REG-> debugging enabled");
         if (roundEnvironment.processingOver()) return false;
         if (typeElements.isEmpty()) return false;
 

@@ -30,6 +30,13 @@
         <connection>scm:hg:https://hg.java.net/hg/simplestub~hg</connection>
     </scm>
 
+    <distributionManagement>
+        <site>
+            <id>java_net</id>
+            <url>dav:https://website.java.net/website/simplestub</url>
+        </site>
+    </distributionManagement>
+
     <developers>
         <developer>
             <id>russgold</id>
