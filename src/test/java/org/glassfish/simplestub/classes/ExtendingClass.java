@@ -1,7 +1,5 @@
 package org.glassfish.simplestub.classes;
 
-import com.sun.jdi.IntegerType;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;

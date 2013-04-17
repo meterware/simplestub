@@ -2,6 +2,7 @@ package org.glassfish.simplestub;
 
 import org.glassfish.simplestub.classes.AbstractClass2;
 import org.glassfish.simplestub.classes.ExtendingClass;
+import org.glassfish.simplestub.classes.GenericClass1;
 import org.glassfish.simplestub.classes.Interface1;
 import org.glassfish.simplestub.classes.SimpleAbstractTestClass;
 import org.junit.Before;
@@ -13,6 +14,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
@@ -35,6 +37,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     private Constructor<SimpleAbstractTestClass> abstractTestClassConstructor;
     private Constructor<ExtendingClass> twoArgConstructor;
     private Method firstLetter;
+    private Method[] generic1;
 
     @Before
     public void setUp() throws Exception {
@@ -47,6 +50,8 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
         abstractTestClassConstructor = SimpleAbstractTestClass.class.getConstructor();
 
         firstLetter = AbstractClass2.class.getDeclaredMethod("firstLetter");
+
+        generic1 = GenericClass1.class.getDeclaredMethods();
     }
 
 
@@ -147,7 +152,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
             if (parametersMatch(constructor, parameters))
                 return removeElement( constructors, i);
         }
-        fail( "No matching constructor with parameters (" + Arrays.asList(parameters));
+        fail("No matching constructor with parameters (" + Arrays.asList(parameters));
         return null;
     }
 
@@ -225,7 +230,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     @Test
     public void givenClassElement_generateBooleanStubMethodWithParameterizedArgument() throws ClassNotFoundException, NoSuchMethodException {
         shouldGenerateMethod(ExtendingClass.class, doSomething3, false,
-                "boolean doSomething3(java.util.List argument0) { return false; }");
+                "boolean doSomething3(java.util.List<java.math.BigInteger> argument0) { return false; }");
     }
 
     @Test
@@ -259,6 +264,41 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
     }
 
     @Test
+    public void givenClassElement_generateMethodWithGenericReturn() throws ClassNotFoundException, NoSuchMethodException {
+        Method method = GenericClass1.class.getDeclaredMethod("generic1", int.class);
+        shouldGenerateMethod(GenericClass1.class, method, false,
+                "<T> T generic1(int argument0) { return null; }");
+    }
+
+    @Test
+    public void givenClassElement_generateMethodWithGenericParameter() throws ClassNotFoundException, NoSuchMethodException {
+        Method method = GenericClass1.class.getDeclaredMethod("generic2", Object.class, int.class);
+        shouldGenerateMethod(GenericClass1.class, method, false,
+                "<T> void generic2(T argument0, int argument1) {}");
+    }
+
+    @Test
+    public void givenClassElement_generateMethodWithBoundedGenericParameter() throws ClassNotFoundException, NoSuchMethodException {
+        Method method = GenericClass1.class.getDeclaredMethod("generic3", String.class, Number.class, int.class);
+        shouldGenerateMethod(GenericClass1.class, method, false,
+                "<T extends java.lang.Number> void generic3(java.lang.String argument0, T argument1, int argument2) {}");
+    }
+
+    @Test
+    public void givenClassElement_generateMethodWithMultipleGenericParameters() throws ClassNotFoundException, NoSuchMethodException {
+        Method method = GenericClass1.class.getDeclaredMethod("generic4", Object.class, Object.class, Object.class);
+        shouldGenerateMethod(GenericClass1.class, method, false,
+                "<T,K> void generic4(java.lang.Object argument0, T argument1, K argument2) {}");
+    }
+
+    @Test
+    public void givenClassElement_generateMethodWithMultiplyBoundedGenericParameter() throws ClassNotFoundException, NoSuchMethodException {
+        Method method = GenericClass1.class.getDeclaredMethod("generic5", Serializable.class);
+        shouldGenerateMethod(GenericClass1.class, method, false,
+                "<T extends java.io.Serializable & java.lang.Cloneable> void generic5(T argument0) {}");
+    }
+
+    @Test
     public void generateExtendingStubClass() throws ClassNotFoundException, IOException {
         StringWriter writer = new StringWriter();
         parseClass(ExtendingClass.class);
@@ -275,7 +315,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
                 "    public ExtendingClass__org_glassfish_SimpleStub(int argument0, java.util.List argument1) { super(argument0, argument1); }",
                 "",
                 "    java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }",
-                "    boolean doSomething3(java.util.List argument0) { return false; }",
+                "    boolean doSomething3(java.util.List<java.math.BigInteger> argument0) { return false; }",
                 "    public java.lang.Boolean[] getSwitches() { return null; }",
                 "    java.net.CookiePolicy getPolicy() { return null; }",
                 "",
@@ -297,7 +337,7 @@ public class ClassGeneratorTest extends SimpleStubTestBase {
                 "    public void method1() {}",
                 "    protected int doSomething(int argument0) { return 0; }",
                 "    java.lang.String doSomething2(int argument0, java.util.List argument1) { return null; }",
-                "    boolean doSomething3(java.util.List argument0) { return false; }",
+                "    boolean doSomething3(java.util.List<java.math.BigInteger> argument0) { return false; }",
                 "    java.net.CookiePolicy getPolicy() { return null; }",
                 "",
                 "}");

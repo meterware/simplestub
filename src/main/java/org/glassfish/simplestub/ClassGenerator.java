@@ -160,7 +160,38 @@ class ClassGenerator {
     }
 
     private String createMethodHeader(ExecutableElement method) {
-        return getVisibility(method) + getType(method.getReturnType()) + ' ' + method.getSimpleName().toString();
+        return getVisibility(method) + getGenericMarker(method) + getType(method.getReturnType()) + ' ' + method.getSimpleName().toString();
+    }
+
+    private String getGenericMarker(ExecutableElement method) {
+        List<? extends TypeParameterElement> typeParameters = method.getTypeParameters();
+        if (typeParameters == null || typeParameters.isEmpty()) return "";
+
+        StringBuilder sb = new StringBuilder("<");
+        int typeNum = 0;
+        for (TypeParameterElement typeParameter : typeParameters) {
+            if (typeNum++ != 0) sb.append(",");
+            sb.append(typeParameter.asType());
+            sb.append(toBoundsString(typeParameter.getBounds()));
+        }
+        sb.append("> ");
+        return sb.toString();
+
+    }
+
+    private String toBoundsString(List<? extends TypeMirror> bounds) {
+        if (bounds == null || bounds.isEmpty() || isJavaLangObject(bounds.get(0))) return "";
+
+        StringBuilder sb = new StringBuilder(" extends ");
+        for (int i = 0; i < bounds.size(); i++) {
+            if (i != 0) sb.append(" & ");
+            sb.append(bounds.get(i));
+        }
+        return sb.toString();
+    }
+
+    private boolean isJavaLangObject(TypeMirror typeMirror) {
+        return typeMirror.toString().equals("java.lang.Object");
     }
 
     private String createParameterString(List<? extends VariableElement> parameters) {

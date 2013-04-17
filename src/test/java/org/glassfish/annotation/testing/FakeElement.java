@@ -7,11 +7,19 @@ import javax.lang.model.type.TypeVisitor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 import static java.lang.reflect.Modifier.*;
 import static javax.lang.model.type.TypeKind.*;
 
+/**
+ * This class and its subclasses are implementations of the Element class and its subclasses defined
+ * in the javax.lang.model package hierarchy. The classes are used internally by the compiler and
+ * provided at annotation processing time.
+ */
 public class FakeElement implements Element {
     private Element enclosingElement;
     private Name simpleName;
@@ -134,10 +142,10 @@ abstract class FakeExecutableElement extends FakeElement implements ExecutableEl
     private Set<Modifier> modifierSet;
     List<VariableElement> parameters = new ArrayList<VariableElement>();
 
-    FakeExecutableElement(String name, Element enclosingClass, int modifiers, Class[] parameterTypes) {
+    FakeExecutableElement(String name, Element enclosingClass, int modifiers, Type[] parameterTypes) {
         super(name, enclosingClass);
         modifierSet = createModifierSet(modifiers);
-        for (Class parameterType: parameterTypes) {
+        for (Type parameterType: parameterTypes) {
             parameters.add(new FakeVariableElement( "argument" + parameters.size(), this, parameterType));
         }
     }
@@ -214,11 +222,27 @@ class MethodElement extends FakeExecutableElement implements ExecutableElement {
 
     private TypeMirror returnType;
     private Method method;
+    private List<FakeTypeParameterElement> genericTypes;
 
     MethodElement(Method method, Element enclosingClass) {
-        super(method.getName(), enclosingClass, method.getModifiers(), method.getParameterTypes());
+        super(method.getName(), enclosingClass, method.getModifiers(), method.getGenericParameterTypes());
+        TypeVariable<Method>[] typeParameters = method.getTypeParameters();
+        for (TypeVariable<Method> typeParameter : typeParameters) {
+            addGenericParameter(typeParameter);
+        }
         this.method = method;
-        returnType = new FakeTypeMirror(method.getReturnType());
+        returnType = new FakeTypeMirror(method.getGenericReturnType());
+    }
+
+    public FakeTypeParameterElement addGenericParameter(TypeVariable<Method> typeVariable) {
+        if (genericTypes == null)
+            genericTypes = new ArrayList<FakeTypeParameterElement>();
+        FakeTypeParameterElement parameterElement = new FakeTypeParameterElement(typeVariable, this);
+        genericTypes.add(parameterElement);
+        for (Type type : typeVariable.getBounds()) {
+            parameterElement.addBound(type);
+        }
+        return parameterElement;
     }
 
     @Override
@@ -232,6 +256,11 @@ class MethodElement extends FakeExecutableElement implements ExecutableElement {
     }
 
     @Override
+    public List<? extends TypeParameterElement> getTypeParameters() {
+        return genericTypes;
+    }
+
+    @Override
     boolean overrides(Method method) {
         return !isAbstract(this.method.getModifiers()) &&
                 this.method.getName().equals(method.getName()) &&
@@ -242,11 +271,11 @@ class MethodElement extends FakeExecutableElement implements ExecutableElement {
 
 class FakeVariableElement extends FakeElement implements VariableElement {
 
-    private TypeMirror type;
+    private TypeMirror typeMirror;
 
-    FakeVariableElement(String name, Element enclosingElement, Class aClass) {
+    FakeVariableElement(String name, Element enclosingElement, Type aType) {
         super(name, enclosingElement);
-        type = new FakeTypeMirror(aClass);
+        typeMirror = new FakeTypeMirror(aType);
     }
 
     @Override
@@ -256,20 +285,27 @@ class FakeVariableElement extends FakeElement implements VariableElement {
 
     @Override
     public TypeMirror asType() {
-        return type;
+        return typeMirror;
     }
 }
 
 
 class FakeTypeMirror implements TypeMirror {
-    private Class aClass;
+    private Type aType;
 
-    FakeTypeMirror(Class aClass) {
-        this.aClass = aClass;
+    FakeTypeMirror(Type type) {
+        this.aType = type;
     }
 
     @Override
     public TypeKind getKind() {
+        if (aType instanceof TypeVariable<?>)
+            return TYPEVAR;
+        else
+            return getKind((Class) aType);
+    }
+
+    private TypeKind getKind(Class aClass) {
         if (aClass.equals(void.class))
             return VOID;
         else if (aClass.equals(char.class))
@@ -301,11 +337,54 @@ class FakeTypeMirror implements TypeMirror {
 
     @Override
     public String toString() {
+        if (aType instanceof TypeVariable<?>)
+            return ((TypeVariable) aType).getName();
+        else if (aType instanceof Class)
+            return toString((Class) aType);
+        else
+            return aType.toString();
+    }
+
+    private String toString(Class aClass) {
         if (!aClass.isArray())
             return aClass.getName();
         else {
             return new FakeTypeMirror(aClass.getComponentType()) + "[]";
         }
+    }
+}
+
+
+class FakeTypeParameterElement extends FakeElement implements TypeParameterElement {
+    private Element enclosingElement;
+    private Type type;
+    private List<FakeTypeMirror> bounds;
+
+    FakeTypeParameterElement(TypeVariable<Method> type, Element enclosingElement) {
+        super(type.getName(), enclosingElement);
+        this.type = type;
+        this.enclosingElement = enclosingElement;
+    }
+
+    void addBound(Type type) {
+        if (bounds == null)
+            bounds = new ArrayList<FakeTypeMirror>();
+        bounds.add(new FakeTypeMirror(type));
+    }
+
+    @Override
+    public Element getGenericElement() {
+        return enclosingElement;
+    }
+
+    @Override
+    public List<? extends TypeMirror> getBounds() {
+        return bounds;
+    }
+
+    @Override
+    public TypeMirror asType() {
+        return new FakeTypeMirror(type);
     }
 }
 
