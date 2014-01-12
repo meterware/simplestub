@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes annotated with
  * the @SimpleStub annotation.
+ * @deprecated use {com.meterware.simplestub.Stub}
  */
 public class Stub {
 
