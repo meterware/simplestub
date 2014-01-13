@@ -9,6 +9,8 @@
     in JDK 1.6, but in a test that only expects to write byte arrays, the following stub could be sufficient:</p>
     <div class="source">
         <pre>
+        <b>import</b> com.meterware.simplestub.SimpleStub
+
         @SimpleStub
         <b>public abstract class</b> ObjectOutputStub <b>implements</b> ObjectOutput {
 
@@ -26,6 +28,8 @@
     The test class can be instantiated easily:
     <div class="source">
         <pre>
+        <b>import</b> com.meterware.simplestub.Stub
+
         ObjectOutputStub objectOutput = Stub.create(ObjectOutputStub.<b>class</b>);</pre>
     </div>
 
@@ -54,6 +58,12 @@
 
     <p>SimpleStub takes a middle course. Developers define the behavior they want, and let the tool fill in the rest
     at compile time. The stub may then be used as usual.</p>
+
+    <h2>Historical Note</h2>
+    <p>The initial implementation of this library, in the <code>org.glassfish.simplestub</code> package, relied
+    on compile-time annotation processing to generate stub classes. This turned out to have an unfortunate interaction
+    with certain IDEs. The current implementation, in the <code>com.meterware.simplestub</code> package, generates
+    stubs at run time, using the <a href="http://javassist.org">Javassist library</a></p>
 
 </body>
 </html>

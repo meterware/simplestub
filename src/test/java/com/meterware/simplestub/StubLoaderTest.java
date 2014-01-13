@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.net.CookiePolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -98,7 +99,13 @@ public class StubLoaderTest {
 
     @Test
     public void whenArgumentsMatchVarArgConstructor_invokeAppropriateConstructor() {
-        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, "height", "age", "color");
+        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, new ArrayList(), "height", "age", null);
+        assertThat(testObject.getId(), is("height:3"));
+    }
+
+    @Test(expected = SimpleStubException.class)
+    public void whenArgumentsDontMatchMatchVarArgConstructor_throwException() {
+        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, null, new ArrayList());
         assertThat(testObject.getId(), is("height:3"));
     }
 
@@ -123,11 +130,15 @@ public class StubLoaderTest {
         loader.create(ClassWithConstructorParameters.class, "age", 7);
     }
 
-
     @Test(expected = SimpleStubException.class)
     public void whenStrictGeneratedMethodCalled_throwException() {
         StrictClass strictClass = loader.create(StrictClass.class);
         strictClass.doIt();
+    }
+
+    @Test(expected = SimpleStubException.class)
+    public void whenErrorInstantiating_throwException() {
+        loader.create(ClassWithConstructorParameters.class, true);
     }
 
     @SimpleStub

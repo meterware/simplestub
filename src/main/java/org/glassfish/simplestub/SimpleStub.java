@@ -10,5 +10,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface SimpleStub {
-    boolean strict() default false;
+    boolean strict() default true;
 }

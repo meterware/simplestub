@@ -10,12 +10,12 @@
 
     <groupId>com.meterware.simplestub</groupId>
     <artifactId>simplestub</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>SimpleStub</name>
     <description>A tool to generate stub classes from abstract classes</description>
 
-    <url>http://java.net/projects/simplestub</url>
+    <url>http://simplestub.meterware.com</url>
 
     <licenses>
         <license>
@@ -33,7 +33,7 @@
     <distributionManagement>
         <site>
             <id>github</id>
-            <url>scm:git:https://github.com/meterware/xmlsemantics.git</url>
+            <url>scm:git:https://github.com/meterware/simplestub.git</url>
         </site>
     </distributionManagement>
 
@@ -48,12 +48,12 @@
         </developer>
     </developers>
 
-    <!--
     <issueManagement>
-        <system>JIRA</system>
-        <url>http://java.net/jira/browse/SIMPLESTUB</url>
+        <system>GitHub</system>
+        <url>https://github.com/meterware/simplestub/issues</url>
     </issueManagement>
 
+    <!--
     <mailingLists>
         <mailingList>
             <name>SimpleStub Users List</name>

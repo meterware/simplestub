@@ -32,8 +32,6 @@ public class StubLoader {
 
     private static final String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
     private final ClassPool pool = new ClassPool(ClassPool.getDefault());
-    private final Map<ClassLoader, Loader> loaders = new HashMap<ClassLoader, Loader>();
-    private final Map<Class<?>, Class<?>> stubClasses = new HashMap<Class<?>, Class<?>>();
 
     /**
      * Instantiates a stub from an abstract class. The class must have been marked with the @SimpleStub annotation.
@@ -44,7 +42,7 @@ public class StubLoader {
      * @return a newly instantiated stub
      */
     @SuppressWarnings("unchecked")
-    public <T> T create(Class<T> aClass, Object... parameters) {
+    <T> T create(Class<T> aClass, Object... parameters) {
         try {
             Class<?> stubClass = getStubClass(aClass);
             Constructor<?> constructor = getConstructor(stubClass, parameters);
@@ -138,10 +136,7 @@ public class StubLoader {
     <T> Class<?> getStubClass(Class<T> aClass) {
         validate(aClass);
 
-        if (stubClasses.containsKey(aClass))
-            return stubClasses.get(aClass);
-        else
-            return loadStubClass(aClass);
+        return loadStubClass(aClass);
     }
 
     private <T> void validate(Class<T> aClass) {
@@ -168,10 +163,7 @@ public class StubLoader {
             defineStubClass(aClass, stubClassName);
 
             Loader loader = getLoaderFor(aClass);
-            Class<?> stubClass = loader.loadClass(stubClassName);
-            stubClasses.put(aClass, stubClass);
-
-            return stubClass;
+            return loader.loadClass(stubClassName);
         } catch (NotFoundException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         } catch (ClassNotFoundException e) {
@@ -240,16 +232,12 @@ public class StubLoader {
     }
 
     private Loader getLoaderFor(ClassLoader classLoader) {
-        if (loaders.containsKey(classLoader))
-            return loaders.get(classLoader);
-        else
-            return createLoader(classLoader);
+        return createLoader(classLoader);
     }
 
     private Loader createLoader(ClassLoader classLoader) {
         Loader loader = new Loader(classLoader, pool);
         loader.delegateLoadingOf(SimpleStubException.class.getName());
-        loaders.put(classLoader, loader);
         return loader;
     }
 }

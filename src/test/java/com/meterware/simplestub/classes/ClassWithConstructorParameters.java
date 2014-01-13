@@ -2,6 +2,8 @@ package com.meterware.simplestub.classes;
 
 import com.meterware.simplestub.SimpleStub;
 
+import java.util.List;
+
 @SimpleStub
 abstract public class ClassWithConstructorParameters {
 
@@ -13,9 +15,16 @@ abstract public class ClassWithConstructorParameters {
         this.name = name;
     }
 
-    protected ClassWithConstructorParameters(String... name) {
+    protected ClassWithConstructorParameters(List list, String... name) {
         this.size = name.length;
         this.name = size == 0 ? "" : name[0];
+    }
+
+    protected ClassWithConstructorParameters(boolean throwInstantionaException) throws InstantiationException {
+        size = 0;
+        name = "";
+        if (throwInstantionaException)
+            throw new InstantiationException("throw during unit test");
     }
 
     public String getId() { return name + ":" + size; }

@@ -4,7 +4,7 @@ package com.meterware.simplestub;
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes annotated with
  * the @SimpleStub annotation.
  */
-public class Stub {
+abstract public class Stub {
     /**
      * Instantiates a stub from an abstract class. The class must have been marked with the @SimpleStub annotation.
      * @param aClass the class from which a stub should be generated.
