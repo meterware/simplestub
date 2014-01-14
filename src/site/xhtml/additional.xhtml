@@ -12,8 +12,8 @@
 <div class="source">
         <pre>
         <b>abstract class</b> FakeObject <b>extends</b> BaseObject {
-            FakeObject(int count, String... names) {
-                super(count, names);
+            FakeObject(<b>int</b> count, String... names) {
+                <b>super</b>(count, names);
             }
 
             :
@@ -39,7 +39,22 @@ will create an object that throws an UnexpectedMethodCallException if one of the
 
 <h2>The @SimpleStub annotation</h2>
 <p>This annotation can be used to identity a stub implementation. Setting the "strict" parameter to true will
-cause it to have the <i>strict</i> behavior, even when creating it with <code>createStub</code>. The usage is optional.</p>
+cause it to have the <i>strict</i> behavior, even when creating it with <code>createStub</code>. The usage is optional:</p>
+<div class="source">
+        <pre>
+        @SimpleStub(strict=true)
+        <b>abstract class</b> FakeObject <b>extends</b> BaseObject {
+            FakeObject(<b>int</b> count, String... names) {
+                <b>super</b>(count, names);
+            }
+
+            :
+            behavior needed for test
+            :
+        }
+</pre>
+</div>
+
 
 </body>
 </html>
