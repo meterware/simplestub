@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub - Project Mailing Lists</title>
+    <title>SimpleStub - 
+    SimpleStub: Getting Started</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -48,40 +49,17 @@
                           <a href="index.html" title="Overview">Overview</a>
             </li>
                   <li class="none">
-                          <a href="started.html" title="Getting Started">Getting Started</a>
-            </li>
+            <strong>Getting Started</strong>
+          </li>
                   <li class="none">
                           <a href="additional.html" title="Additional Use Cases">Additional Use Cases</a>
             </li>
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                          <li class="expanded">
+                                                                                                                                                                                <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-                          <a href="dependency-info.html" title="Dependency Information">Dependency Information</a>
-            </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-                      <li class="none">
-            <strong>Mailing Lists</strong>
-          </li>
-              </ul>
-        </li>
+                  </li>
                                                                                       <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -95,9 +73,70 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Project Mailing Lists<a name="Project_Mailing_Lists"></a></h2><a name="Project_Mailing_Lists"></a>
-<p>There are no mailing lists currently associated with this project.</p></div>
+        
+
+
+    <div class="section">
+<h2>Getting Started<a name="Getting_Started"></a></h2>
+    
+<p>The simplest use of a stub in unit test comes when the system under test (SUT) requires an object, but the test
+        doesn't cause it to be called, or ignores anything it does. Simplestub handles this very simply.
+    </p>
+    
+<p>In the following test, the SUT requires an <tt>ObjectOutput</tt> instance, but never uses it. SimpleStub
+    creates the appropriate stub easily with a call to <tt>createStub</tt>.</p>
+    
+        
+<div class="source">
+<pre>
+        @Test
+        <b>public void</b> whenObjectIsInstantiated_OutputObjectIsAvailable() {
+            MyClass sut = <b>new</b> MyClass(Stub.createStub(ObjectOutput.class);
+
+            assertNotNull(sut.getOutput());
+        }</pre></div>
+    
+    
+<p>
+        This works for both interfaces and abstract classes. If the test were to invoke one of the abstract methods,
+        it would return null, false, or zero, depending on the return type.</p>
+
+    
+<p>
+        Sometimes a test will use some of the methods of an abstract class, but not all. Again, this is handled simply
+        by implementing the ones needed for the test, and ignoring the rest.
+    </p>
+    
+        
+<div class="source">
+<pre>
+        <b>public abstract class</b> ObjectOutputStub <b>implements</b> ObjectOutput {
+
+            <b>private</b> List&lt;<b>byte</b>[]&gt; bytes = <b>new</b> ArrayList&lt;<b>byte</b>[]&gt;
+            <b>boolean</b> closed;
+
+            <b>byte</b>[][] getWrittenBytes() { <b>return</b> b.toArray(<b>new byte</b>[][b.size()]); }
+            <b>boolean</b> isClosed() { <b>return</b> closed; }
+
+            <b>public void</b> write(<b>byte</b>[] b) { bytes.add(b); }
+            <b>public void</b> close() { closed = true; }
+        }</pre></div>
+    
+    
+<p>
+        The same invocation can be used to instantiate this test object.
+    </p>
+    
+         
+<div class="source">
+<pre>
+         <b>import</b> com.meterware.simplestub.Stub
+
+         ObjectOutputStub objectOutput = Stub.createStub(ObjectOutputStub.<b>class</b>);</pre></div>
+     
+
+</div>
+
       </div>
     </div>
     <div class="clear">
