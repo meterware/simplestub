@@ -126,7 +126,7 @@ public class StubLoaderTest {
 
     @Test(expected = UnexpectedMethodCallException.class)
     public void whenCreateStrictCalled_throwException() {
-        ProtectedClass strictClass = Stub.createStrict(ProtectedClass.class);
+        ProtectedClass strictClass = Stub.createStrictStub(ProtectedClass.class);
         strictClass.doIt();
     }
 

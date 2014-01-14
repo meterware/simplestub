@@ -7,16 +7,17 @@ package com.meterware.simplestub;
 abstract public class Stub {
 
     /**
-     * Instantiates a stub from an abstract class, generated implementations of any abstract methods. By default,
-     * any abstract methods will do nothing, returning a zero, false, or null value; however, if the class is annotated
-     * with @SimpleStub and the strict parameter is set true, generated methods will throw an exception.
+     * Instantiates a stub from an abstract class or interface, generated implementations of any abstract methods.
+     * By default, any abstract methods will do nothing, returning a zero, false, or null value;
+     * however, if the class is annotated with @SimpleStub and the strict parameter is set true,
+     * generated methods will throw an exception.
      * @param aClass the class from which a stub should be generated.
      * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
      *                   must be the outer class instance.
      * @param <T> the abstract class
      * @return a newly instantiated stub
      */
-    public static <T> T create(Class<T> aClass, Object... parameters) {
+    public static <T> T createStub(Class<T> aClass, Object... parameters) {
         return new StubLoader(aClass, isStrict(aClass)).create(parameters);
     }
 
@@ -33,7 +34,15 @@ abstract public class Stub {
      * @param <T> the abstract class
      * @return a newly instantiated stub
      */
-    public static <T> T createStrict(Class<T> aClass, Object... parameters) {
+    public static <T> T createStrictStub(Class<T> aClass, Object... parameters) {
         return new StubLoader(aClass, true).create(parameters);
+    }
+
+    /**
+     * Instantiates a stub from an abstract class
+     * @deprecated use #createStub
+     */
+    public static <T> T create(Class<T> aClass, Object... parameters) {
+        return createStub(aClass, parameters);
     }
 }

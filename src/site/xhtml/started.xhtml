@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>SimpleStub: Getting Started</title>
+</head>
+<body>
+    <h2>Getting Started</h2>
+    <p>The simplest use of a stub in unit test comes when the system under test (SUT) requires an object, but the test
+        doesn't cause it to be called, or ignores anything it does. Simplestub handles this very simply.
+    </p>
+    <p>In the following test, the SUT requires an <code>ObjectOutput</code> instance, but never uses it. SimpleStub
+    creates the appropriate stub easily with a call to <code>createStub</code>.</p>
+    <div class="source">
+        <pre>
+        @Test
+        <b>public void</b> whenObjectIsInstantiated_OutputObjectIsAvailable() {
+            MyClass sut = <b>new</b> MyClass(<div style="color:blue">Stub.createStub(ObjectOutput.class)</div>;
+
+            assertNotNull(sut.getOutput());
+        }</pre>
+    </div>
+    <p>
+        This works for both interfaces and abstract classes. If the test were to invoke one of the abstract methods,
+        it would return null, false, or zero, depending on the return type.</p>
+
+    <p>
+        Sometimes a test will use some of the methods of an abstract class, but not all. Again, this is handled simply
+        by implementing the ones needed for the test, and ignoring the rest.
+    </p>
+    <div class="source">
+        <pre>
+        <b>public abstract class</b> ObjectOutputStub <b>implements</b> ObjectOutput {
+
+            <b>private</b> List&lt;<b>byte</b>[]&gt; bytes = <b>new</b> ArrayList&lt;<b>byte</b>[]&gt;
+            <b>boolean</b> closed;
+
+            <b>byte</b>[][] getWrittenBytes() { <b>return</b> b.toArray(<b>new byte</b>[][b.size()]); }
+            <b>boolean</b> isClosed() { <b>return</b> closed; }
+
+            <b>public void</b> write(<b>byte</b>[] b) { bytes.add(b); }
+            <b>public void</b> close() { closed = true; }
+        }</pre>
+    </div>
+    <p>
+        The same invocation can be used to instantiate this test object.
+    </p>
+    <div class="source">
+         <pre>
+         <b>import</b> com.meterware.simplestub.Stub
+
+         ObjectOutputStub objectOutput = Stub.createStub(ObjectOutputStub.<b>class</b>);</pre>
+     </div>
+
+</body>
+</html>

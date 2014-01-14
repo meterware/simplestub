@@ -1,0 +1,40 @@
+<html>
+<head>
+    <title>SimpleStub: Additional Features</title>
+</head>
+<body>
+<h2>Passing arguments to constructors</h2>
+
+<p>In this first examples, the base objects were assumed to have no-arg constructors. That is not always the case.
+    When arguments are passed to its <code>createStub</code> me>thod, SimpleStub will look for a matching constructor
+    and call it. For example:</p>
+
+<div class="source">
+        <pre>
+        <b>abstract class</b> FakeObject <b>extends</b> BaseObject {
+            FakeObject(int count, String... names) {
+                super(count, names);
+            }
+
+            :
+            behavior needed for test
+            :
+        }
+
+        @Test
+        public void testListofString() {
+            FakeObject fake = Stub.createStub(8, "Joe", "Sam", "Susan");
+            :
+            rest of test
+            }
+        }
+</pre>
+</div>
+
+<h2>Detecting unexpected method calls</h2>
+<p>In most cases, calls to methods not specifically implemented can be treated as no-ops. There are some cases, however,
+where it is useful to be able to find out if an unexpected call is being made. Calling <code>createStrictStub</code>
+will create an object that throws an UnexpectedMethodCallException if one of the generated methods is called.</p>
+
+</body>
+</html>
