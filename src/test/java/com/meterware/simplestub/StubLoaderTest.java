@@ -1,9 +1,9 @@
 package com.meterware.simplestub;
 
 import com.meterware.simplestub.classes.AbstractImplementation;
-import com.meterware.simplestub.classes.ClassWithAbstractPackageMethod;
 import com.meterware.simplestub.classes.ClassWithConstructorParameters;
 import com.meterware.simplestub.classes.ConcreteClass;
+import com.meterware.simplestub.classes.Interface1;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -22,23 +22,8 @@ import static org.junit.Assert.assertThat;
 public class StubLoaderTest {
 
     @Test(expected = SimpleStubException.class)
-    public void whenClassNotAnnotated_throwException() {
-        Stub.create(String.class);
-    }
-
-    @Test(expected = SimpleStubException.class)
     public void whenClassNotAbstract_throwException() {
         Stub.create(ConcreteClass.class);
-    }
-
-    @Test(expected = SimpleStubException.class)
-    public void whenClassHasAbstractPackageMethod_throwException() {
-        Stub.create(ClassWithAbstractPackageMethod.class);
-    }
-
-    @Test(expected = SimpleStubException.class)
-    public void whenClassIsPackagePrivate_throwException() {
-        Stub.create(PackagePrivateClass.class);
     }
 
     @Test
@@ -50,6 +35,24 @@ public class StubLoaderTest {
     public void createdStub_runsDefinedMethod() throws IllegalAccessException, InstantiationException {
         SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
         assertThat(testObject.getName(), is("name"));
+    }
+
+    @Test
+    public void whenClassNotAnnotated_generateStub() {
+        UnannotatedClass testObject = Stub.create(UnannotatedClass.class);
+        assertThat(testObject.doIt(), is(0L));
+    }
+
+    @Test
+    public void whenClassIsPackagePrivate_createStub() {
+        PackagePrivateClass testObject = Stub.create(PackagePrivateClass.class);
+        assertThat(testObject.doIt(), is(0));
+    }
+
+    @Test
+    public void whenAbstractMethodIsPackagePrivate_handleNormally() throws IllegalAccessException, InstantiationException {
+        SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
+        assertThat(testObject.packagePrivateMethod(null), is(false));
     }
 
     @Test
@@ -71,15 +74,9 @@ public class StubLoaderTest {
     }
 
     @Test
-    public void createdStub_generatesBooleanMethod() throws IllegalAccessException, InstantiationException {
-        SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
-        assertThat(testObject.doSomething3(null), is(false));
-    }
-
-    @Test
     public void createdStub_generatesMultiArgMethod() throws IllegalAccessException, InstantiationException, NoSuchMethodException {
         SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
-        assertThat(testObject.doSomething2(7, ""), nullValue());
+        assertThat(testObject.multiArgumentMethod(7, ""), nullValue());
     }
 
     @Test
@@ -121,15 +118,31 @@ public class StubLoaderTest {
         Stub.create(ClassWithConstructorParameters.class, "age", 7);
     }
 
-    @Test(expected = SimpleStubException.class)
-    public void whenStrictGeneratedMethodCalled_throwException() {
+    @Test(expected = UnexpectedMethodCallException.class)
+    public void whenStrictAnnotationUsed_throwException() {
         StrictClass strictClass = Stub.create(StrictClass.class);
+        strictClass.doIt();
+    }
+
+    @Test(expected = UnexpectedMethodCallException.class)
+    public void whenCreateStrictCalled_throwException() {
+        ProtectedClass strictClass = Stub.createStrict(ProtectedClass.class);
         strictClass.doIt();
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenErrorInstantiating_throwException() {
         Stub.create(ClassWithConstructorParameters.class, true);
+    }
+
+    @Test
+    public void whenBaseClassIsInterface_generateStub() {
+        Interface1 testObject = Stub.create(Interface1.class);
+        assertThat(testObject.getAge(), is(0));
+    }
+
+    abstract public static class UnannotatedClass {
+        abstract protected long doIt();
     }
 
     @SimpleStub
@@ -154,9 +167,9 @@ public class StubLoaderTest {
 
         protected abstract int doSomething(int value);
 
-        protected abstract String doSomething2(int value1, String value2);
+        protected abstract String multiArgumentMethod(int value1, String value2);
 
-        protected abstract boolean doSomething3(List<BigInteger> list);
+        abstract boolean packagePrivateMethod(List<BigInteger> list);
 
         public abstract CookiePolicy getPolicy();
     }
