@@ -6,6 +6,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +15,9 @@ import java.util.Map;
 /**
  * A class to load generated simple stubs.
  */
-public class StubLoader {
+class StubLoader {
 
+    private final static String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
     private final static Map<Class<?>, Class<?>> PRIMITIVE_TYPES;
 
     static {
@@ -30,21 +33,26 @@ public class StubLoader {
         PRIMITIVE_TYPES.put(Double.TYPE,    Double.class);
     }
 
-    private static final String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
     private final ClassPool pool = new ClassPool(ClassPool.getDefault());
+    private final Class<?> baseClass;
+    private final ClassLoader classLoader;
+
+    StubLoader(Class<?> baseClass) {
+        this.baseClass = baseClass;
+        this.classLoader = new URLClassLoader(new URL[0], baseClass.getClassLoader());
+    }
 
     /**
      * Instantiates a stub from an abstract class. The class must have been marked with the @SimpleStub annotation.
-     * @param aClass the class from which a stub should be generated.
+     *
      * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
      *                   must be the outer class instance.
-     * @param <T> the abstract class
      * @return a newly instantiated stub
      */
     @SuppressWarnings("unchecked")
-    <T> T create(Class<T> aClass, Object... parameters) {
+    <T> T create(Object... parameters) {
         try {
-            Class<?> stubClass = getStubClass(aClass);
+            Class<?> stubClass = getStubClass();
             Constructor<?> constructor = getConstructor(stubClass, parameters);
             constructor.setAccessible(true);
             if (isVarArgs(constructor))
@@ -52,13 +60,13 @@ public class StubLoader {
             else
                 return (T) constructor.newInstance(parameters);
         } catch (InstantiationException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + aClass.getName(), e);
+            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + aClass.getName(), e);
+            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
         } catch (NoSuchMethodException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + aClass.getName(), e);
+            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
         } catch (InvocationTargetException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + aClass.getName(), e);
+            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
         }
     }
 
@@ -133,63 +141,59 @@ public class StubLoader {
                 constructorParameterType.isPrimitive() && PRIMITIVE_TYPES.get(constructorParameterType).isAssignableFrom(actualParameter.getClass());
     }
 
-    <T> Class<?> getStubClass(Class<T> aClass) {
-        validate(aClass);
+    Class<?> getStubClass() {
+        validateBaseClass();
 
-        return loadStubClass(aClass);
+        return loadStubClass();
     }
 
-    private <T> void validate(Class<T> aClass) {
-        SimpleStub annotation = aClass.getAnnotation(SimpleStub.class);
+    private void validateBaseClass() {
+        SimpleStub annotation = baseClass.getAnnotation(SimpleStub.class);
         if (annotation == null)
-            throw new SimpleStubException("No @SimpleStub annotation defined for class " + aClass.getName());
-        if (!isAbstract(aClass))
-            throw new SimpleStubException("Class " + aClass.getName() + " is marked with @SimpleStub but is not abstract");
-        if (isPackageOrPrivate(aClass))
-            throw new SimpleStubException("Class " + aClass.getName() + " is marked with @SimpleStub but is not public or protected");
+            throw new SimpleStubException("No @SimpleStub annotation defined for class " + baseClass.getName());
+        if (!isAbstractClass())
+            throw new SimpleStubException("Class " + baseClass.getName() + " is marked with @SimpleStub but is not abstract");
+        if (isPackageOrPrivateClass())
+            throw new SimpleStubException("Class " + baseClass.getName() + " is marked with @SimpleStub but is not public or protected");
     }
 
-    private <T> boolean isAbstract(Class<T> aClass) {
-        return Modifier.isAbstract(aClass.getModifiers());
+    private boolean isAbstractClass() {
+        return Modifier.isAbstract(baseClass.getModifiers());
     }
 
-    private boolean isPackageOrPrivate(Class<?> aClass) {
-        return !Modifier.isPublic(aClass.getModifiers()) && !Modifier.isProtected(aClass.getModifiers());
+    private boolean isPackageOrPrivateClass() {
+        return !Modifier.isPublic(baseClass.getModifiers()) && !Modifier.isProtected(baseClass.getModifiers());
     }
 
-    private <T> Class<?> loadStubClass(Class<T> aClass) {
+    private Class<?> loadStubClass() {
         try {
-            String stubClassName = createStubClassName(aClass.getName());
-            defineStubClass(aClass, stubClassName);
-
-            Loader loader = getLoaderFor(aClass);
-            return loader.loadClass(stubClassName);
+            String stubClassName = createStubClassName(baseClass.getName());
+            return createStubClass(stubClassName);
         } catch (NotFoundException e) {
-            throw new SimpleStubException("Unable to create stub class", e);
-        } catch (ClassNotFoundException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         } catch (CannotCompileException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         }
     }
 
-    private <T> void defineStubClass(Class<T> aClass, String stubClassName) throws NotFoundException, CannotCompileException {
-        CtClass ctClass = pool.makeClass(stubClassName, pool.get(aClass.getName()));
+    private Class<?> createStubClass(String stubClassName) throws NotFoundException, CannotCompileException {
+        CtClass ctClass = pool.makeClass(stubClassName, pool.get(baseClass.getName()));
         for (CtMethod method : ctClass.getMethods()) {
             if (isAbstract(method))
-                addStubMethod(aClass, ctClass, method);
+                addStubMethod(ctClass, method);
         }
+        return ctClass.toClass(classLoader, null);
     }
 
-    private <T> void addStubMethod(Class<T> aClass, CtClass ctClass, CtMethod method) throws CannotCompileException, NotFoundException {
+    private void addStubMethod(CtClass ctClass, CtMethod method) throws CannotCompileException, NotFoundException {
         if (isPackagePrivate(method))
-            throw new SimpleStubException("Unable to generate stub method for " + aClass.getName() + '.' + method.getLongName() + " because it is package private");
+            throw new SimpleStubException("Unable to generate stub method for " + baseClass.getName() + '.' + method.getLongName() + " because it is package private");
         else
-            addNewMethod(aClass, ctClass, createMethod(ctClass, method));
+            addNewMethod(ctClass, createMethod(ctClass, method));
     }
 
-    private void addNewMethod(Class<?> aClass, CtClass ctClass, CtMethod method) throws CannotCompileException, NotFoundException {
-        if (isStrictStub(aClass))
+    private void addNewMethod(CtClass ctClass, CtMethod method) throws CannotCompileException, NotFoundException {
+        if (isStrictStub())
             defineMethodToThrowException(method);
         ctClass.addMethod(method);
     }
@@ -204,8 +208,8 @@ public class StubLoader {
         return longName.substring(0, i) + longName.substring(i + SIMPLESTUB_SUFFIX.length());
     }
 
-    private boolean isStrictStub(Class<?> aClass) {
-        return aClass.getAnnotation(SimpleStub.class).strict();
+    private boolean isStrictStub() {
+        return baseClass.getAnnotation(SimpleStub.class).strict();
     }
 
     private CtMethod createMethod(CtClass ctClass, CtMethod method) throws NotFoundException, CannotCompileException {
@@ -225,19 +229,4 @@ public class StubLoader {
         return className + SIMPLESTUB_SUFFIX;
     }
 
-    private <T> Loader getLoaderFor(Class<T> aClass) {
-        Loader loader = getLoaderFor(aClass.getClassLoader());
-        loader.delegateLoadingOf(aClass.getName());
-        return loader;
-    }
-
-    private Loader getLoaderFor(ClassLoader classLoader) {
-        return createLoader(classLoader);
-    }
-
-    private Loader createLoader(ClassLoader classLoader) {
-        Loader loader = new Loader(classLoader, pool);
-        loader.delegateLoadingOf(SimpleStubException.class.getName());
-        return loader;
-    }
 }

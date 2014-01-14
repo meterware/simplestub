@@ -14,7 +14,6 @@ import java.util.List;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.hamcrest.object.IsCompatibleType.typeCompatibleWith;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -22,54 +21,46 @@ import static org.junit.Assert.assertThat;
  */
 public class StubLoaderTest {
 
-    private StubLoader loader = new StubLoader();
-
     @Test(expected = SimpleStubException.class)
     public void whenClassNotAnnotated_throwException() {
-        loader.create(String.class);
+        Stub.create(String.class);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenClassNotAbstract_throwException() {
-        loader.create(ConcreteClass.class);
+        Stub.create(ConcreteClass.class);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenClassHasAbstractPackageMethod_throwException() {
-        loader.create(ClassWithAbstractPackageMethod.class);
+        Stub.create(ClassWithAbstractPackageMethod.class);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenClassIsPackagePrivate_throwException() {
-        loader.create(PackagePrivateClass.class);
+        Stub.create(PackagePrivateClass.class);
     }
 
     @Test
-    public void createdStubClass_isSubclassOfAbstractClass() {
-        Class<?> testClass = loader.getStubClass(SimpleAbstractTestClass.class);
-        assertThat(testClass, typeCompatibleWith(SimpleAbstractTestClass.class));
-    }
-
-    @Test
-    public void createdStub_isNotNull() {
-        assertThat(loader.create(SimpleAbstractTestClass.class), instanceOf(SimpleAbstractTestClass.class));
+    public void createdStub_isAssignableFromBaseClass() {
+        assertThat(Stub.create(SimpleAbstractTestClass.class), instanceOf(SimpleAbstractTestClass.class));
     }
 
     @Test
     public void createdStub_runsDefinedMethod() throws IllegalAccessException, InstantiationException {
-        SimpleAbstractTestClass testObject = loader.create(SimpleAbstractTestClass.class);
+        SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
         assertThat(testObject.getName(), is("name"));
     }
 
     @Test
     public void createdStub_generatesNoArgMethod() throws IllegalAccessException, InstantiationException {
-        SimpleAbstractTestClass testObject = loader.create(SimpleAbstractTestClass.class);
+        SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
         assertThat(testObject.getPolicy(), nullValue());
     }
 
     @Test
     public void createdStub_generatesNoArgMethodInProtectedSubclass() throws IllegalAccessException, InstantiationException {
-        ProtectedClass testObject = loader.create(ProtectedClass.class);
+        ProtectedClass testObject = Stub.create(ProtectedClass.class);
         assertThat(testObject.doIt(), nullValue());
     }
 
@@ -81,7 +72,7 @@ public class StubLoaderTest {
 
     @Test
     public void createdStub_generatesBooleanMethod() throws IllegalAccessException, InstantiationException {
-        SimpleAbstractTestClass testObject = loader.create(SimpleAbstractTestClass.class);
+        SimpleAbstractTestClass testObject = Stub.create(SimpleAbstractTestClass.class);
         assertThat(testObject.doSomething3(null), is(false));
     }
 
@@ -93,52 +84,52 @@ public class StubLoaderTest {
 
     @Test
     public void whenConstructorArgumentsSpecified_invokeAppropriateConstructor() {
-        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, 5, "age");
+        ClassWithConstructorParameters testObject = Stub.create(ClassWithConstructorParameters.class, 5, "age");
         assertThat(testObject.getId(), is("age:5"));
     }
 
     @Test
     public void whenArgumentsMatchVarArgConstructor_invokeAppropriateConstructor() {
-        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, new ArrayList(), "height", "age", null);
+        ClassWithConstructorParameters testObject = Stub.create(ClassWithConstructorParameters.class, new ArrayList(), "height", "age", null);
         assertThat(testObject.getId(), is("height:3"));
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenArgumentsDontMatchMatchVarArgConstructor_throwException() {
-        ClassWithConstructorParameters testObject = loader.create(ClassWithConstructorParameters.class, null, new ArrayList());
+        ClassWithConstructorParameters testObject = Stub.create(ClassWithConstructorParameters.class, null, new ArrayList());
         assertThat(testObject.getId(), is("height:3"));
     }
 
     @Test
     public void whenMethodsAreInherited_generateStubs() {
-        AbstractImplementation testObject = loader.create(AbstractImplementation.class);
+        AbstractImplementation testObject = Stub.create(AbstractImplementation.class);
         assertThat(testObject.getLength(), is(0));
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenTooFewArgumentsSpecified_throwException() {
-        loader.create(ClassWithConstructorParameters.class, 5);
+        Stub.create(ClassWithConstructorParameters.class, 5);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenTooManyArgumentsSpecified_throwException() {
-        loader.create(ClassWithConstructorParameters.class, 5, "age", null);
+        Stub.create(ClassWithConstructorParameters.class, 5, "age", null);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenWrongArgumentTypesSpecified_throwException() {
-        loader.create(ClassWithConstructorParameters.class, "age", 7);
+        Stub.create(ClassWithConstructorParameters.class, "age", 7);
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenStrictGeneratedMethodCalled_throwException() {
-        StrictClass strictClass = loader.create(StrictClass.class);
+        StrictClass strictClass = Stub.create(StrictClass.class);
         strictClass.doIt();
     }
 
     @Test(expected = SimpleStubException.class)
     public void whenErrorInstantiating_throwException() {
-        loader.create(ClassWithConstructorParameters.class, true);
+        Stub.create(ClassWithConstructorParameters.class, true);
     }
 
     @SimpleStub

@@ -15,6 +15,6 @@ abstract public class Stub {
      */
     @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> aClass, Object... parameters) {
-        return new StubLoader().create(aClass, parameters);
+        return new StubLoader(aClass).create(parameters);
     }
 }
