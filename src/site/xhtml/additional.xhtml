@@ -6,7 +6,7 @@
 <h2>Passing arguments to constructors</h2>
 
 <p>In this first examples, the base objects were assumed to have no-arg constructors. That is not always the case.
-    When arguments are passed to its <code>createStub</code> me>thod, SimpleStub will look for a matching constructor
+    When arguments are passed to its <code>createStub</code> method, SimpleStub will look for a matching constructor
     and call it. For example:</p>
 
 <div class="source">
@@ -38,7 +38,7 @@ will create an object that throws an UnexpectedMethodCallException if one of the
 
 
 <h2>The @SimpleStub annotation</h2>
-<p>This annotation can be used to identity a stub implementation. Setting the "strict" parameter to true will
+<p>This annotation can be used to identify a stub implementation. Setting the "strict" parameter to true will
 cause it to have the <i>strict</i> behavior, even when creating it with <code>createStub</code>. The usage is optional:</p>
 <div class="source">
         <pre>

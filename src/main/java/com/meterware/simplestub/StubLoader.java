@@ -93,9 +93,30 @@ class StubLoader {
     }
 
     Constructor<?> getConstructor(Class<?> stubClass, Object... parameters) throws NoSuchMethodException {
+        Constructor<?> constructor = findConstructor(stubClass, parameters);
+        if (constructor != null) return constructor;
+
+        StringBuilder sb = new StringBuilder("Unable to instantiate stub for ");
+        sb.append(stubClass.getSuperclass().getName()).append(" because no constructor matches ").append(Arrays.toString(parameters));
+        Class<?> enclosingClass = baseClass.getEnclosingClass();
+        if (!isStatic(baseClass) && enclosingClass != null && !matchesFirstParameter(enclosingClass, parameters))
+            sb.append(". This appears to be a non-static inner class, but the first parameter is not the enclosing class.");
+            
+        throw new SimpleStubException(sb.toString());
+    }
+
+    private boolean isStatic(Class<?> aClass) {
+        return Modifier.isStatic(aClass.getModifiers());
+    }
+
+    private boolean matchesFirstParameter(Class<?> enclosingClass, Object[] parameters) {
+        return parameters.length > 0 && enclosingClass.isAssignableFrom(parameters[0].getClass());
+    }
+
+    private Constructor<?> findConstructor(Class<?> stubClass, Object... parameters) throws NoSuchMethodException {
         for (Constructor constructor : stubClass.getDeclaredConstructors())
             if (isCompatible(constructor, parameters)) return constructor;
-        throw new SimpleStubException("Unable to instantiate stub for " + stubClass.getSuperclass().getName() + " because no constructor matches " + Arrays.toString(parameters));
+        return null;
     }
 
     private boolean isCompatible(Constructor constructor, Object[] parameters) throws NoSuchMethodException {
