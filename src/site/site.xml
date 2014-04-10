@@ -10,6 +10,7 @@
             <item name="Overview" href="index.html"/>
             <item name="Getting Started" href="started.html"/>
             <item name="Additional Use Cases" href="additional.html"/>
+            <item name="Handling static variables" href="statics.html"/>
         </menu>
         <menu ref="reports"/>
     </body>
