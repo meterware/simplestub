@@ -40,10 +40,40 @@ class StubLoader {
     private final ClassPool pool = new ClassPool(ClassPool.getDefault());
     private final Class<?> baseClass;
     private boolean strict;
+    private Type type;
 
     StubLoader(Class<?> baseClass, boolean strict) {
         this.baseClass = baseClass;
         this.strict = strict;
+        this.type = baseClass.getClassLoader() == null ? Type.jdkClass : Type.userClass;
+    }
+
+    enum Type {
+        jdkClass {
+            @Override
+            String getPackagePrefix() {
+                return "com.meterware.simplestub.";
+            }
+
+            @Override
+            Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException {
+                return Class.forName(stubClassName);
+            }
+        }, userClass {
+            @Override
+            String getPackagePrefix() {
+                return "";
+            }
+
+            @Override
+            Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException {
+                return classLoader.loadClass(stubClassName);
+            }
+        };
+
+        abstract String getPackagePrefix();
+
+        abstract Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException;
     }
 
     /**
@@ -170,8 +200,9 @@ class StubLoader {
         validateBaseClass();
 
         String stubClassName = createStubClassName(baseClass.getName());
+        ClassLoader classLoader = baseClass.getClassLoader();
         try {
-            return baseClass.getClassLoader().loadClass(stubClassName);
+            return type.loadClass(stubClassName, classLoader);
         } catch (ClassNotFoundException e) {
             return loadStubClass(stubClassName);
         }
@@ -254,7 +285,7 @@ class StubLoader {
     }
 
     private String createStubClassName(String className) {
-        return className + (strict ? SIMPLESTUB_STRICT_SUFFIX : SIMPLESTUB_SUFFIX);
+        return type.getPackagePrefix() + className + (strict ? SIMPLESTUB_STRICT_SUFFIX : SIMPLESTUB_SUFFIX);
     }
 
 }

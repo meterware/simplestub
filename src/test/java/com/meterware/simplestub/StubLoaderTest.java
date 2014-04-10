@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.net.CookiePolicy;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,6 +160,11 @@ public class StubLoaderTest {
         } catch (SimpleStubException e) {
             assertThat(e.getMessage(), not(containsString("This appears to be a non-static inner class")));
         }
+    }
+
+    @Test
+    public void whenBaseClassInJDK_useDefaultClassLoader() {
+        assertThat(Stub.createStub(Remote.class), instanceOf( Remote.class));
     }
 
     abstract public static class UnannotatedClass {
