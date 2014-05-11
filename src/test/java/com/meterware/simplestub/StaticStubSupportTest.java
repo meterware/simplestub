@@ -2,6 +2,7 @@ package com.meterware.simplestub;
 
 import org.junit.Test;
 
+import static com.meterware.simplestub.StaticStubSupport.Momento;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -11,18 +12,45 @@ import static org.junit.Assert.assertThat;
 public class StaticStubSupportTest {
 
     @Test
-    public void setAndRestore() throws Exception {
+    public void whenInstallCalled_staticValueIsChanged() throws Exception {
         Statics.setStringValue("original Value");
-        StaticStubSupport.Momento momento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
+        StaticStubSupport.install(Statics.class, "stringValue", "test value");
         assertThat(Statics.getStringValue(), equalTo("test value"));
+    }
 
+    @Test
+    public void whenMomentoInvokedAfterInstall_staticValueIsReverted() throws Exception {
+        Statics.setStringValue("original Value");
+        Momento momento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
         momento.revert();
         assertThat(Statics.getStringValue(), equalTo("original Value"));
     }
 
+    @Test
+    public void whenPreserveCalled_staticValueIsUnchanged() throws Exception {
+        Statics.setStringValue("original Value");
+        StaticStubSupport.preserve(Statics.class, "stringValue");
+        assertThat(Statics.getStringValue(), equalTo("original Value"));
+    }
+
+    @Test
+    public void whenMomentoInvokedAfterPreserve_staticValueIsReverted() throws Exception {
+        Statics.setStringValue("original Value");
+        Momento momento = StaticStubSupport.preserve(Statics.class, "stringValue");
+        Statics.setStringValue("test value");
+        momento.revert();
+        assertThat(Statics.getStringValue(), equalTo("original Value"));
+    }
+
+    @Test
+    public void nullObject_doesNothing() {
+        Momento momento = Momento.NULL;
+        momento.revert();
+    }
+
     @Test(expected = NoSuchFieldException.class)
     public void whenTheFieldNameIsWrong_throwException() throws NoSuchFieldException {
-        StaticStubSupport.Momento momento = StaticStubSupport.install(Statics.class, "noSuchValue", "test value");
+        StaticStubSupport.install(Statics.class, "noSuchValue", "test value");
     }
 
     static class Statics {

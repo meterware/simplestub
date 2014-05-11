@@ -27,14 +27,14 @@
         <pre>
     <b>abstract static class</b> TimerStub <b>implements</b> Timer {
         <b>private long</b> secondsSinceStartup = 0;
-        <b>private</b> StaticStubSupport.Momento momento;
+        <b>private</b> StaticStubSupport.Momento momento = StaticStubSupport.Momento.NULL;
 
         <b>static void</b> install() <b>throws</b> NoSuchFieldException {
             momento = StaticStubSupport.install(TimerManager.<b>class</b>, "timer", createStub(TimerStub.<b>class</b>);
         }
 
         <b>static void</b> uninstall() {
-            if (momento != <b>null</b>) momento.revert();
+            momento.revert();
         }
 
         <b>static void</b> setSecondsSinceStartup(<b>long</b> seconds) { secondsSinceStartup = seconds; }
