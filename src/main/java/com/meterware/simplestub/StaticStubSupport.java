@@ -43,7 +43,12 @@ abstract public class StaticStubSupport {
      * An object which contains all the information needed to revert the static field to its previous value.
      */
     public static class Momento {
+
+        /**
+         * A null object instance. Initializing a Momento to this value ensures that it does nothing.
+         */
         public static final Momento NULL = new NullMomento();
+
         private Class<?> containingClass;
         private String fieldName;
         private Object preservedValue;
