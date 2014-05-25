@@ -105,10 +105,29 @@ class StubLoader {
     }
 
     private Object[] toVarArgList(Constructor<?> constructor, Object[] parameters) {
-        Object[] result = new Object[constructor.getParameterTypes().length];
+        Object[] result = new Object[numConstructorArgs(constructor)];
         System.arraycopy(parameters, 0, result, 0, result.length-1);
-        result[result.length-1] = slice(lastElement(constructor.getParameterTypes()).getComponentType(), parameters, result.length-1);
+        result[result.length - 1] = isNonVarArgsInvocation(constructor, parameters)
+                                        ? lastElement(parameters)
+                                        : remainingArgsAsArray(parameters, constructor);
         return result;
+    }
+
+    private Object remainingArgsAsArray(Object[] parameters, Constructor<?> constructor) {
+        return slice(lastConstructorArg(constructor).getComponentType(), parameters, numConstructorArgs(constructor)-1);
+    }
+
+    private boolean isNonVarArgsInvocation(Constructor<?> constructor, Object[] parameters) {
+        return parameters.length == numConstructorArgs(constructor)
+                && isAssignableFrom(lastConstructorArg(constructor), lastElement(parameters));
+    }
+
+    private int numConstructorArgs(Constructor<?> constructor) {
+        return constructor.getParameterTypes().length;
+    }
+
+    private Class<?> lastConstructorArg(Constructor<?> constructor) {
+        return lastElement(constructor.getParameterTypes());
     }
 
     private <T> T lastElement(T[] array) {
@@ -159,10 +178,8 @@ class StubLoader {
     }
 
     private boolean isCompatible(Class[] formalArguments, Object[] actualParameters, boolean isVarArgs) {
-        if (isVarArgs)
-            return areCompatibleVarArgs(formalArguments, actualParameters);
-        else
-            return areCompatibleFixedArgs(formalArguments, actualParameters);
+        return areCompatibleFixedArgs(formalArguments, actualParameters)
+                || (isVarArgs && areCompatibleVarArgs(formalArguments, actualParameters));
     }
 
     private boolean areCompatibleVarArgs(Class[] formalArguments, Object[] actualParameters) {

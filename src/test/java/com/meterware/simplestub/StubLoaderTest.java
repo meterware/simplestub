@@ -89,8 +89,14 @@ public class StubLoaderTest {
     }
 
     @Test
-    public void whenArgumentsMatchVarArgConstructor_invokeAppropriateConstructor() {
+    public void whenListOfArgumentsMatchesVarArg_invokeVarArgConstructor() {
         ClassWithConstructorParameters testObject = Stub.createStub(ClassWithConstructorParameters.class, new ArrayList(), "height", "age", null);
+        assertThat(testObject.getId(), is("height:3"));
+    }
+
+    @Test
+    public void whenArrayMatchVarArg_invokeVarArgConstructor() {
+        ClassWithConstructorParameters testObject = Stub.createStub(ClassWithConstructorParameters.class, new ArrayList(), new String[] {"height", "age", "sex"});
         assertThat(testObject.getId(), is("height:3"));
     }
 

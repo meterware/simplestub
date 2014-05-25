@@ -20,10 +20,10 @@ abstract public class ClassWithConstructorParameters {
         this.name = size == 0 ? "" : name[0];
     }
 
-    protected ClassWithConstructorParameters(boolean throwInstantionaException) throws InstantiationException {
+    protected ClassWithConstructorParameters(boolean throwInstantiationException) throws InstantiationException {
         size = 0;
         name = "";
-        if (throwInstantionaException)
+        if (throwInstantiationException)
             throw new InstantiationException("throw during unit test");
     }
 
