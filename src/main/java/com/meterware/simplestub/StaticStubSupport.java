@@ -51,19 +51,27 @@ abstract public class StaticStubSupport {
 
         private Class<?> containingClass;
         private String fieldName;
-        private Object preservedValue;
+        private Object originalValue;
 
         /**
          * Reverts the field.
          */
         public void revert() {
             try {
-                setPrivateStaticField(containingClass, fieldName, preservedValue);
+                setPrivateStaticField(containingClass, fieldName, originalValue);
             } catch (NoSuchFieldException e) {
                 throw new SimpleStubException("Somehow managed to lose the field name", e);
             } catch (IllegalAccessException e) {
                 throw new SimpleStubException("Somehow managed to lose access to the field", e);
             }
+        }
+
+        /**
+         * Returns the original value of the field.
+         */
+        @SuppressWarnings("unchecked")
+        public <T> T getOriginalValue() {
+            return (T) originalValue;
         }
 
         private Momento() {
@@ -73,7 +81,7 @@ abstract public class StaticStubSupport {
             try {
                 this.containingClass = containingClass;
                 this.fieldName = fieldName;
-                preservedValue = getPrivateStaticField(containingClass, fieldName);
+                originalValue = getPrivateStaticField(containingClass, fieldName);
             } catch (IllegalAccessException e) {
                 throw new SimpleStubException("Unable to gain access to field '" + fieldName + "'", e);
             }
@@ -89,15 +97,29 @@ abstract public class StaticStubSupport {
         }
 
         private void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
-            Field field = aClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(null, value);
+            try {
+                Field field = aClass.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                field.set(null, value);
+            } catch (NoSuchFieldException e) {
+                if (aClass.getSuperclass() == null)
+                    throw e;
+                else
+                    setPrivateStaticField(aClass.getSuperclass(), fieldName, value);
+            }
         }
 
         private Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-            Field field = aClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field.get(null);
+            try {
+                Field field = aClass.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field.get(null);
+            } catch (NoSuchFieldException e) {
+                if (aClass.getSuperclass() == null)
+                    throw e;
+                else
+                    return getPrivateStaticField(aClass.getSuperclass(), fieldName);
+            }
         }
     }
 
