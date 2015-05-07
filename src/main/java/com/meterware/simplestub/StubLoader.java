@@ -59,7 +59,8 @@ class StubLoader {
             Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException {
                 return Class.forName(stubClassName);
             }
-        }, userClass {
+        },
+        userClass {
             @Override
             String getPackagePrefix() {
                 return "";

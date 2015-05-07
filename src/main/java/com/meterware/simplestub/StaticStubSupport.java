@@ -19,7 +19,7 @@ abstract public class StaticStubSupport {
      * @throws NoSuchFieldException if the named field does not exist.
      */
     public static Momento install(Class<?> containingClass, String fieldName, Object newValue) throws NoSuchFieldException {
-        return new Momento(containingClass, fieldName, newValue);
+        return new StaticMemento(containingClass, fieldName, newValue);
     }
 
     /**
@@ -32,22 +32,22 @@ abstract public class StaticStubSupport {
      * @throws NoSuchFieldException if the named field does not exist.
      */
     public static Momento preserve(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
-        return new Momento(containingClass, fieldName);
+        return new StaticMemento(containingClass, fieldName);
     }
 
     private StaticStubSupport() {
     }
 
-
     /**
      * An object which contains all the information needed to revert the static field to its previous value.
+     * @deprecated use @{link com.meterware.simplestub.Memento}
      */
-    public static class Momento {
+    public interface Momento extends Memento {
+        public final static Momento NULL = new NullMomento();
+    }
 
-        /**
-         * A null object instance. Initializing a Momento to this value ensures that it does nothing.
-         */
-        public static final Momento NULL = new NullMomento();
+
+    private static class StaticMemento implements Momento {
 
         private Class<?> containingClass;
         private String fieldName;
@@ -56,6 +56,7 @@ abstract public class StaticStubSupport {
         /**
          * Reverts the field.
          */
+        @Override
         public void revert() {
             try {
                 setPrivateStaticField(containingClass, fieldName, originalValue);
@@ -69,15 +70,13 @@ abstract public class StaticStubSupport {
         /**
          * Returns the original value of the field.
          */
+        @Override
         @SuppressWarnings("unchecked")
         public <T> T getOriginalValue() {
             return (T) originalValue;
         }
 
-        private Momento() {
-        }
-
-        private Momento(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
+        private StaticMemento(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
             try {
                 this.containingClass = containingClass;
                 this.fieldName = fieldName;
@@ -87,7 +86,7 @@ abstract public class StaticStubSupport {
             }
         }
 
-        private Momento(Class<?> containingClass, String fieldName, Object stubValue) throws NoSuchFieldException {
+        private StaticMemento(Class<?> containingClass, String fieldName, Object stubValue) throws NoSuchFieldException {
             this(containingClass, fieldName);
             try {
                 setPrivateStaticField(containingClass, fieldName, stubValue);
@@ -123,9 +122,14 @@ abstract public class StaticStubSupport {
         }
     }
 
-    private static class NullMomento extends Momento {
+    private static class NullMomento implements Momento {
         @Override
         public void revert() {
+        }
+
+        @Override
+        public <T> T getOriginalValue() {
+            throw new UnsupportedOperationException();
         }
     }
 

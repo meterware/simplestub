@@ -74,6 +74,12 @@ public class StaticStubSupportTest {
         momento.revert();
     }
 
+    @Test
+    public void nullMemento_doesNothing() {
+        Memento memento = Memento.NULL;
+        memento.revert();
+    }
+
     @Test(expected = NoSuchFieldException.class)
     public void whenTheFieldNameIsWrong_throwException() throws NoSuchFieldException {
         StaticStubSupport.install(Statics.class, "noSuchValue", "test value");
