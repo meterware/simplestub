@@ -1,0 +1,98 @@
+<html>
+<head>
+    <title>SimpleStub: Handling System Properties</title>
+</head>
+<body>
+<h2>Handling System Properties</h2>
+
+<p>It sometimes happens that a class will manipulate or depend on system properties. Since we always want to restore
+    conditions to what they were before a unit test, SimpleStub provides support for manipulating them in a reversible
+    way.
+</p>
+
+<p>
+    One place where this can be useful is JNDI, where the call to <code>new InitialContext()</code> uses a factory
+    defined by the property <code>java.naming.factory.initial</code>, defined by the constant
+    <a href="http://docs.oracle.com/javase/8/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY."><code>javax.naming.Context.INITIAL_CONTEXT_FACTORY</code>code></a>.
+    Testing code that uses JNDI can often be simplified is we can substitute a test factory.
+</p>
+
+<p>The first thing we do is to define an appropriate Context stub class. In this case, our test will only do lookups, so
+    that is all that we implement:</p>
+
+<div class="source">
+    <pre>
+<b>abstract static class</b> ContextStub <b>implements</b> javax.naming.Context
+    <b>private static </b> Map&lt;String, Object&gt; contents = new HashMap&lt;&gt;;
+
+    <b>static void</b> clear() { contents.clear(); }
+
+    <b>static void</b> defineEntry(String name, Object value) { context.put(name, value); }
+
+    <i>@Override</i>
+    <b>public Object</b> lookup(String name) throws NamingException {
+        <b>if</b> (!map.containsKey(name)) throw <b>new</b> NamingException("failed in test");
+        <b>return</b> contents.get(name);
+    }
+}</pre>
+</div>
+<p>
+    Then we define the initial context factory itself, along with methods to activate it and clean up afterwards.
+</p>
+<div class="source">
+    <pre>
+<b>static class</b> InitialContextFactoryStub <b>implements</b> javax.naming.spi.InitialContextFactory
+    <b>private static </b> Memento memento = Memento.NULL;
+
+    <b>static void</b> install() {
+        ContextStub.clear();
+        memento = SystemPropertySupport.install(Context.INITIAL_CONTEXT_FACTORY, InitialContextFactoryStub<b>.class</b>.getName());
+    }
+
+    <b>static void</b> uninstall() {
+        memento.revert();
+    }
+
+    <i>@Override</i>
+    <b>public</b> Context getInitialContext(Hashtable&lt;?,?&gt; environment) throws NamingException {
+        return createStub(ContextStub<b>.class</b>);
+    }
+
+}</pre>
+</div>
+
+<p>Note that when we install the factory, we also clear all current definitions. This prevents one test from affecting others.
+    Now we can use this in a test:</p>
+
+<div class="source">
+    <pre>
+    <i>@Before</i>
+    <b>public void</b> setUp() <b>throws</b> Exception {
+        InitialContextFactoryStub.install();
+    }
+
+    <i>@After</i>
+    <b>public void</b> tearDown() {
+        InitialContextFactoryStub.uninstall();
+    }
+
+    <i>@Test</i>
+    <b>public void</b> whenJndiValueIsString_reportValue() {
+        ContextStub.defineEntry(computer.VALUE_NAME, "zork");
+
+        assertThat(computer.getValue(), is("zork");
+    }
+
+    <i>@Test</i>
+    <b>public void</b> whenJndiValueIsBoolean_reportValue() {
+         ContextStub.defineEntry(computer.VALUE_NAME, Boolean.TRUE);
+
+         assertThat(computer.getValue(), is("asserted");
+     }</pre>
+</div>
+
+<p>thus verifying that the <code>getValue</code> method is looking up the value named VALUE_NAME and converting it appropriately.</p>
+
+
+</body>
+</html>
