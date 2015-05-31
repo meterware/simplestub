@@ -70,7 +70,7 @@ public class StaticStubSupportTest {
 
     @Test
     public void nullObject_doesNothing() {
-        Momento momento = Momento.NULL;
+        Memento momento = Momento.NULL;
         momento.revert();
     }
 

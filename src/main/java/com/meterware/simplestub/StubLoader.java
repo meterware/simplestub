@@ -215,29 +215,37 @@ class StubLoader {
     }
 
     Class<?> getStubClass() {
-        validateBaseClass();
-
-        String stubClassName = createStubClassName(baseClass.getName());
-        ClassLoader classLoader = baseClass.getClassLoader();
-        try {
-            return type.loadClass(stubClassName, classLoader);
-        } catch (ClassNotFoundException e) {
-            return loadStubClass(stubClassName);
-        }
-    }
-
-    private void validateBaseClass() {
         if (!isAbstractClass())
             throw new SimpleStubException("Class " + baseClass.getName() + " is not abstract");
+
+        return getStubClass(createStubClassName(baseClass.getName()), baseClass.getClassLoader());
+    }
+
+    Class<?> getStubClassForThread(String className) {
+        try {
+            if (!baseClass.isInterface())
+                baseClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new SimpleStubException("Base class " + baseClass.getName() + " lacks a public no-arg constructor");
+        }
+        return getStubClass(className, Thread.currentThread().getContextClassLoader());
+    }
+
+    private Class<?> getStubClass(String stubClassName, ClassLoader classLoader) {
+        try {
+            return type.loadClass(stubClassName, classLoader);
+        } catch (ClassNotFoundException e) { // class has not already been created; create it now
+            return loadStubClass(stubClassName, classLoader);
+        }
     }
 
     private boolean isAbstractClass() {
         return Modifier.isAbstract(baseClass.getModifiers());
     }
 
-    private Class<?> loadStubClass(String stubClassName) {
+    private Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
         try {
-            return createStubClass(stubClassName);
+            return createStubClass(stubClassName, classLoader);
         } catch (NotFoundException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         } catch (CannotCompileException e) {
@@ -245,13 +253,14 @@ class StubLoader {
         }
     }
 
-    private Class<?> createStubClass(String stubClassName) throws NotFoundException, CannotCompileException {
+    // create the named stub in a specified classloader.
+    private Class<?> createStubClass(String stubClassName, ClassLoader classLoader) throws NotFoundException, CannotCompileException {
         CtClass ctClass = createStubClassBase(stubClassName);
         for (CtMethod method : ctClass.getMethods()) {
             if (isAbstract(method))
                 addStubMethod(ctClass, method);
         }
-        return ctClass.toClass(baseClass.getClassLoader(), null);
+        return ctClass.toClass(classLoader, null);
     }
 
     private CtClass createStubClassBase(String stubClassName) throws NotFoundException {

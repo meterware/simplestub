@@ -40,10 +40,10 @@ abstract public class StaticStubSupport {
 
     /**
      * An object which contains all the information needed to revert the static field to its previous value.
-     * @deprecated use @{link com.meterware.simplestub.Memento}
+     * @deprecated use {@link com.meterware.simplestub.Memento} instead.
      */
     public interface Momento extends Memento {
-        public final static Momento NULL = new NullMomento();
+        Momento NULL = new NullMemento();
     }
 
 
@@ -122,7 +122,7 @@ abstract public class StaticStubSupport {
         }
     }
 
-    private static class NullMomento implements Momento {
+    private static class NullMemento implements Momento {
         @Override
         public void revert() {
         }

@@ -27,7 +27,7 @@
         <pre>
     <b>abstract static class</b> TimerStub <b>implements</b> Timer {
         <b>private long</b> secondsSinceStartup = 0;
-        <b>private</b> Memento memento = Memento.NULL;
+        <b>private static</b> Memento memento = Memento.NULL;
 
         <b>static void</b> install() <b>throws</b> NoSuchFieldException {
             memento = StaticStubSupport.install(TimerManager.<b>class</b>, "timer", createStub(TimerStub.<b>class</b>);

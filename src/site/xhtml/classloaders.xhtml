@@ -11,65 +11,59 @@
 </p>
 <p>
     The following example tests some behavior of the <code>Reader</code> class. This class reads serialized data from
-    an input stream, using the thread context class-loader to find any application-specific classes.
+    an input stream, using the thread context class-loader to find any application-specific classes. Any class which
+    implements the <code>Tagged</code> interface will have its <code>applicationName</code> property set to the
+    corresponding property from its classloader (which also implements that interface).
 </p>
 
-
-
-
-
-<p>The first thing we do is to create an appropriate stub class:</p>
+<p>We'll start by creating a setup class:</p>
 
     <div class="source">
         <pre>
-    <b>abstract static class</b> TimerStub <b>implements</b> Timer {
-        <b>private long</b> secondsSinceStartup = 0;
+    <b>abstract static class</b> ClassLoaderControl {
         <b>private</b> Memento memento = Memento.NULL;
 
         <b>static void</b> install() <b>throws</b> NoSuchFieldException {
-            memento = StaticStubSupport.install(TimerManager.<b>class</b>, "timer", createStub(TimerStub.<b>class</b>);
+            memento = ThreadContextClassLoaderSupport.install(<b>new</b> TaggedClassLoader("test1"));
         }
 
         <b>static void</b> uninstall() {
             memento.revert();
         }
-
-        <b>static void</b> setSecondsSinceStartup(<b>long</b> seconds) { secondsSinceStartup = seconds; }
-
-        <i>@Override</i>
-        <b>public long</b> getSecondsSinceStartup() { <b>return</b> secondsSinceStartup; }
     }</pre>
     </div>
 
-    <p>In addition to providing a test implementation of our method, and a way to give it a value, we've also created a pair
-       of methods to install and uninstall the stub itself, using StaticStubSupport. Now we can use this in a test:</p>
+    <p>We can then write some tests, assuming the existing of an appropriate class-loader class, and a method which
+    can instantiate and serialize an instance, returning a byte array.</p>
+
 
 <div class="source">
     <pre>
     <i>@Before</i>
     <b>public void</b> setUp() <b>throws</b> Exception {
-        TimerStub.install();
+        ClassLoaderControl.install();
     }
 
     <i>@After</i>
     <b>public void</b> tearDown() {
-        TimerStub.uninstall();
+        ClassLoaderControl.uninstall();
     }
 
     <i>@Test</i>
-    <b>public void</b> afterNineSeconds_lightNotWarm() {
-        TimerStub.setSecondsSinceStartup(9);
-        assertFalse(light.isWarm());
+    <b>public void</b> whenTaggedClassRead_setProperty() {
+        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader("my.Class", BaseClass.class);
+        BaseClass in = (BaseClass) Thread.current.getContextClassLoader().loadClass("my.class");
+        byte[] bytes = populateAndSerialize(base);
+
+        BaseClass out = reader.read(new ByteArrayInputStream(bytes));
+
+        assertThat(out.getApplicationName(), is("test1");
     }
+</pre>
+</div>
 
-    <i>@Test</i>
-    <b>public void</b> afterTenSeconds_lightIsWarm() {
-        TimerStub.setSecondsSinceStartup(10);
-        assertTrue(light.isWarm());
-    }</pre>
-    </div>
-
-    <p>thus verifying that the <code>isMature</code> method is reading the Timer and changing state once ten seconds have elapsed.</p>
+    <p>while the <code>Reader</code> class is never given the classloader, and the instance is only found in the
+        thread context classloader, the code now is able to read it, allowing us to test that behavior.</p>
 
 
 

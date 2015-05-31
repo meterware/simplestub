@@ -11,6 +11,8 @@
             <item name="Getting Started" href="started.html"/>
             <item name="Additional Use Cases" href="additional.html"/>
             <item name="Handling static variables" href="statics.html"/>
+            <item name="Handling system properties" href="properties.html"/>
+            <item name="Handling class loaders" href="classloaders.html"/>
         </menu>
         <menu ref="reports"/>
     </body>
