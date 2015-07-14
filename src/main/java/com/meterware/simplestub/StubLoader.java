@@ -1,11 +1,7 @@
 package com.meterware.simplestub;
 
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
-import javassist.CtNewMethod;
-import javassist.NotFoundException;
+import com.meterware.simplestub.generation.NameFilter;
+import com.meterware.simplestub.generation.StubGenerator;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -35,9 +31,11 @@ class StubLoader {
         PRIMITIVE_TYPES.put(Boolean.TYPE,   Boolean.class);
         PRIMITIVE_TYPES.put(Float.TYPE,     Float.class);
         PRIMITIVE_TYPES.put(Double.TYPE,    Double.class);
+
+        StubGenerator.setNameFilter(new StubNameFilter());
     }
 
-    private final ClassPool pool = new ClassPool(ClassPool.getDefault());
+    private StubGenerator generator;
     private final Class<?> baseClass;
     private boolean strict;
     private Type type;
@@ -45,6 +43,7 @@ class StubLoader {
     StubLoader(Class<?> baseClass, boolean strict) {
         this.baseClass = baseClass;
         this.strict = strict;
+        this.generator = StubGenerator.create(baseClass, strict);
         this.type = baseClass.getClassLoader() == null ? Type.jdkClass : Type.userClass;
     }
 
@@ -244,75 +243,23 @@ class StubLoader {
     }
 
     private Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
-        try {
-            return createStubClass(stubClassName, classLoader);
-        } catch (NotFoundException e) {
-            throw new SimpleStubException("Unable to create stub class", e);
-        } catch (CannotCompileException e) {
-            throw new SimpleStubException("Unable to create stub class", e);
-        }
+        return generator.loadStubClass(stubClassName, classLoader);
     }
 
-    // create the named stub in a specified classloader.
-    private Class<?> createStubClass(String stubClassName, ClassLoader classLoader) throws NotFoundException, CannotCompileException {
-        CtClass ctClass = createStubClassBase(stubClassName);
-        for (CtMethod method : ctClass.getMethods()) {
-            if (isAbstract(method))
-                addStubMethod(ctClass, method);
-        }
-        return ctClass.toClass(classLoader, null);
-    }
-
-    private CtClass createStubClassBase(String stubClassName) throws NotFoundException {
-        if (baseClass.isInterface()) {
-            return createStubClassFromInterface(stubClassName);
-        } else {
-            return createStubClassFromAbstractClass(stubClassName);
-        }
-    }
-
-    private CtClass createStubClassFromInterface(String stubClassName) throws NotFoundException {
-        CtClass ctClass = pool.makeClass(stubClassName);
-        ctClass.addInterface(pool.getCtClass(baseClass.getName()));
-        return ctClass;
-    }
-
-    private CtClass createStubClassFromAbstractClass(String stubClassName) throws NotFoundException {
-        return pool.makeClass(stubClassName, pool.get(baseClass.getName()));
-    }
-
-    private void addStubMethod(CtClass ctClass, CtMethod method) throws CannotCompileException, NotFoundException {
-        CtMethod method1 = createMethod(ctClass, method);
-        if (generateStrictStub())
-            defineMethodToThrowException(method1);
-        ctClass.addMethod(method1);
-    }
-
-    private void defineMethodToThrowException(CtMethod method) throws CannotCompileException {
-        method.setBody("{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"unexpected call to method " +
-                withoutSuffix(method.getLongName()) + "\"); }" );
-    }
-
-    private String withoutSuffix(String longName) {
+    private static String withoutSuffix(String longName) {
         int i = longName.indexOf(SIMPLESTUB_SUFFIX);
         return longName.substring(0, i) + longName.substring(i + SIMPLESTUB_SUFFIX.length());
     }
 
-    private boolean generateStrictStub() {
-        return strict;
-    }
-
-    private CtMethod createMethod(CtClass ctClass, CtMethod method) throws NotFoundException, CannotCompileException {
-        return CtNewMethod.make(method.getModifiers() & ~javassist.Modifier.ABSTRACT,
-                method.getReturnType(), method.getName(), method.getParameterTypes(), method.getExceptionTypes(), null, ctClass);
-    }
-
-    private boolean isAbstract(CtMethod method) {
-        return javassist.Modifier.isAbstract(method.getModifiers());
-    }
-
     private String createStubClassName(String className) {
         return type.getPackagePrefix() + className + (strict ? SIMPLESTUB_STRICT_SUFFIX : SIMPLESTUB_SUFFIX);
+    }
+
+    static class StubNameFilter implements NameFilter {
+        @Override
+        public String toMethodDisplayName(String fullMethodName) {
+            return withoutSuffix(fullMethodName);
+        }
     }
 
 }
