@@ -1,5 +1,8 @@
 package com.meterware.simplestub.generation;
 
+import com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory;
+import com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +10,7 @@ import java.util.List;
  * A base class for stub generation.
  */
 public abstract class StubGenerator {
-    private static StubGeneratorFactory[] FACTORIES = {new JavassistStubGeneratorFactory()};
+    private static StubGeneratorFactory[] FACTORIES = {new JavassistStubGeneratorFactory(), new AsmStubGeneratorFactory()};
 
     private static NameFilter nameFilter;
     private static StubGeneratorFactory factory;

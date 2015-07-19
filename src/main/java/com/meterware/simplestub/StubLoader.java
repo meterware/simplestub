@@ -217,7 +217,11 @@ class StubLoader {
         if (!isAbstractClass())
             throw new SimpleStubException("Class " + baseClass.getName() + " is not abstract");
 
-        return getStubClass(createStubClassName(baseClass.getName()), baseClass.getClassLoader());
+        return getStubClass(createStubClassName(baseClass.getName()), getNonNullClassLoader(baseClass.getClassLoader()));
+    }
+
+    private ClassLoader getNonNullClassLoader(ClassLoader classLoader) {
+        return classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
     }
 
     Class<?> getStubClassForThread(String className) {
@@ -257,7 +261,7 @@ class StubLoader {
 
     static class StubNameFilter implements NameFilter {
         @Override
-        public String toMethodDisplayName(String fullMethodName) {
+        public String toDisplayName(String fullMethodName) {
             return withoutSuffix(fullMethodName);
         }
     }

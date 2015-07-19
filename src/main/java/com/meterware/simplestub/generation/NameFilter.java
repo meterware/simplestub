@@ -6,5 +6,5 @@ package com.meterware.simplestub.generation;
 public interface NameFilter {
 
     /** Converts the actual full method name to one suitable for display in an error message. */
-    String toMethodDisplayName(String fullMethodName);
+    String toDisplayName(String fullMethodName);
 }

@@ -1,4 +1,7 @@
-package com.meterware.simplestub.generation;
+package com.meterware.simplestub.generation.javassist;
+
+import com.meterware.simplestub.generation.StubGenerator;
+import com.meterware.simplestub.generation.StubGeneratorFactory;
 
 /**
  * A factory for creating Javassist-based stub generators.

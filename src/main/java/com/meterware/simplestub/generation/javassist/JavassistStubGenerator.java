@@ -1,6 +1,7 @@
-package com.meterware.simplestub.generation;
+package com.meterware.simplestub.generation.javassist;
 
 import com.meterware.simplestub.SimpleStubException;
+import com.meterware.simplestub.generation.StubGenerator;
 import javassist.*;
 
 /**
@@ -67,7 +68,7 @@ public class JavassistStubGenerator extends StubGenerator {
 
     private void defineMethodToThrowException(CtMethod method) throws CannotCompileException {
         method.setBody("{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"unexpected call to method " +
-                        getNameFilter().toMethodDisplayName(method.getLongName()) + "\"); }" );
+                        getNameFilter().toDisplayName(method.getLongName()) + "\"); }" );
     }
 
     private CtClass createStubClassFromInterface(String stubClassName) throws NotFoundException {
