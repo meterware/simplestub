@@ -1,8 +1,5 @@
 package com.meterware.simplestub.generation;
 
-import com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory;
-import com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +7,10 @@ import java.util.List;
  * A base class for stub generation.
  */
 public abstract class StubGenerator {
-    private static StubGeneratorFactory[] FACTORIES = {new JavassistStubGeneratorFactory(), new AsmStubGeneratorFactory()};
+    private static String[] FACTORY_NAMES = {
+            "com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory",
+            "com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory"
+    };
 
     private static NameFilter nameFilter;
     private static StubGeneratorFactory factory;
@@ -36,13 +36,23 @@ public abstract class StubGenerator {
     private static StubGeneratorFactory loadStubGeneratoryFactory() {
         List<String> libraries = new ArrayList<String>();
 
-        for (StubGeneratorFactory candidate : FACTORIES)
-            if (candidate.isAvailable())
+        for (String factoryName : FACTORY_NAMES) {
+            StubGeneratorFactory candidate = loadCandidate(factoryName);
+            if (candidate != null && candidate.isAvailable())
                 return candidate;
-            else
+            else if (candidate != null)
                 libraries.add(candidate.getLibraryName());
+        }
 
         return new NullStubGeneratorFactory(libraries);
+    }
+
+    private static StubGeneratorFactory loadCandidate(String factoryName) {
+        try {
+            return (StubGeneratorFactory) Class.forName(factoryName).newInstance();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     abstract public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader);
