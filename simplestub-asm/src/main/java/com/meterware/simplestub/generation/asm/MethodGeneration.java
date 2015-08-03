@@ -31,7 +31,7 @@ public class MethodGeneration {
 
     static void addConstructor(ClassWriter cw, Constructor constructor) {
         Method m = Method.getMethod(constructor);
-        GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC, m, null, null, cw);
+        GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
         mg.loadThis();
         mg.loadArgs();
         mg.invokeConstructor(Type.getType(constructor.getDeclaringClass()), m);
@@ -55,7 +55,7 @@ public class MethodGeneration {
         @Override
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
             Method m = Method.getMethod(method);
-            GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC, m, null, null, cw);
+            GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
             mg.visitInsn(getDefaultReturnValueConstant(method.getReturnType()));
             mg.returnValue();
             mg.endMethod();
@@ -80,7 +80,7 @@ public class MethodGeneration {
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
 
             Method m = Method.getMethod(method);
-            GeneratorAdapter mg = new GeneratorAdapter(ACC_PUBLIC, m, null, null, cw);
+            GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
             mg.throwException(Type.getType(UnexpectedMethodCallException.class), getUnexpectedCallMessage(method));
             mg.endMethod();
         }

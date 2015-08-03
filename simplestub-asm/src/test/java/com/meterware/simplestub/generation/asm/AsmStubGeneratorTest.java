@@ -4,6 +4,7 @@ import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubGeneratorFactory;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
@@ -178,7 +179,7 @@ public class AsmStubGeneratorTest {
     public void whenMethodsAreInherited_generateStubs() throws Exception {
         AbstractImplementation testObject = createStub(AbstractImplementation.class);
 
-        assertThat(testObject.getLength(), is(0));
+        MatcherAssert.assertThat(testObject.getLength(), is(0));
     }
 
 }

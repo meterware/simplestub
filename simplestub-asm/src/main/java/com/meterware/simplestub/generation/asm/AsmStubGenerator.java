@@ -3,6 +3,7 @@ package com.meterware.simplestub.generation.asm;
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.generation.StubGenerator;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,9 +15,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.V1_6;
 
 /**
  * A stub generator which uses the ASM library.
@@ -53,7 +51,7 @@ class AsmStubGenerator extends StubGenerator {
     @Override
     public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        cw.visit(V1_6, ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
+        cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
 
         for (Constructor constructor : baseClass.getDeclaredConstructors())
             MethodGeneration.addConstructor(cw, constructor);
@@ -117,6 +115,6 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private static String getFilteredName(String className) {
-        return getNameFilter().toDisplayName(className);
+        return StubGenerator.getNameFilter().toDisplayName(className);
     }
 }

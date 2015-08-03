@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>SimpleStub: Using ASM instead of Javassist</title>
+</head>
+<body>
+<h2>Using ASM instead of Javassist</h2>
+
+<p>Simplestub is built using the Javassist library; however, some platforms (such as Android) do not support the
+features it needs. An alternative is to use the simplestub-asm extension:</p>
+
+<p>In Maven, this means adding the following to your project:</p>
+<pre>
+    &lt;dependency&gt;
+        &lt;group&gt;com.meterware.simplestub&lt;/group&gt;
+        &lt;artifact&gt;simplestub-asm&lt;/artifact&gt;
+        &lt;version&gt;1.2.0&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+</pre>
+
+<p>This will, in turn, pull in asm, asm-tree, and asm-commons</p>
+</body>
+</html>
