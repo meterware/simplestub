@@ -37,7 +37,12 @@ abstract public class Stub {
 
     /**
      * Instantiates a stub from an abstract class
-     * @deprecated use #createStub
+     * @deprecated as of 1.1 use #createStub
+     * @param aClass the class from which a stub should be generated.
+     * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
+     *                   must be the outer class instance.
+     * @param <T> the abstract class
+     * @return a newly instantiated stub
      */
     public static <T> T create(Class<T> aClass, Object... parameters) {
         return createStub(aClass, parameters);

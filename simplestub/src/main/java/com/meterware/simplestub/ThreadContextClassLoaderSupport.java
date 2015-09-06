@@ -9,6 +9,7 @@ public class ThreadContextClassLoaderSupport {
      * Installs a classloader as the current thread context classloader, returning a memento which can be used to
      * undo the installation.
      * @param classLoader the classloader to install.
+     * @return an object which holds the information needed to revert the thread context classloader.
      */
     public static Memento install(ClassLoader classLoader) {
         Memento memento = new ThreadContextClassLoaderMemento();
@@ -18,6 +19,7 @@ public class ThreadContextClassLoaderSupport {
 
     /**
      * Returns a memento to restore the current thread context classloader.
+     * @return an object which holds the information needed to revert the thread context classloader.
      */
     public static Memento preserve() {
         return new ThreadContextClassLoaderMemento();

@@ -9,6 +9,7 @@ public class SystemPropertySupport {
      * Sets a property to the specified value, returning a memento to restore it.
      * @param propertyName the name of the property to set
      * @param newValue the new value for the property
+     * @return an object which holds the information needed to revert the system property.
      */
     public static Memento install(String propertyName, String newValue) {
         PropertyMemento memento = new PropertyMemento(propertyName);
@@ -19,6 +20,7 @@ public class SystemPropertySupport {
     /**
      * Returns a memento to restore the specified property to its current value.
      * @param propertyName the name of the property to preserve
+     * @return an object which holds the information needed to revert the system property.
      */
     public static Memento preserve(String propertyName) {
         return new PropertyMemento(propertyName);
