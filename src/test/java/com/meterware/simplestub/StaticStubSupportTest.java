@@ -2,9 +2,12 @@ package com.meterware.simplestub;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static com.meterware.simplestub.StaticStubSupport.Momento;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -17,6 +20,13 @@ public class StaticStubSupportTest {
         Statics.setStringValue("original Value");
         StaticStubSupport.install(Statics.class, "stringValue", "test value");
         assertThat(Statics.getStringValue(), equalTo("test value"));
+    }
+
+    @Test
+    public void whenInstallCalledForFinal_staticValueIsChanged() throws Exception {
+        ArrayList<String> testValue = new ArrayList<String>();
+        StaticStubSupport.install(Statics.class, "finalValue", testValue);
+        assertThat(Statics.getFinalValue(), sameInstance(testValue));
     }
 
     @Test
@@ -88,12 +98,22 @@ public class StaticStubSupportTest {
     static class Statics {
         private static String stringValue;
 
+        private static final ArrayList<String> finalValue = new ArrayList<String>();
+
+        static {
+            finalValue.add("abc");
+        }
+
         public static String getStringValue() {
             return stringValue;
         }
 
         public static void setStringValue(String stringValue) {
             Statics.stringValue = stringValue;
+        }
+
+        static ArrayList<String> getFinalValue() {
+            return finalValue;
         }
     }
 
