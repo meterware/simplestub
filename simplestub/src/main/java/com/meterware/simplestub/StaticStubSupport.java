@@ -1,6 +1,7 @@
 package com.meterware.simplestub;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * A class which simplifies the assignment of stubs to static variables.
@@ -97,8 +98,7 @@ abstract public class StaticStubSupport {
 
         private void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
             try {
-                Field field = aClass.getDeclaredField(fieldName);
-                field.setAccessible(true);
+                Field field = getAccessibleField(aClass, fieldName);
                 field.set(null, value);
             } catch (NoSuchFieldException e) {
                 if (aClass.getSuperclass() == null)
@@ -108,10 +108,22 @@ abstract public class StaticStubSupport {
             }
         }
 
+        /**
+         * Returns the specified field, ensuring that the code can access it. Note that this will not work
+         * with fields representing primitives or Strings, as the compiler may optimize them.
+         */
+        private Field getAccessibleField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+            Field field = aClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field modifiers = Field.class.getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            return field;
+        }
+
         private Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
             try {
-                Field field = aClass.getDeclaredField(fieldName);
-                field.setAccessible(true);
+                Field field = getAccessibleField(aClass, fieldName);
                 return field.get(null);
             } catch (NoSuchFieldException e) {
                 if (aClass.getSuperclass() == null)
