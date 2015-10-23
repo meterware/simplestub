@@ -1,0 +1,72 @@
+<html>
+<head>
+    <title>SimpleStub: Testing Static Initialization</title>
+</head>
+<body>
+<h2>Testing Static Initialization</h2>
+
+<p>Some classes do static initialization based on the environment at startup. This can include system properties, classes
+    on the classpath, the presence of specific files, and so on. These tend to be difficult to unit test, since
+    the computation is done exactly once. Lazy initialization is often a better choice, but not everyone does that.
+    To unit test such initializations, we need to reload the class, allowing it to run its initializations after
+    the test has set up new conditions. The <code>ClassLoadingSupport</code> class exists to encapsulate that behavior.
+</p>
+<p>
+    The unit test for <code>ClassLoadingSupport</code> shows how this works. The following class reads the current
+    system properties when it is initialized.</p>
+
+    <div class="source">
+        <pre>
+    <b>public class</b> PropertyReaderImpl <b>implements</b> PropertyReader {
+        <b>private static final</b> Properties initialProperties;
+
+        <b>static</b> {
+            initialProperties = (Properties) System.getProperties().clone();
+        }
+
+        <i>@Override</i>
+        <b>public</b> String getPropertyValue(String propertyName) {
+            <b>return</b> initialProperties.getProperty(propertyName);
+        }
+    }</pre>
+    </div>
+
+    <p>Note that the <code>getPropertyValue()</code> method implements one defined on the interface. When we use this class
+    in a test, it will initialize the <code>initialProperties</code> field only once, which limits us in testing it. But
+    if we can reload it during the test, we can set new properties and have the class read them. </p>
+
+<div class="source">
+    <pre>
+    <b>private</b> List&lt;Memento&gt; mementos = <b>new</b> ArrayList&lt;Memento&gt;();
+
+    <i>@After</i>
+    <b>public void</b> tearDown() <b>throws</b> Exception {
+        <b>for</b> (Memento memento : mementos)
+            memento.revert();
+        }
+    }
+
+    <i>@Test
+    @SuppressWarnings("all")</i>
+    <b>public void</b> testClassReloading() <b>throws</b> Exception {
+(1)     mementos.add(SystemPropertySupport.install("test.property", "zork"));
+(2)     Class reloadedClass = ClassLoadingSupport.reloadClass(PropertyReaderImpl.class);
+(3)     PropertyReader secondReader = (PropertyReader) reloadedClass.newInstance();
+(4)     assertThat(secondReader.getPropertyValue("test.property"), is("zork"));
+    }</pre>
+    </div>
+
+<p>The test will:</p>
+    <ol type="1">
+    	<li>use the <code>SystemPropertySupport</code> class to set a system property in our environment (it will be reverted
+    	    by the <code>tearDown</code> method after the test completes.</li>
+    	<li>reload the <code>PropertyReaderImpl</code> class in its own classloader. This causes the static initializers to run.</li>
+    	<li>create an instance of the new class. Since its classloader inherits from the original, we can cast it to the interface.</li>
+    	<li>verify that the static value set during initialization is based on the new property value.</li>
+    </ol>
+
+<p>Our new class is garbage collected when the test is over.</p>
+
+
+</body>
+</html>
