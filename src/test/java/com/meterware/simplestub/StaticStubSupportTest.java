@@ -5,9 +5,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import static com.meterware.simplestub.StaticStubSupport.Momento;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 /**

@@ -1,5 +1,8 @@
 package com.meterware.simplestub;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -134,7 +137,7 @@ abstract public class StaticStubSupport {
         }
     }
 
-    private static class NullMemento implements Momento {
+    static private class NullMemento implements Momento {
         @Override
         public void revert() {
         }
