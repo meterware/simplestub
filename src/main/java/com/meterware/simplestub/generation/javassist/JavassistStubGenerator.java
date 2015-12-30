@@ -1,6 +1,7 @@
 package com.meterware.simplestub.generation.javassist;
 
 import com.meterware.simplestub.SimpleStubException;
+import com.meterware.simplestub.Stub;
 import com.meterware.simplestub.generation.StubGenerator;
 import javassist.*;
 
@@ -59,16 +60,68 @@ public class JavassistStubGenerator extends StubGenerator {
 
     private CtMethod createMethod(CtClass ctClass, CtMethod method) throws NotFoundException, CannotCompileException {
         return CtNewMethod.make(method.getModifiers() & ~Modifier.ABSTRACT,
-                method.getReturnType(), method.getName(), method.getParameterTypes(), method.getExceptionTypes(), null, ctClass);
+                method.getReturnType(), method.getName(), method.getParameterTypes(), method.getExceptionTypes(), createBody(method.getReturnType()), ctClass);
     }
+
+    private String createBody(CtClass returnType) throws NotFoundException {
+        if (returnType.isPrimitive())
+            return null;
+        else if (returnType.getName().equals("java.lang.String"))
+            return "return \"\";";
+        else if (!hasNullConstructor(returnType))
+            return null;
+        else if (returnType.isInterface() || isAbstract(returnType))
+            return createStubCreationBody(returnType.getName());
+        else
+            return "return new " + returnType.getName() + "();";
+    }
+
+    private String createStubCreationBody(String name) {
+        return "return (" + name + ") " + Stub.class.getName() + ".createStub(" + name + ".class, new java.lang.Object[0]);";
+    }
+
+    /**
+     * Returns true if the specified class can be stubbed without passing parameters.
+     * @param aClass the class to be stubbed
+     */
+    protected static boolean hasNullConstructor(CtClass aClass) throws NotFoundException {
+        return aClass.isInterface() || getNullConstructor(aClass) != null;
+    }
+
+    private static CtConstructor getNullConstructor(CtClass aClass) throws NotFoundException {
+        for (CtConstructor constructor : aClass.getConstructors())
+            if (constructor.getParameterTypes().length == 0) return constructor;
+
+        return null;
+    }
+
+    private boolean isAbstract(CtClass aClass) {
+        return java.lang.reflect.Modifier.isAbstract(aClass.getModifiers());
+    }
+
 
     private boolean generateStrictStub() {
         return strict;
     }
 
-    private void defineMethodToThrowException(CtMethod method) throws CannotCompileException {
-        method.setBody("{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"unexpected call to method " +
-                        getNameFilter().toDisplayName(method.getLongName()) + "\"); }" );
+    private void defineMethodToThrowException(CtMethod method) throws CannotCompileException, NotFoundException {
+
+        method.setBody("{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"" +
+                        getUnexpectedCallMessage(method) + "\"); }" );
+    }
+
+    private String getUnexpectedCallMessage(CtMethod method) throws NotFoundException {
+        StringBuilder sb = new StringBuilder("Unexpected call to method ");
+        sb.append(method.getDeclaringClass().getName());
+        sb.append('.').append(method.getName()).append('(');
+
+        int count = 0;
+        for (CtClass parameterType : method.getParameterTypes()) {
+            if (count++ != 0) sb.append(',');
+            sb.append(parameterType.getName());
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
     private CtClass createStubClassFromInterface(String stubClassName) throws NotFoundException {

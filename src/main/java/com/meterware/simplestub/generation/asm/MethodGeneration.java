@@ -9,10 +9,9 @@ import org.objectweb.asm.commons.Method;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
  * Utilities for method generation.
@@ -56,12 +55,39 @@ public class MethodGeneration {
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
             Method m = Method.getMethod(method);
             GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
-            mg.visitInsn(getDefaultReturnValueConstant(method.getReturnType()));
+            pushReturnValue(mg, method.getReturnType());
             mg.returnValue();
             mg.endMethod();
         }
 
-        private int getDefaultReturnValueConstant(Class<?> returnType) {
+        private void pushReturnValue(GeneratorAdapter mg, Class<?> returnType) {
+            if (returnType.isPrimitive())
+                mg.visitInsn(getPrimitiveReturnValueConstant(returnType));
+            else if (returnType.equals(String.class))
+                mg.visitLdcInsn("");
+            else if (!AsmStubGenerator.hasNullConstructor(returnType))
+                mg.visitInsn(Opcodes.ACONST_NULL);
+            else if (returnType.isInterface() || isAbstract(returnType))
+                pushGenerateStub(mg, returnType);
+            else
+                pushInstantiateObject(mg, returnType);
+        }
+
+        private void pushInstantiateObject(GeneratorAdapter mg, Class<?> returnType) {
+            mg.newInstance(Type.getType(returnType));
+            mg.dup();
+            mg.visitMethodInsn(Opcodes.INVOKESPECIAL, returnType.getName().replace('.','/'), "<init>", "()V", false);
+        }
+
+        private void pushGenerateStub(GeneratorAdapter mg, Class<?> returnType) {
+            mg.visitLdcInsn(Type.getType(returnType));
+            mg.visitInsn(Opcodes.ICONST_0);
+            mg.newArray(Type.getType(Object.class));
+            mg.visitMethodInsn(Opcodes.INVOKESTATIC, "com/meterware/simplestub/Stub", "createStub", "(Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mg.checkCast(Type.getType(returnType));
+        }
+
+        private int getPrimitiveReturnValueConstant(Class<?> returnType) {
             if (returnType.equals(long.class))
                 return Opcodes.LCONST_0;
             else if (returnType.equals(float.class))
@@ -73,6 +99,11 @@ public class MethodGeneration {
             else
                 return Opcodes.ACONST_NULL;
         }
+
+        private boolean isAbstract(Class<?> aClass) {
+            return Modifier.isAbstract(aClass.getModifiers());
+        }
+
     }
 
     static class StrictMethodGenerator implements MethodGenerator {

@@ -1,5 +1,6 @@
 package com.meterware.simplestub.generation;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,4 +57,19 @@ public abstract class StubGenerator {
     }
 
     abstract public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader);
+
+    /**
+     * Returns true if the specified class can be stubbed without passing parameters.
+     * @param aClass the class to be stubbed
+     */
+    protected static boolean hasNullConstructor(Class<?> aClass) {
+        return aClass.isInterface() || getNullConstructor(aClass) != null;
+    }
+
+    private static Constructor<?> getNullConstructor(Class<?> aClass) {
+        for (Constructor<?> constructor : aClass.getConstructors())
+            if (constructor.getParameterTypes().length == 0) return constructor;
+
+        return null;
+    }
 }

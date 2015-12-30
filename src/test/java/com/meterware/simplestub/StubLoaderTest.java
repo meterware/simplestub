@@ -12,11 +12,7 @@ import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -61,13 +57,13 @@ public class StubLoaderTest {
     @Test
     public void createdStub_generatesNoArgMethod() throws IllegalAccessException, InstantiationException {
         SimpleAbstractTestClass testObject = Stub.createStub(SimpleAbstractTestClass.class);
-        assertThat(testObject.getPolicy(), nullValue());
+        assertThat(testObject.getPolicy(), instanceOf(CookiePolicy.class));
     }
 
     @Test
     public void createdStub_generatesNoArgMethodInProtectedSubclass() throws IllegalAccessException, InstantiationException {
         ProtectedClass testObject = Stub.createStub(ProtectedClass.class);
-        assertThat(testObject.doIt(), nullValue());
+        assertThat(testObject.doIt(), isEmptyOrNullString());
     }
 
     @Test
@@ -79,7 +75,7 @@ public class StubLoaderTest {
     @Test
     public void createdStub_generatesMultiArgMethod() throws IllegalAccessException, InstantiationException, NoSuchMethodException {
         SimpleAbstractTestClass testObject = Stub.createStub(SimpleAbstractTestClass.class);
-        assertThat(testObject.multiArgumentMethod(7, ""), nullValue());
+        assertThat(testObject.multiArgumentMethod(7, ""), isEmptyOrNullString());
     }
 
     @Test
