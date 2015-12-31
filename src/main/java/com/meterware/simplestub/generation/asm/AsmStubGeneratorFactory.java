@@ -19,7 +19,7 @@ public class AsmStubGeneratorFactory implements StubGeneratorFactory {
     public boolean isAvailable() {
         try {
             Class.forName("org.objectweb.asm.ClassVisitor");
-            Class.forName("org.objectweb.asm.commons.GeneratorAdaptor");
+            Class.forName("org.objectweb.asm.commons.GeneratorAdapter");
             return true;
         } catch (ClassNotFoundException e) {
             return false;

@@ -46,6 +46,17 @@ public class MethodGeneration {
         return STRICT_METHOD_GENERATOR;
     }
 
+    protected static boolean hasNullConstructor(Class<?> aClass) {
+        return aClass.isInterface() || getNullConstructor(aClass) != null;
+    }
+
+    private static Constructor<?> getNullConstructor(Class<?> aClass) {
+        for (Constructor<?> constructor : aClass.getConstructors())
+            if (constructor.getParameterTypes().length == 0) return constructor;
+
+        return null;
+    }
+
     interface MethodGenerator {
         void addMethod(ClassWriter cw, java.lang.reflect.Method method);
     }
@@ -65,9 +76,9 @@ public class MethodGeneration {
                 mg.visitInsn(getPrimitiveReturnValueConstant(returnType));
             else if (returnType.equals(String.class))
                 mg.visitLdcInsn("");
-            else if (!AsmStubGenerator.hasNullConstructor(returnType))
+            else if (!hasNullConstructor(returnType))
                 mg.visitInsn(Opcodes.ACONST_NULL);
-            else if (returnType.isInterface() || isAbstract(returnType))
+            else if (isAbstract(returnType))
                 pushGenerateStub(mg, returnType);
             else
                 pushInstantiateObject(mg, returnType);

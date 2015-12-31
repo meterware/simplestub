@@ -114,10 +114,6 @@ class AsmStubGenerator extends StubGenerator {
         }
     }
 
-    protected static boolean hasNullConstructor(Class<?> aClass) {
-        return StubGenerator.hasNullConstructor(aClass);
-    }
-
     private static String getFilteredName(String className) {
         return StubGenerator.getNameFilter().toDisplayName(className);
     }

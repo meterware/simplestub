@@ -2,9 +2,6 @@ package com.meterware.simplestub.generation.javassist;
 
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
-import com.meterware.simplestub.classes.ClassWithObjectGetters;
-import com.meterware.simplestub.classes.ConcreteClass;
-import com.meterware.simplestub.classes.Interface1;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubGeneratorFactory;
 import org.hamcrest.MatcherAssert;
@@ -25,41 +22,6 @@ public class JavassistStubGeneratorTest {
     private static int stubNum = 0;
     private static StubGeneratorFactory factory = new JavassistStubGeneratorFactory();
     private AnInterface anInterfaceStub;
-
-    interface AnInterface {
-        boolean isTrue();
-
-        byte getByte();
-        char getChar();
-        short getShort();
-        int getInt();
-        long getLong();
-
-        float getFloat();
-        double getDouble();
-
-        String getString();
-
-        void doNothing();
-    }
-
-    @SuppressWarnings("unused")
-    abstract static class ABaseClass {
-        private String aString;
-
-        public ABaseClass() {
-        }
-
-        ABaseClass(String aString) {
-            this.aString = aString;
-        }
-
-        abstract int getInt();
-
-        String getString() {
-            return aString;
-        }
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -171,29 +133,28 @@ public class JavassistStubGeneratorTest {
     public void whenUndefinedMethodReturnsObjectWithoutNullArgConstructor_generatedMethodReturnsNull() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getClassWithConstructorParameters(), nullValue());
+        assertThat(aClassStub.getAClassWithNoDefaultConstructor(), nullValue());
     }
 
     @Test
     public void whenUndefinedMethodReturnsInterface_generatedMethodReturnsStub() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getInterface1(), instanceOf(Interface1.class));
+        assertThat(aClassStub.getAnInterface(), instanceOf(AnInterface.class));
     }
 
     @Test
     public void whenUndefinedMethodReturnsConcreteClass_generatedMethodReturnsInstance() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getConcreteClass(), instanceOf(ConcreteClass.class));
+        assertThat(aClassStub.getAConcreteClass(), instanceOf(AConcreteClass.class));
     }
 
     @Test
     public void whenUndefinedMethodReturnsAbstractClass_generatedMethodReturnsStub() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        AbstractImplementation abstractImplementation = aClassStub.getAbstractImplementation();
-        assertThat(abstractImplementation, instanceOf(AbstractImplementation.class));
+        assertThat(aClassStub.getABaseClass(), instanceOf(ABaseClass.class));
     }
 
     @Test

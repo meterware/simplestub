@@ -9,10 +9,16 @@ public class NullStubGeneratorFactory implements StubGeneratorFactory {
     private String libraryList;
 
     public NullStubGeneratorFactory(List<String> libraryNames) {
-        StringBuilder sb = new StringBuilder(libraryNames.get(0));
-        for (int i = 1; i < libraryNames.size(); i++)
-            sb.append(", ").append(libraryNames.get(i));
+        StringBuilder sb = new StringBuilder();
+        for (String libraryName : libraryNames)
+            appendTo(sb, libraryName);
         libraryList = sb.toString();
+    }
+
+    private void appendTo(StringBuilder sb, String libraryName) {
+        if (sb.length() > 0)
+            sb.append(", ");
+        sb.append(libraryName);
     }
 
     @Override
