@@ -186,11 +186,22 @@
                 <configuration>
                     <excludePackageNames>com.meterware.simplestub.generation</excludePackageNames>
                 </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.0</version>
+                <configuration>
+                    <excludeFilterFile>src/main/findbugs/findbugs-excludes.xml</excludeFilterFile>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
