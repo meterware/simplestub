@@ -9,7 +9,6 @@ import org.objectweb.asm.commons.Method;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class MethodGeneration {
     private static final List<? extends Class<?>> INTEGER_TYPES = createIntegerTypesList();
 
     private static final MethodGenerator NICE_METHOD_GENERATOR = new NiceMethodGenerator();
+    private static final MethodGenerator NONNULL_METHOD_GENERATOR = new NonNullMethodGenerator();
     private static final MethodGenerator STRICT_METHOD_GENERATOR = new StrictMethodGenerator();
 
     @SuppressWarnings("unchecked")
@@ -42,19 +42,12 @@ public class MethodGeneration {
         return NICE_METHOD_GENERATOR;
     }
 
+    static MethodGenerator getNonnullMethodGenerator() {
+        return NONNULL_METHOD_GENERATOR;
+    }
+
     static MethodGenerator getStrictMethodGenerator() {
         return STRICT_METHOD_GENERATOR;
-    }
-
-    protected static boolean hasNullConstructor(Class<?> aClass) {
-        return aClass.isInterface() || getNullConstructor(aClass) != null;
-    }
-
-    private static Constructor<?> getNullConstructor(Class<?> aClass) {
-        for (Constructor<?> constructor : aClass.getConstructors())
-            if (constructor.getParameterTypes().length == 0) return constructor;
-
-        return null;
     }
 
     interface MethodGenerator {
@@ -74,28 +67,8 @@ public class MethodGeneration {
         private void pushReturnValue(GeneratorAdapter mg, Class<?> returnType) {
             if (returnType.isPrimitive())
                 mg.visitInsn(getPrimitiveReturnValueConstant(returnType));
-            else if (returnType.equals(String.class))
-                mg.visitLdcInsn("");
-            else if (!hasNullConstructor(returnType))
-                mg.visitInsn(Opcodes.ACONST_NULL);
-            else if (isAbstract(returnType))
-                pushGenerateStub(mg, returnType);
             else
-                pushInstantiateObject(mg, returnType);
-        }
-
-        private void pushInstantiateObject(GeneratorAdapter mg, Class<?> returnType) {
-            mg.newInstance(Type.getType(returnType));
-            mg.dup();
-            mg.visitMethodInsn(Opcodes.INVOKESPECIAL, returnType.getName().replace('.','/'), "<init>", "()V", false);
-        }
-
-        private void pushGenerateStub(GeneratorAdapter mg, Class<?> returnType) {
-            mg.visitLdcInsn(Type.getType(returnType));
-            mg.visitInsn(Opcodes.ICONST_0);
-            mg.newArray(Type.getType(Object.class));
-            mg.visitMethodInsn(Opcodes.INVOKESTATIC, "com/meterware/simplestub/Stub", "createStub", "(Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;", false);
-            mg.checkCast(Type.getType(returnType));
+                pushObjectReturnType(mg, returnType);
         }
 
         private int getPrimitiveReturnValueConstant(Class<?> returnType) {
@@ -111,8 +84,41 @@ public class MethodGeneration {
                 return Opcodes.ACONST_NULL;
         }
 
-        private boolean isAbstract(Class<?> aClass) {
-            return Modifier.isAbstract(aClass.getModifiers());
+        protected void pushObjectReturnType(GeneratorAdapter mg, Class<?> returnType) {
+            mg.visitInsn(Opcodes.ACONST_NULL);
+        }
+
+    }
+
+    static class NonNullMethodGenerator extends NiceMethodGenerator {
+
+        @Override
+        protected void pushObjectReturnType(GeneratorAdapter mg, Class<?> returnType) {
+            if (returnType.isArray())
+                pushGenerateEmptyArray(mg, returnType.getComponentType());
+            else if (returnType.equals(String.class))
+                mg.visitLdcInsn("");
+            else if (isInterface(returnType))
+                pushGenerateStub(mg, returnType);
+            else
+                super.pushObjectReturnType(mg, returnType);
+        }
+
+        private void pushGenerateEmptyArray(GeneratorAdapter mg, Class<?> componentType) {
+            mg.visitInsn(Opcodes.ICONST_0);
+            mg.visitTypeInsn(Opcodes.ANEWARRAY, componentType.getName().replace('.','/'));
+        }
+
+        private void pushGenerateStub(GeneratorAdapter mg, Class<?> returnType) {
+            mg.visitLdcInsn(Type.getType(returnType));
+            mg.visitInsn(Opcodes.ICONST_0);
+            mg.newArray(Type.getType(Object.class));
+            mg.visitMethodInsn(Opcodes.INVOKESTATIC, "com/meterware/simplestub/Stub", "createStub", "(Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mg.checkCast(Type.getType(returnType));
+        }
+
+        private boolean isInterface(Class<?> aClass) {
+            return aClass.isInterface();
         }
 
     }

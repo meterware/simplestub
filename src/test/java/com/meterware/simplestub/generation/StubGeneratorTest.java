@@ -39,7 +39,7 @@ public class StubGeneratorTest {
     public void whenNoFactoriesFound_throwException() throws Exception {
         setUpFactories();
 
-        StubGenerator.create(Interface1.class, false);
+        StubGenerator.create(Interface1.class, false, true);
     }
 
     private boolean setUpFactories(Class<? extends StubGeneratorFactory>... knownFactories) throws NoSuchFieldException {
@@ -58,7 +58,7 @@ public class StubGeneratorTest {
     public void whenOnlyJavassistFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(JavassistStubGeneratorFactory.class);
 
-        assertThat(StubGenerator.create(Interface1.class, false).getClass().getSimpleName(), equalTo("JavassistStubGenerator"));
+        assertThat(StubGenerator.create(Interface1.class, false, true).getClass().getSimpleName(), equalTo("JavassistStubGenerator"));
     }
 
     @Test
@@ -66,6 +66,6 @@ public class StubGeneratorTest {
     public void whenOnlyAsmFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(AsmStubGeneratorFactory.class);
 
-        assertThat(StubGenerator.create(Interface1.class, false).getClass().getSimpleName(), equalTo("AsmStubGenerator"));
+        assertThat(StubGenerator.create(Interface1.class, false, true).getClass().getSimpleName(), equalTo("AsmStubGenerator"));
     }
 }

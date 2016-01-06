@@ -13,10 +13,12 @@ public class JavassistStubGenerator extends StubGenerator {
     private ClassPool pool = new ClassPool(ClassPool.getDefault());
     private Class<?> baseClass;
     private boolean strict;
+    private boolean returnNulls;
 
-    public JavassistStubGenerator(Class<?> baseClass, boolean strict) {
+    public JavassistStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls) {
         this.baseClass = baseClass;
         this.strict = strict;
+        this.returnNulls = returnNulls;
     }
 
     @Override
@@ -64,39 +66,32 @@ public class JavassistStubGenerator extends StubGenerator {
     }
 
     private String createBody(CtClass returnType) throws NotFoundException {
-        if (returnType.isPrimitive())
+        if (returnNulls || returnType.isPrimitive())
             return null;
+        else if (returnType.isArray())
+            return "return new " + createEmptyArrayInstantiator(returnType) + ";";
         else if (returnType.getName().equals("java.lang.String"))
             return "return \"\";";
-        else if (!hasNullConstructor(returnType))
-            return null;
-        else if (returnType.isInterface() || isAbstract(returnType))
+        else if (returnType.isInterface())
             return createStubCreationBody(returnType.getName());
         else
-            return "return new " + returnType.getName() + "();";
+            return null;
+    }
+
+    private String createEmptyArrayInstantiator(CtClass returnType) throws NotFoundException {
+        int numDimensions = 0;
+        while (returnType.isArray()) {
+            numDimensions++;
+            returnType = returnType.getComponentType();
+        }
+        StringBuilder sb = new StringBuilder(returnType.getName());
+        sb.append("[0]");
+        for (int i = 1; i < numDimensions; i++) sb.append("[]");
+        return sb.toString();
     }
 
     private String createStubCreationBody(String name) {
         return "return (" + name + ") " + Stub.class.getName() + ".createStub(" + name + ".class, new java.lang.Object[0]);";
-    }
-
-    /**
-     * Returns true if the specified class can be stubbed without passing parameters.
-     * @param aClass the class to be stubbed
-     */
-    protected static boolean hasNullConstructor(CtClass aClass) throws NotFoundException {
-        return aClass.isInterface() || getNullConstructor(aClass) != null;
-    }
-
-    private static CtConstructor getNullConstructor(CtClass aClass) throws NotFoundException {
-        for (CtConstructor constructor : aClass.getConstructors())
-            if (constructor.getParameterTypes().length == 0) return constructor;
-
-        return null;
-    }
-
-    private boolean isAbstract(CtClass aClass) {
-        return java.lang.reflect.Modifier.isAbstract(aClass.getModifiers());
     }
 
 

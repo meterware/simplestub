@@ -23,8 +23,8 @@ public abstract class StubGenerator {
         return nameFilter;
     }
 
-    public static StubGenerator create(Class<?> baseClass, boolean strict) {
-        return getStubGeneratorFactory().createStubGenerator(baseClass, strict);
+    public static StubGenerator create(Class<?> baseClass, boolean strict, boolean returnNulls) {
+        return getStubGeneratorFactory().createStubGenerator(baseClass, strict, returnNulls);
     }
 
     private static StubGeneratorFactory getStubGeneratorFactory() {

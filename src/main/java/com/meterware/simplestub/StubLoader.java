@@ -17,6 +17,7 @@ import java.util.Map;
 class StubLoader {
 
     private final static String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
+    private final static String SIMPLESTUB_NONNULL_SUFFIX = "$$_com_meterware_SimpleStub_NonNulls";
     private final static String SIMPLESTUB_STRICT_SUFFIX = "$$_com_meterware_SimpleStub_Strict";
     private final static Map<Class<?>, Class<?>> PRIMITIVE_TYPES;
 
@@ -38,12 +39,14 @@ class StubLoader {
     private StubGenerator generator;
     private final Class<?> baseClass;
     private boolean strict;
+    private boolean returnNulls;
     private Type type;
 
-    StubLoader(Class<?> baseClass, boolean strict) {
+    StubLoader(Class<?> baseClass, boolean strict, boolean returnNulls) {
         this.baseClass = baseClass;
         this.strict = strict;
-        this.generator = StubGenerator.create(baseClass, strict);
+        this.returnNulls = returnNulls;
+        this.generator = StubGenerator.create(baseClass, strict, returnNulls);
         this.type = baseClass.getClassLoader() == null ? Type.jdkClass : Type.userClass;
     }
 
@@ -256,7 +259,13 @@ class StubLoader {
     }
 
     private String createStubClassName(String className) {
-        return type.getPackagePrefix() + className + (strict ? SIMPLESTUB_STRICT_SUFFIX : SIMPLESTUB_SUFFIX);
+        return type.getPackagePrefix() + className + getStubClassSuffix();
+    }
+
+    private String getStubClassSuffix() {
+        if (strict) return SIMPLESTUB_STRICT_SUFFIX;
+        if (!returnNulls) return SIMPLESTUB_NONNULL_SUFFIX;
+        return SIMPLESTUB_SUFFIX;
     }
 
     static class StubNameFilter implements NameFilter {

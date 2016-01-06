@@ -4,6 +4,8 @@ import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.classes.ClassWithConstructorParameters;
 import com.meterware.simplestub.classes.ConcreteClass;
 import com.meterware.simplestub.classes.Interface1;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -19,6 +21,18 @@ import static org.junit.Assert.assertThat;
  * Tests the Javassist-based runtime stub-loader.
  */
 public class StubLoaderTest {
+
+    List<Memento> mementos = new ArrayList<Memento>();
+
+    @Before
+    public void setUp() throws Exception {
+        Stub.setReturnNulls(true);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Stub.setReturnNulls(true);
+    }
 
     @Test(expected = SimpleStubException.class)
     public void whenClassNotAbstract_throwException() {
@@ -55,8 +69,18 @@ public class StubLoaderTest {
     }
 
     @Test
-    public void createdStub_generatesNoArgMethod() throws IllegalAccessException, InstantiationException {
+    public void createdStubNoArgMethod_returnsNullWhenReturnNullsEnabled() throws IllegalAccessException, InstantiationException {
+        Stub.setReturnNulls(true);
         SimpleAbstractTestClass testObject = Stub.createStub(SimpleAbstractTestClass.class);
+
+        assertThat(testObject.getPolicy(), nullValue(CookiePolicy.class));
+    }
+
+    @Test
+    public void createdStubNoArgMethod_returnsStubWhenReturnNullsDisabled() throws IllegalAccessException, InstantiationException {
+        Stub.setReturnNulls(false);
+        SimpleAbstractTestClass testObject = Stub.createStub(SimpleAbstractTestClass.class);
+
         assertThat(testObject.getPolicy(), instanceOf(CookiePolicy.class));
     }
 

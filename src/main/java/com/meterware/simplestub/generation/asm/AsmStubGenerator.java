@@ -42,10 +42,16 @@ class AsmStubGenerator extends StubGenerator {
     private Class<?>[] interfaces;
     private MethodGeneration.MethodGenerator methodGenerator;
 
-    AsmStubGenerator(Class<?> baseClass, boolean strict, Class<?>... interfaces) {
+    AsmStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls, Class<?>... interfaces) {
         this.baseClass = baseClass;
         this.interfaces = interfaces;
-        methodGenerator = strict ? MethodGeneration.getStrictMethodGenerator() : MethodGeneration.getNiceMethodGenerator();
+        methodGenerator = getMethodGenerator(strict, returnNulls);
+    }
+
+    private MethodGeneration.MethodGenerator getMethodGenerator(boolean strict, boolean returnNulls) {
+        if (strict) return MethodGeneration.getStrictMethodGenerator();
+        if (!returnNulls) return MethodGeneration.getNonnullMethodGenerator();
+        return MethodGeneration.getNiceMethodGenerator();
     }
 
     @Override

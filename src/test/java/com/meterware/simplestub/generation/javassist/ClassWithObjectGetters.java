@@ -5,6 +5,8 @@ package com.meterware.simplestub.generation.javassist;
  */
 public interface ClassWithObjectGetters {
 
+    Object getObject();
+
     AnInterface getAnInterface();
 
     ABaseClass getABaseClass();
@@ -12,6 +14,10 @@ public interface ClassWithObjectGetters {
     AConcreteClass getAConcreteClass();
 
     AClassWithNoDefaultConstructor getAClassWithNoDefaultConstructor();
+
+    AnInterface[] getAnInterfaceArray();
+
+    AnInterface[][] getATwoDArray();
 
 }
 

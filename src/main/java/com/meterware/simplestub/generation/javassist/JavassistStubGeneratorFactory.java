@@ -19,8 +19,8 @@ public class JavassistStubGeneratorFactory implements StubGeneratorFactory {
     }
 
     @Override
-    public StubGenerator createStubGenerator(Class<?> baseClass, boolean strict) {
-        return new JavassistStubGenerator(baseClass, strict);
+    public StubGenerator createStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls) {
+        return new JavassistStubGenerator(baseClass, strict, returnNulls);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubGeneratorFactory;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,9 @@ public class JavassistStubGeneratorTest {
 
     private static int stubNum = 0;
     private static StubGeneratorFactory factory = new JavassistStubGeneratorFactory();
+
     private AnInterface anInterfaceStub;
+    private boolean returnNulls = true;
 
     @Before
     public void setUp() throws Exception {
@@ -62,7 +65,7 @@ public class JavassistStubGeneratorTest {
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName) {
-        StubGenerator generator = factory.createStubGenerator(baseClass, false);
+        StubGenerator generator = factory.createStubGenerator(baseClass, false, returnNulls);
 
         return (Class<T>) generator.loadStubClass(stubClassName, getClass().getClassLoader());
     }
@@ -120,8 +123,25 @@ public class JavassistStubGeneratorTest {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsStringValue_generatedMethodReturnsEmptyString() throws Exception {
+    public void whenUndefinedMethodReturnsStringValueAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
+        enableReturnNulls();
+        assertThat(anInterfaceStub.getString(), nullValue());
+    }
+
+    private void enableReturnNulls() throws NoSuchFieldException {
+        returnNulls = true;
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsStringValueAndReturnNullsDisabled_generatedMethodReturnsEmptyString() throws Exception {
+        disableReturnNulls();
+        anInterfaceStub = createStub(AnInterface.class);
+
         assertThat(anInterfaceStub.getString(), isEmptyString());
+    }
+
+    private void disableReturnNulls() throws NoSuchFieldException {
+        returnNulls = false;
     }
 
     @Test
@@ -137,24 +157,72 @@ public class JavassistStubGeneratorTest {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsInterface_generatedMethodReturnsStub() throws Exception {
+    public void whenUndefinedMethodReturnsJavaLangObject_generatedMethodReturnsNull() throws Exception {
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getObject(), nullValue());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsInterfaceAndReturnNullsDisabled_generatedMethodReturnsStub() throws Exception {
+        disableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getAnInterface(), instanceOf(AnInterface.class));
     }
 
     @Test
-    public void whenUndefinedMethodReturnsConcreteClass_generatedMethodReturnsInstance() throws Exception {
+    public void whenUndefinedMethodReturnsInterfaceAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
+        enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getAConcreteClass(), instanceOf(AConcreteClass.class));
+        assertThat(aClassStub.getAnInterface(), nullValue());
     }
 
     @Test
-    public void whenUndefinedMethodReturnsAbstractClass_generatedMethodReturnsStub() throws Exception {
+    public void whenUndefinedMethodReturnsArrayAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
+        enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getABaseClass(), instanceOf(ABaseClass.class));
+        assertThat(aClassStub.getAnInterfaceArray(), nullValue());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsArrayAndReturnNullsDisabled_generatedMethodReturnsEmptyArray() throws Exception {
+        disableReturnNulls();
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getAnInterfaceArray(), Matchers.<AnInterface>emptyArray());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsTwoDArrayAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
+        enableReturnNulls();
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getATwoDArray(), nullValue());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsTwoDArrayAndReturnNullsDisabled_generatedMethodReturnsEmptyArray() throws Exception {
+        disableReturnNulls();
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getATwoDArray(), Matchers.<AnInterface[]>emptyArray());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsConcreteClass_generatedMethodReturnsNull() throws Exception {
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getAConcreteClass(), nullValue());
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsAbstractClass_generatedMethodReturnsNull() throws Exception {
+        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+
+        assertThat(aClassStub.getABaseClass(), nullValue());
     }
 
     @Test
@@ -186,7 +254,7 @@ public class JavassistStubGeneratorTest {
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStrictStubClass(Class<T> baseClass) {
-        StubGenerator generator = factory.createStubGenerator(baseClass, true);
+        StubGenerator generator = factory.createStubGenerator(baseClass, true, false);
 
         return (Class<T>) generator.loadStubClass(getStubClassName(baseClass), getClass().getClassLoader());
     }
