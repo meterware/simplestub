@@ -1,7 +1,7 @@
 package com.meterware.simplestub;
 
-import com.meterware.simplestub.generation.NameFilter;
 import com.meterware.simplestub.generation.StubGenerator;
+import com.meterware.simplestub.generation.StubKind;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -16,9 +16,6 @@ import java.util.Map;
  */
 class StubLoader {
 
-    private final static String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
-    private final static String SIMPLESTUB_NONNULL_SUFFIX = "$$_com_meterware_SimpleStub_NonNulls";
-    private final static String SIMPLESTUB_STRICT_SUFFIX = "$$_com_meterware_SimpleStub_Strict";
     private final static Map<Class<?>, Class<?>> PRIMITIVE_TYPES;
 
     static {
@@ -32,21 +29,17 @@ class StubLoader {
         PRIMITIVE_TYPES.put(Boolean.TYPE,   Boolean.class);
         PRIMITIVE_TYPES.put(Float.TYPE,     Float.class);
         PRIMITIVE_TYPES.put(Double.TYPE,    Double.class);
-
-        StubGenerator.setNameFilter(new StubNameFilter());
     }
 
     private StubGenerator generator;
     private final Class<?> baseClass;
-    private boolean strict;
-    private boolean returnNulls;
+    private StubKind kind;
     private Type type;
 
-    StubLoader(Class<?> baseClass, boolean strict, boolean returnNulls) {
+    StubLoader(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
-        this.strict = strict;
-        this.returnNulls = returnNulls;
-        this.generator = StubGenerator.create(baseClass, strict, returnNulls);
+        this.kind = kind;
+        this.generator = StubGenerator.create(baseClass, kind);
         this.type = baseClass.getClassLoader() == null ? Type.jdkClass : Type.userClass;
     }
 
@@ -253,26 +246,12 @@ class StubLoader {
         return generator.loadStubClass(stubClassName, classLoader);
     }
 
-    private static String withoutSuffix(String longName) {
-        int i = longName.indexOf(SIMPLESTUB_SUFFIX);
-        return longName.substring(0, i) + longName.substring(i + SIMPLESTUB_SUFFIX.length());
-    }
-
     private String createStubClassName(String className) {
         return type.getPackagePrefix() + className + getStubClassSuffix();
     }
 
     private String getStubClassSuffix() {
-        if (strict) return SIMPLESTUB_STRICT_SUFFIX;
-        if (!returnNulls) return SIMPLESTUB_NONNULL_SUFFIX;
-        return SIMPLESTUB_SUFFIX;
-    }
-
-    static class StubNameFilter implements NameFilter {
-        @Override
-        public String toDisplayName(String fullMethodName) {
-            return withoutSuffix(fullMethodName);
-        }
+        return kind.getStubClassSuffix();
     }
 
 }

@@ -12,19 +12,10 @@ public abstract class StubGenerator {
             "com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory"
     };
 
-    private static NameFilter nameFilter;
     private static StubGeneratorFactory factory;
 
-    public static void setNameFilter(NameFilter nameFilter) {
-        StubGenerator.nameFilter = nameFilter;
-    }
-
-    protected static NameFilter getNameFilter() {
-        return nameFilter;
-    }
-
-    public static StubGenerator create(Class<?> baseClass, boolean strict, boolean returnNulls) {
-        return getStubGeneratorFactory().createStubGenerator(baseClass, strict, returnNulls);
+    public static StubGenerator create(Class<?> baseClass, StubKind kind) {
+        return getStubGeneratorFactory().createStubGenerator(baseClass, kind);
     }
 
     private static StubGeneratorFactory getStubGeneratorFactory() {

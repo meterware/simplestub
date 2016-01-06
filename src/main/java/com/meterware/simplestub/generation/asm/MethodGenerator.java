@@ -1,6 +1,7 @@
 package com.meterware.simplestub.generation.asm;
 
 import com.meterware.simplestub.UnexpectedMethodCallException;
+import com.meterware.simplestub.generation.StubKind;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -8,53 +9,38 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Utilities for method generation.
+ * Classes to generate appropriate methods, based on stub type.
  */
-public class MethodGeneration {
+abstract class MethodGenerator {
 
-    private static final List<? extends Class<?>> INTEGER_TYPES = createIntegerTypesList();
+    static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<StubKind, MethodGenerator>();
 
-    private static final MethodGenerator NICE_METHOD_GENERATOR = new NiceMethodGenerator();
-    private static final MethodGenerator NONNULL_METHOD_GENERATOR = new NonNullMethodGenerator();
-    private static final MethodGenerator STRICT_METHOD_GENERATOR = new StrictMethodGenerator();
-
-    @SuppressWarnings("unchecked")
-    private static List<? extends Class<? extends Serializable>> createIntegerTypesList() {
-        return Arrays.asList(boolean.class, byte.class, char.class, short.class, int.class);
+    static {
+        methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
+        methodGenerators.put(StubKind.NON_NULL, new NonNullMethodGenerator());
+        methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 
-    static void addConstructor(ClassWriter cw, Constructor constructor) {
-        Method m = Method.getMethod(constructor);
-        GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
-        mg.loadThis();
-        mg.loadArgs();
-        mg.invokeConstructor(Type.getType(constructor.getDeclaringClass()), m);
-        mg.returnValue();
-        mg.endMethod();
+    static MethodGenerator getMethodGenerator(StubKind kind) {
+        return methodGenerators.get(kind);
     }
 
-    static MethodGenerator getNiceMethodGenerator() {
-        return NICE_METHOD_GENERATOR;
-    }
+    abstract void addMethod(ClassWriter cw, java.lang.reflect.Method method);
 
-    static MethodGenerator getNonnullMethodGenerator() {
-        return NONNULL_METHOD_GENERATOR;
-    }
+    static class NiceMethodGenerator extends MethodGenerator {
+        private static final List<? extends Class<?>> INTEGER_TYPES = createIntegerTypesList();
 
-    static MethodGenerator getStrictMethodGenerator() {
-        return STRICT_METHOD_GENERATOR;
-    }
+        @SuppressWarnings("unchecked")
+        private static List<? extends Class<? extends Serializable>> createIntegerTypesList() {
+            return Arrays.asList(boolean.class, byte.class, char.class, short.class, int.class);
+        }
 
-    interface MethodGenerator {
-        void addMethod(ClassWriter cw, java.lang.reflect.Method method);
-    }
-
-    static class NiceMethodGenerator implements MethodGenerator {
         @Override
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
             Method m = Method.getMethod(method);
@@ -123,7 +109,7 @@ public class MethodGeneration {
 
     }
 
-    static class StrictMethodGenerator implements MethodGenerator {
+    static class StrictMethodGenerator extends MethodGenerator {
         @Override
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
 

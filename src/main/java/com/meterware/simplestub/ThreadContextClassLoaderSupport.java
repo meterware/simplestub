@@ -1,5 +1,7 @@
 package com.meterware.simplestub;
 
+import com.meterware.simplestub.generation.StubKind;
+
 /**
  * Support for manipulating the thread context class-loader in a unit test.
  */
@@ -33,7 +35,7 @@ public class ThreadContextClassLoaderSupport {
      * @param aClass a base class or interface to use as a parent for the specified class.
      */
     public static void createStubInThreadContextClassLoader(String className, Class<?> aClass) {
-        new StubLoader(aClass, false, true).getStubClassForThread(className);
+        new StubLoader(aClass, StubKind.NICE).getStubClassForThread(className);
     }
 
     static private class ThreadContextClassLoaderMemento implements Memento {

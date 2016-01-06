@@ -1,8 +1,8 @@
 package com.meterware.simplestub.generation.javassist;
 
 import com.meterware.simplestub.SimpleStubException;
-import com.meterware.simplestub.Stub;
 import com.meterware.simplestub.generation.StubGenerator;
+import com.meterware.simplestub.generation.StubKind;
 import javassist.*;
 
 /**
@@ -12,13 +12,11 @@ public class JavassistStubGenerator extends StubGenerator {
 
     private ClassPool pool = new ClassPool(ClassPool.getDefault());
     private Class<?> baseClass;
-    private boolean strict;
-    private boolean returnNulls;
+    private MethodGenerator methodGenerator;
 
-    public JavassistStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls) {
+    public JavassistStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
-        this.strict = strict;
-        this.returnNulls = returnNulls;
+        methodGenerator = MethodGenerator.getMethodGenerator(kind);
     }
 
     @Override
@@ -53,70 +51,13 @@ public class JavassistStubGenerator extends StubGenerator {
         return Modifier.isAbstract(method.getModifiers());
     }
 
-    private void addStubMethod(CtClass ctClass, CtMethod method) throws NotFoundException, CannotCompileException {
-        CtMethod method1 = createMethod(ctClass, method);
-        if (generateStrictStub())
-            defineMethodToThrowException(method1);
-        ctClass.addMethod(method1);
+    private void addStubMethod(CtClass declaringClass, CtMethod abstractMethod) throws NotFoundException, CannotCompileException {
+        declaringClass.addMethod(createCtMethod(declaringClass, abstractMethod));
     }
 
-    private CtMethod createMethod(CtClass ctClass, CtMethod method) throws NotFoundException, CannotCompileException {
-        return CtNewMethod.make(method.getModifiers() & ~Modifier.ABSTRACT,
-                method.getReturnType(), method.getName(), method.getParameterTypes(), method.getExceptionTypes(), createBody(method.getReturnType()), ctClass);
-    }
-
-    private String createBody(CtClass returnType) throws NotFoundException {
-        if (returnNulls || returnType.isPrimitive())
-            return null;
-        else if (returnType.isArray())
-            return "return new " + createEmptyArrayInstantiator(returnType) + ";";
-        else if (returnType.getName().equals("java.lang.String"))
-            return "return \"\";";
-        else if (returnType.isInterface())
-            return createStubCreationBody(returnType.getName());
-        else
-            return null;
-    }
-
-    private String createEmptyArrayInstantiator(CtClass returnType) throws NotFoundException {
-        int numDimensions = 0;
-        while (returnType.isArray()) {
-            numDimensions++;
-            returnType = returnType.getComponentType();
-        }
-        StringBuilder sb = new StringBuilder(returnType.getName());
-        sb.append("[0]");
-        for (int i = 1; i < numDimensions; i++) sb.append("[]");
-        return sb.toString();
-    }
-
-    private String createStubCreationBody(String name) {
-        return "return (" + name + ") " + Stub.class.getName() + ".createStub(" + name + ".class, new java.lang.Object[0]);";
-    }
-
-
-    private boolean generateStrictStub() {
-        return strict;
-    }
-
-    private void defineMethodToThrowException(CtMethod method) throws CannotCompileException, NotFoundException {
-
-        method.setBody("{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"" +
-                        getUnexpectedCallMessage(method) + "\"); }" );
-    }
-
-    private String getUnexpectedCallMessage(CtMethod method) throws NotFoundException {
-        StringBuilder sb = new StringBuilder("Unexpected call to method ");
-        sb.append(method.getDeclaringClass().getName());
-        sb.append('.').append(method.getName()).append('(');
-
-        int count = 0;
-        for (CtClass parameterType : method.getParameterTypes()) {
-            if (count++ != 0) sb.append(',');
-            sb.append(parameterType.getName());
-        }
-        sb.append(')');
-        return sb.toString();
+    private CtMethod createCtMethod(CtClass declaringClass, CtMethod method) throws CannotCompileException, NotFoundException {
+        return CtNewMethod.make(method.getModifiers() & ~Modifier.ABSTRACT, method.getReturnType(),
+                                 method.getName(), method.getParameterTypes(), method.getExceptionTypes(), methodGenerator.createBody(method), declaringClass);
     }
 
     private CtClass createStubClassFromInterface(String stubClassName) throws NotFoundException {
@@ -128,4 +69,5 @@ public class JavassistStubGenerator extends StubGenerator {
     private CtClass createStubClassFromAbstractClass(String stubClassName) throws NotFoundException {
         return pool.makeClass(stubClassName, pool.get(baseClass.getName()));
     }
+
 }

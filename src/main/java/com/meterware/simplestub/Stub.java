@@ -1,5 +1,7 @@
 package com.meterware.simplestub;
 
+import com.meterware.simplestub.generation.StubKind;
+
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes.
  */
@@ -35,7 +37,13 @@ abstract public class Stub {
     }
 
     private static <T> T createStub(Class<T> aClass, boolean strict, Object[] parameters) {
-        return new StubLoader(aClass, strict, returnNulls).create(parameters);
+        return new StubLoader(aClass, getStubKind(strict)).create(parameters);
+    }
+
+    private static StubKind getStubKind(boolean strict) {
+        if (strict) return StubKind.STRICT;
+        if (returnNulls) return StubKind.NICE;
+        return StubKind.NON_NULL;
     }
 
     private static boolean isStrict(Class<?> aClass) {

@@ -2,8 +2,11 @@ package com.meterware.simplestub.generation.asm;
 
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.generation.StubGenerator;
+import com.meterware.simplestub.generation.StubKind;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -40,18 +43,12 @@ class AsmStubGenerator extends StubGenerator {
 
     private final Class<?> baseClass;
     private Class<?>[] interfaces;
-    private MethodGeneration.MethodGenerator methodGenerator;
+    private MethodGenerator methodGenerator;
 
-    AsmStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls, Class<?>... interfaces) {
+    AsmStubGenerator(Class<?> baseClass, StubKind kind, Class<?>... interfaces) {
         this.baseClass = baseClass;
         this.interfaces = interfaces;
-        methodGenerator = getMethodGenerator(strict, returnNulls);
-    }
-
-    private MethodGeneration.MethodGenerator getMethodGenerator(boolean strict, boolean returnNulls) {
-        if (strict) return MethodGeneration.getStrictMethodGenerator();
-        if (!returnNulls) return MethodGeneration.getNonnullMethodGenerator();
-        return MethodGeneration.getNiceMethodGenerator();
+        methodGenerator = MethodGenerator.getMethodGenerator(kind);
     }
 
     @Override
@@ -60,13 +57,23 @@ class AsmStubGenerator extends StubGenerator {
         cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
 
         for (Constructor constructor : baseClass.getDeclaredConstructors())
-            MethodGeneration.addConstructor(cw, constructor);
+            addConstructor(cw, constructor);
 
         for (Method method : getAbstractMethods())
             methodGenerator.addMethod(cw, method);
 
         cw.visitEnd();
         return defineClass(classLoader, stubClassName, cw.toByteArray());
+    }
+
+    private void addConstructor(ClassWriter cw, Constructor constructor) {
+        org.objectweb.asm.commons.Method m = org.objectweb.asm.commons.Method.getMethod(constructor);
+        GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
+        mg.loadThis();
+        mg.loadArgs();
+        mg.invokeConstructor(Type.getType(constructor.getDeclaringClass()), m);
+        mg.returnValue();
+        mg.endMethod();
     }
 
     private Set<Method> getAbstractMethods() {
@@ -107,20 +114,24 @@ class AsmStubGenerator extends StubGenerator {
         return stubClassName.replace('.','/');
     }
 
-    static private Class<?> defineClass(ClassLoader classLoader, String className, byte[] classBytes) {
+    private Class<?> defineClass(ClassLoader classLoader, String className, byte[] classBytes) {
         try {
             defineClassMethod.setAccessible(true);
             return (Class<?>) defineClassMethod.invoke(classLoader, className, classBytes, 0, classBytes.length);
         } catch (InvocationTargetException e) {
-            throw new SimpleStubException("error creating stub for " + getFilteredName(className), e.getTargetException());
+            throw new SimpleStubException("error creating stub for " + getStubName(), e.getTargetException());
         } catch (IllegalAccessException e) {
-            throw new SimpleStubException("error creating stub for " + getFilteredName(className), e);
+            throw new SimpleStubException("error creating stub for " + getStubName(), e);
         } finally {
             defineClassMethod.setAccessible(false);
         }
     }
 
-    private static String getFilteredName(String className) {
-        return StubGenerator.getNameFilter().toDisplayName(className);
+    private String getStubName() {
+        if (interfaces.length == 0)
+            return baseClass.getName();
+        else
+            return interfaces[0].getName();
     }
+
 }

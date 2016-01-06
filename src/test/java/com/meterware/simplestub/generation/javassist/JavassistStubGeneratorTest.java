@@ -4,6 +4,7 @@ import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubGeneratorFactory;
+import com.meterware.simplestub.generation.StubKind;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -65,7 +66,7 @@ public class JavassistStubGeneratorTest {
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName) {
-        StubGenerator generator = factory.createStubGenerator(baseClass, false, returnNulls);
+        StubGenerator generator = factory.createStubGenerator(baseClass, returnNulls ? StubKind.NICE : StubKind.NON_NULL);
 
         return (Class<T>) generator.loadStubClass(stubClassName, getClass().getClassLoader());
     }
@@ -254,7 +255,7 @@ public class JavassistStubGeneratorTest {
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStrictStubClass(Class<T> baseClass) {
-        StubGenerator generator = factory.createStubGenerator(baseClass, true, false);
+        StubGenerator generator = factory.createStubGenerator(baseClass, StubKind.STRICT);
 
         return (Class<T>) generator.loadStubClass(getStubClassName(baseClass), getClass().getClassLoader());
     }

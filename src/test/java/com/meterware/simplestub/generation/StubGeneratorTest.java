@@ -39,11 +39,15 @@ public class StubGeneratorTest {
     public void whenNoFactoriesFound_throwException() throws Exception {
         setUpFactories();
 
-        StubGenerator.create(Interface1.class, false, true);
+        createStubGenerator();
     }
 
     private boolean setUpFactories(Class<? extends StubGeneratorFactory>... knownFactories) throws NoSuchFieldException {
         return mementos.add(StaticStubSupport.install(StubGenerator.class, "FACTORY_NAMES", createFactoryNameList(knownFactories)));
+    }
+
+    private StubGenerator createStubGenerator() {
+        return StubGenerator.create(Interface1.class, StubKind.NICE);
     }
 
     private String[] createFactoryNameList(Class<? extends StubGeneratorFactory>[] knownFactories) {
@@ -58,7 +62,7 @@ public class StubGeneratorTest {
     public void whenOnlyJavassistFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(JavassistStubGeneratorFactory.class);
 
-        assertThat(StubGenerator.create(Interface1.class, false, true).getClass().getSimpleName(), equalTo("JavassistStubGenerator"));
+        assertThat(createStubGenerator().getClass().getSimpleName(), equalTo("JavassistStubGenerator"));
     }
 
     @Test
@@ -66,6 +70,6 @@ public class StubGeneratorTest {
     public void whenOnlyAsmFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(AsmStubGeneratorFactory.class);
 
-        assertThat(StubGenerator.create(Interface1.class, false, true).getClass().getSimpleName(), equalTo("AsmStubGenerator"));
+        assertThat(createStubGenerator().getClass().getSimpleName(), equalTo("AsmStubGenerator"));
     }
 }

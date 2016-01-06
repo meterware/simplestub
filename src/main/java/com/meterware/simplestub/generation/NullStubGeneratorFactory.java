@@ -22,7 +22,7 @@ public class NullStubGeneratorFactory implements StubGeneratorFactory {
     }
 
     @Override
-    public StubGenerator createStubGenerator(Class<?> baseClass, boolean strict, boolean returnNulls) {
+    public StubGenerator createStubGenerator(Class<?> baseClass, StubKind kind) {
         throw new RuntimeException("No stub generators are available. Ensure that one of the required libraries (" + libraryList + ") is on the class path");
     }
 
