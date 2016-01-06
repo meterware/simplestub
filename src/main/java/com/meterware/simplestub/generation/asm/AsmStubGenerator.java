@@ -15,7 +15,6 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,28 +41,37 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private final Class<?> baseClass;
-    private Class<?>[] interfaces;
     private MethodGenerator methodGenerator;
 
-    AsmStubGenerator(Class<?> baseClass, StubKind kind, Class<?>... interfaces) {
+    AsmStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
-        this.interfaces = interfaces;
         methodGenerator = MethodGenerator.getMethodGenerator(kind);
     }
 
     @Override
     public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
-
-        for (Constructor constructor : baseClass.getDeclaredConstructors())
-            addConstructor(cw, constructor);
+        defineClass(stubClassName, cw);
 
         for (Method method : getAbstractMethods())
             methodGenerator.addMethod(cw, method);
 
         cw.visitEnd();
         return defineClass(classLoader, stubClassName, cw.toByteArray());
+    }
+
+    private void defineClass(String stubClassName, ClassWriter cw) {
+        if (baseClass.isInterface())
+            defineClass(stubClassName, cw, Object.class, baseClass);
+        else
+            defineClass(stubClassName, cw, baseClass);
+    }
+
+    private void defineClass(String stubClassName, ClassWriter cw, Class<?> baseClass, Class<?>... interfaces) {
+        cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
+
+        for (Constructor constructor : baseClass.getDeclaredConstructors())
+            addConstructor(cw, constructor);
     }
 
     private void addConstructor(ClassWriter cw, Constructor constructor) {
@@ -82,13 +90,7 @@ class AsmStubGenerator extends StubGenerator {
             if (Modifier.isAbstract(method.getModifiers()))
                 abstractMethods.add(method);
 
-        addInterfaceMethods(abstractMethods, interfaces);
         return abstractMethods;
-    }
-
-    private static void addInterfaceMethods(Set<Method> abstractMethods, Class<?>[] interfaces) {
-        for (Class<?> anInterface : interfaces)
-            Collections.addAll(abstractMethods, anInterface.getDeclaredMethods());
     }
 
     static String[] toInternalNames(Class<?>[] classes) {
@@ -120,10 +122,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private String getStubName() {
-        if (interfaces.length == 0)
-            return baseClass.getName();
-        else
-            return interfaces[0].getName();
+        return baseClass.getName();
     }
 
 }

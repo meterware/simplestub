@@ -10,10 +10,7 @@ import com.meterware.simplestub.generation.StubKind;
 public class AsmStubGeneratorFactory implements StubGeneratorFactory {
     @Override
     public StubGenerator createStubGenerator(Class<?> baseClass, StubKind kind) {
-        if (baseClass.isInterface())
-            return new AsmStubGenerator(Object.class, kind, baseClass);
-        else
-            return new AsmStubGenerator(baseClass, kind);
+        return new AsmStubGenerator(baseClass, kind);
     }
 
     @Override
