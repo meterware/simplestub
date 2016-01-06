@@ -1,4 +1,4 @@
-package com.meterware.simplestub.generation.javassist;
+package com.meterware.simplestub.generation;
 
 /**
  * An interface that returns a variety of types.

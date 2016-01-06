@@ -1,4 +1,4 @@
-package com.meterware.simplestub.generation.javassist;
+package com.meterware.simplestub.generation;
 
 /**
  * A class which cannot be created automatically when returned from a stub.

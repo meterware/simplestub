@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
  * A test of the stub generator factory selection. The tests work by manipulating the list of factory names.
  * It would be better to tamper with the classloader in some fashion to hide the expected classes.
  */
-public class StubGeneratorTest {
+public class StubGeneratorSelectorTest {
 
     private List<Memento> mementos = new ArrayList<Memento>();
 

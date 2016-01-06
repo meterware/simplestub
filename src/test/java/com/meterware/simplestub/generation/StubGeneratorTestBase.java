@@ -1,49 +1,31 @@
-package com.meterware.simplestub.generation.asm;
+package com.meterware.simplestub.generation;
 
-import com.meterware.simplestub.generation.StubGeneratorTestBase;
+import com.meterware.simplestub.SimpleStubException;
+import com.meterware.simplestub.classes.AbstractImplementation;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
 
-/**
- * Tests for creating stubs using ASM.
- */
-public class AsmStubGeneratorTest
+import java.lang.reflect.Constructor;
 
-    /**/
-        extends StubGeneratorTestBase {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.Is.is;
 
-    public AsmStubGeneratorTest() {
-        super(new AsmStubGeneratorFactory());
-    }
-
-    @Override
-    protected String getImplementationType() {
-        return "ASM";
-    }
-
-    /*/
+abstract public class StubGeneratorTestBase {
 
     private static int stubNum = 0;
-    private static StubGeneratorFactory factory = new AsmStubGeneratorFactory();
+    private StubGeneratorFactory factory;
 
     private AnInterface anInterfaceStub;
     private boolean returnNulls = true;
 
-    @SuppressWarnings("unused")
-    abstract static class ABaseClass {
-        private String aString;
-
-        public ABaseClass() {
-        }
-
-        ABaseClass(String aString) {
-            this.aString = aString;
-        }
-
-        abstract int getInt();
-
-        String getString() {
-            return aString;
-        }
+    protected StubGeneratorTestBase(StubGeneratorFactory factory) {
+        this.factory = factory;
     }
+
+    protected abstract String getImplementationType();
 
     @Before
     public void setUp() throws Exception {
@@ -70,27 +52,44 @@ public class AsmStubGeneratorTest
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStubClass(Class<T> baseClass) {
+        String stubClassName = getStubClassName(baseClass);
+        try {
+            return (Class<T>) getClass().getClassLoader().loadClass(stubClassName);
+        } catch (ClassNotFoundException e) {
+            return createStubClass(baseClass, stubClassName);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName) {
         StubGenerator generator = factory.createStubGenerator(baseClass, returnNulls ? StubKind.NICE : StubKind.NON_NULL);
 
-        return (Class<T>) generator.loadStubClass(getStubClassName(baseClass), getClass().getClassLoader());
+        return (Class<T>) generator.loadStubClass(stubClassName, getClass().getClassLoader());
     }
 
     private String getStubClassName(Class<?> baseClass) {
-        return baseClass.getName() + "_Stub" + (++stubNum);
+        return baseClass.getName() + "_" + getImplementationType() +  "Stub" + (++stubNum);
     }
 
     @Test
-    public void whenBaseClassIsAbstractClass_stubImplementsAbstractClass() throws Exception {
+    public void whenBaseClassIsAbstractClass_stubExtendsAbstractClass() throws Exception {
         Class<?> aStub = createStubClass(ABaseClass.class);
 
         assertThat(aStub, typeCompatibleWith(ABaseClass.class));
     }
 
     @Test
-    public void whenBaseClassImplementsInterface_stubImplementsAbstractClass() throws Exception {
+    public void whenBaseClassImplementsInterface_stubImplementsInterface() throws Exception {
         Class<?> aStub = createStubClass(AbstractImplementation.class);
 
         assertThat(aStub, typeCompatibleWith(AbstractImplementation.class));
+    }
+
+    @Test
+    public void whenMethodsAreInherited_generateStubs() throws Exception {
+        AbstractImplementation testObject = createStub(AbstractImplementation.class);
+
+        MatcherAssert.assertThat(testObject.getLength(), is(0));
     }
 
     @Test
@@ -151,7 +150,7 @@ public class AsmStubGeneratorTest
     public void whenUndefinedMethodReturnsObjectWithoutNullArgConstructor_generatedMethodReturnsNull() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getClassWithConstructorParameters(), nullValue());
+        assertThat(aClassStub.getAClassWithNoDefaultConstructor(), nullValue());
     }
 
     @Test
@@ -166,7 +165,7 @@ public class AsmStubGeneratorTest
         disableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getInterface1(), instanceOf(Interface1.class));
+        assertThat(aClassStub.getAnInterface(), instanceOf(AnInterface.class));
     }
 
     @Test
@@ -174,7 +173,7 @@ public class AsmStubGeneratorTest
         enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getInterface1(), nullValue());
+        assertThat(aClassStub.getAnInterface(), nullValue());
     }
 
     @Test
@@ -210,33 +209,34 @@ public class AsmStubGeneratorTest
     }
 
     @Test
-    public void whenUndefinedMethodReturnsConcreteClass_generatedMethodReturnsNul() throws Exception {
+    public void whenUndefinedMethodReturnsConcreteClass_generatedMethodReturnsNull() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getConcreteClass(), nullValue());
+        assertThat(aClassStub.getAConcreteClass(), nullValue());
     }
 
     @Test
     public void whenUndefinedMethodReturnsAbstractClass_generatedMethodReturnsNull() throws Exception {
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getAbstractImplementation(), nullValue());
+        assertThat(aClassStub.getABaseClass(), nullValue());
     }
 
     @Test
-    public void whenAbstractClass_implementAbstractMethods() throws Exception {
+    public void whenAbstractClassImplementsInterfaceMethods_useImplementations() throws Exception {
         ABaseClass stub = createStub(ABaseClass.class);
 
-        assertThat(stub.getInt(), is(0));
+        assertThat(stub.getInt(), is(ABaseClass.INT_VALUE));
     }
 
     @Test
-    public void whenNoArgContructorUsed_baseClassReceivesValue() throws Exception {
+    public void whenOneArgConstructorUsed_baseClassReceivesValue() throws Exception {
         Class<ABaseClass> aStubClass = createStubClass(ABaseClass.class);
-        Constructor<ABaseClass> constructor = aStubClass.getConstructor(String.class);
+        Constructor<ABaseClass> constructor = aStubClass.getDeclaredConstructor(String.class);
         ABaseClass aBaseClass = constructor.newInstance("Test Value");
 
-        assertThat(aBaseClass.getString(), is("Test Value"));
+        String string = aBaseClass.getString();
+        assertThat(string, is("Test Value"));
     }
 
     @Test(expected = SimpleStubException.class)
@@ -256,14 +256,4 @@ public class AsmStubGeneratorTest
 
         return (Class<T>) generator.loadStubClass(getStubClassName(baseClass), getClass().getClassLoader());
     }
-
-    @Test
-    public void whenMethodsAreInherited_generateStubs() throws Exception {
-        AbstractImplementation testObject = createStub(AbstractImplementation.class);
-
-        MatcherAssert.assertThat(testObject.getLength(), is(0));
-    }
-
-    /**/
-
 }

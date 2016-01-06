@@ -1,4 +1,4 @@
-package com.meterware.simplestub.generation.javassist;
+package com.meterware.simplestub.generation;
 
 /**
  * An interface which returns various objects for SimpleStub to stub or instantiate.

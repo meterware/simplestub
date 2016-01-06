@@ -78,25 +78,17 @@ class AsmStubGenerator extends StubGenerator {
 
     private Set<Method> getAbstractMethods() {
         Set<Method> abstractMethods = new HashSet<Method>();
+        for (Method method : baseClass.getMethods())
+            if (Modifier.isAbstract(method.getModifiers()))
+                abstractMethods.add(method);
+
         addInterfaceMethods(abstractMethods, interfaces);
-
-        for (Class<?> aClass = baseClass; aClass != null; aClass = aClass.getSuperclass())
-            addAbstractDeclaredMethods(abstractMethods, baseClass);
-
         return abstractMethods;
     }
 
     private static void addInterfaceMethods(Set<Method> abstractMethods, Class<?>[] interfaces) {
         for (Class<?> anInterface : interfaces)
             Collections.addAll(abstractMethods, anInterface.getDeclaredMethods());
-    }
-
-    private static void addAbstractDeclaredMethods(Set<Method> abstractMethods, Class<?> aClass) {
-        for (Method method : aClass.getDeclaredMethods())
-            if (Modifier.isAbstract(method.getModifiers()))
-                abstractMethods.add(method);
-
-        addInterfaceMethods(abstractMethods, aClass.getInterfaces());
     }
 
     static String[] toInternalNames(Class<?>[] classes) {
