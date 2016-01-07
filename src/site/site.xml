@@ -19,7 +19,7 @@ http://maven.apache.org/DECORATION/1.3.0 ">
         </menu>
         <menu ref="reports"/>
 
-        <footer>Copyright &copy; 2014-2015, Russell Gold. All Rights Reserved.</footer>
+        <footer>Copyright &copy; 2012-2016, Russell Gold. All Rights Reserved.</footer>
     </body>
 
 </project>
