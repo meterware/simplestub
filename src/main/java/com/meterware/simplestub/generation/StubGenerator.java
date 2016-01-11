@@ -8,8 +8,8 @@ import java.util.List;
  */
 public abstract class StubGenerator {
     private static String[] FACTORY_NAMES = {
-            "com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory",
-            "com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory"
+            "com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory",
+            "com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory"
     };
 
     private static StubGeneratorFactory factory;
