@@ -35,7 +35,7 @@ public class ThreadContextClassLoaderSupport {
      * @param aClass a base class or interface to use as a parent for the specified class.
      */
     public static void createStubInThreadContextClassLoader(String className, Class<?> aClass) {
-        new StubLoader(aClass, StubKind.NICE).getStubClassForThread(className);
+        new StubLoader(aClass, StubKind.DEFAULT).getStubClassForThread(className);
     }
 
     static private class ThreadContextClassLoaderMemento implements Memento {

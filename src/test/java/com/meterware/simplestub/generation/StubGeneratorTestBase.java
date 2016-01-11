@@ -19,7 +19,6 @@ abstract public class StubGeneratorTestBase {
     private StubGeneratorFactory factory;
 
     private AnInterface anInterfaceStub;
-    private boolean returnNulls = true;
 
     protected StubGeneratorTestBase(StubGeneratorFactory factory) {
         this.factory = factory;
@@ -39,6 +38,12 @@ abstract public class StubGeneratorTestBase {
     }
 
     @SuppressWarnings("unchecked")
+    private <T> T createNiceStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException {
+        Class<T> aStubClass = createNiceStubClass(baseClass);
+        return create(aStubClass);
+    }
+
+    @SuppressWarnings("unchecked")
     private <T> T create(Class<?> aStubClass) throws InstantiationException, IllegalAccessException {
         return (T) aStubClass.newInstance();
     }
@@ -52,17 +57,21 @@ abstract public class StubGeneratorTestBase {
 
     @SuppressWarnings("unchecked")
     private <T> Class<T> createStubClass(Class<T> baseClass) {
-        String stubClassName = getStubClassName(baseClass);
-        try {
-            return (Class<T>) getClass().getClassLoader().loadClass(stubClassName);
-        } catch (ClassNotFoundException e) {
-            return createStubClass(baseClass, stubClassName);
-        }
+        return createStubClass(baseClass, StubKind.DEFAULT);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName) {
-        StubGenerator generator = factory.createStubGenerator(baseClass, returnNulls ? StubKind.NICE : StubKind.NON_NULL);
+    private <T> Class<T> createNiceStubClass(Class<T> baseClass) {
+        return createStubClass(baseClass, StubKind.NICE);
+    }
+
+    private <T> Class<T> createStubClass(Class<T> baseClass, StubKind kind) {
+        return createStubClass(baseClass, getStubClassName(baseClass), kind);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName, StubKind kind) {
+        StubGenerator generator = factory.createStubGenerator(baseClass, kind);
 
         return (Class<T>) generator.loadStubClass(stubClassName, getClass().getClassLoader());
     }
@@ -126,19 +135,17 @@ abstract public class StubGeneratorTestBase {
     }
 
     private void enableReturnNulls() throws NoSuchFieldException {
-        returnNulls = true;
     }
 
     @Test
-    public void whenUndefinedMethodReturnsStringValueAndReturnNullsDisabled_generatedMethodReturnsEmptyString() throws Exception {
+    public void whenUndefinedMethodReturnsStringValue_generatedNiceStubMethodReturnsEmptyString() throws Exception {
         disableReturnNulls();
-        anInterfaceStub = createStub(AnInterface.class);
+        anInterfaceStub = createNiceStub(AnInterface.class);
 
         assertThat(anInterfaceStub.getString(), isEmptyString());
     }
 
     private void disableReturnNulls() throws NoSuchFieldException {
-        returnNulls = false;
     }
 
     @Test
@@ -161,9 +168,8 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsInterfaceAndReturnNullsDisabled_generatedMethodReturnsStub() throws Exception {
-        disableReturnNulls();
-        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+    public void whenUndefinedMethodReturnsInterface_generatedNiceMethodReturnsStub() throws Exception {
+        ClassWithObjectGetters aClassStub = createNiceStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getAnInterface(), instanceOf(AnInterface.class));
     }
@@ -185,9 +191,8 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsArrayAndReturnNullsDisabled_generatedMethodReturnsEmptyArray() throws Exception {
-        disableReturnNulls();
-        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+    public void whenUndefinedMethodReturnsArray_generatedNiceMethodReturnsEmptyArray() throws Exception {
+        ClassWithObjectGetters aClassStub = createNiceStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getAnInterfaceArray(), Matchers.<AnInterface>emptyArray());
     }
@@ -201,9 +206,8 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsTwoDArrayAndReturnNullsDisabled_generatedMethodReturnsEmptyArray() throws Exception {
-        disableReturnNulls();
-        ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
+    public void whenUndefinedMethodReturnsTwoDArray_generatedNiceMethodReturnsEmptyArray() throws Exception {
+        ClassWithObjectGetters aClassStub = createNiceStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getATwoDArray(), Matchers.<AnInterface[]>emptyArray());
     }
@@ -238,8 +242,7 @@ abstract public class StubGeneratorTestBase {
 
     @Test
     public void whenAbstractMethodIsPackage_generateStubMethod() throws Exception {
-        disableReturnNulls();
-        ADerivedClass stub = createStub(ADerivedClass.class);
+        ADerivedClass stub = createNiceStub(ADerivedClass.class);
 
         assertThat(stub.getPackageString(), isEmptyString());
     }

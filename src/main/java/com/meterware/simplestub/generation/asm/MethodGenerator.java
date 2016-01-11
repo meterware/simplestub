@@ -22,8 +22,8 @@ abstract class MethodGenerator {
     static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<StubKind, MethodGenerator>();
 
     static {
-        methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
-        methodGenerators.put(StubKind.NON_NULL, new NonNullMethodGenerator());
+        methodGenerators.put(StubKind.DEFAULT, new NiceMethodGenerator());
+        methodGenerators.put(StubKind.NICE, new NonNullMethodGenerator());
         methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 

@@ -47,7 +47,7 @@ public class StubGeneratorSelectorTest {
     }
 
     private StubGenerator createStubGenerator() {
-        return StubGenerator.create(Interface1.class, StubKind.NICE);
+        return StubGenerator.create(Interface1.class, StubKind.DEFAULT);
     }
 
     private String[] createFactoryNameList(Class<? extends StubGeneratorFactory>[] knownFactories) {

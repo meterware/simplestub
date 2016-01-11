@@ -7,24 +7,8 @@ import com.meterware.simplestub.generation.StubKind;
  */
 abstract public class Stub {
 
-    private static boolean returnNulls = true;
-
     /**
-     * Sets the behavior of generated methods for "nice" stubs that return instances. If 'returnNulls' is true
-     * (the default), those methods will always return null. If it is set to false, methods that return String
-     * will return the empty string, methods returning arrays will return empty arrays, and methods returning
-     * interfaces will return generated stubs. Methods that return class instances will always return null,
-     * regardless of this setting. That prevents unexpected behavior which could result from running
-     * class constructors.
-     *
-     * @param returnNulls if true, generated methods for nice stubs will return null.
-     */
-    public static void setReturnNulls(boolean returnNulls) {
-        Stub.returnNulls = returnNulls;
-    }
-
-    /**
-     * Instantiates a stub from an abstract class or interface, generated implementations of any abstract methods.
+     * Instantiates a stub from an abstract class or interface, generating implementations for any abstract methods.
      * Generated methods will do nothing. If they are defined as returning value, they will return zero, false, or null, as appropriate.
      * @param aClass the class from which a stub should be generated.
      * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
@@ -33,22 +17,36 @@ abstract public class Stub {
      * @return a newly instantiated stub
      */
     public static <T> T createStub(Class<T> aClass, Object... parameters) {
-        return createStub(aClass, isStrict(aClass), parameters);
-    }
-
-    private static <T> T createStub(Class<T> aClass, boolean strict, Object[] parameters) {
-        return new StubLoader(aClass, getStubKind(strict)).create(parameters);
+        return createStub(aClass, getStubKind(isStrict(aClass)), parameters);
     }
 
     private static StubKind getStubKind(boolean strict) {
-        if (strict) return StubKind.STRICT;
-        if (returnNulls) return StubKind.NICE;
-        return StubKind.NON_NULL;
+        return strict ? StubKind.STRICT : StubKind.DEFAULT;
+    }
+
+    private static <T> T createStub(Class<T> aClass, StubKind stubKind, Object[] parameters) {
+        return new StubLoader(aClass, stubKind).create(parameters);
     }
 
     private static boolean isStrict(Class<?> aClass) {
         SimpleStub annotation = aClass.getAnnotation(SimpleStub.class);
         return annotation != null && annotation.strict();
+    }
+
+    /**
+     * Instantiates a stub from an abstract class or interface, generating implementations for any abstract methods.
+     * Generated methods will do nothing. If they are defined as returning value, they will create an appropriate value:
+     * zero, false, empty strings and arrays. Object values will be returned as null, and interface values will be returned
+     * as generated 'nice' stubs.
+     * @param aClass the class from which a stub should be generated.
+     * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
+     *                   must be the outer class instance.
+     * @param <T> the abstract class
+     * @return a newly instantiated stub
+     * @since 1.2.2
+     */
+    public static <T> T createNiceStub(Class<T> aClass, Object... parameters) {
+        return createStub(aClass, StubKind.NICE, parameters);
     }
 
     /**
@@ -60,7 +58,7 @@ abstract public class Stub {
      * @return a newly instantiated stub
      */
     public static <T> T createStrictStub(Class<T> aClass, Object... parameters) {
-        return createStub(aClass, true, parameters);
+        return createStub(aClass, StubKind.STRICT, parameters);
     }
 
     /**
