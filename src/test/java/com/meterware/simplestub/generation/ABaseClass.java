@@ -23,4 +23,7 @@ abstract class ABaseClass implements AnInterface {
     public int getInt() {
         return INT_VALUE;
     }
+
+    abstract
+    protected int getProtectedInt();
 }

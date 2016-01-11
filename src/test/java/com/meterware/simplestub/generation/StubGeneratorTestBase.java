@@ -230,6 +230,21 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
+    public void whenAbstractMethodIsProtected_generateStubMethod() throws Exception {
+        ADerivedClass stub = createStub(ADerivedClass.class);
+
+        assertThat(stub.getProtectedInt(), equalTo(0));
+    }
+
+    @Test
+    public void whenAbstractMethodIsPackage_generateStubMethod() throws Exception {
+        disableReturnNulls();
+        ADerivedClass stub = createStub(ADerivedClass.class);
+
+        assertThat(stub.getPackageString(), isEmptyString());
+    }
+
+    @Test
     public void whenOneArgConstructorUsed_baseClassReceivesValue() throws Exception {
         Class<ABaseClass> aStubClass = createStubClass(ABaseClass.class);
         Constructor<ABaseClass> constructor = aStubClass.getDeclaredConstructor(String.class);

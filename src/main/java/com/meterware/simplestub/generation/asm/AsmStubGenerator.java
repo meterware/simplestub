@@ -15,8 +15,7 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A stub generator which uses the ASM library.
@@ -85,13 +84,43 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private Set<Method> getAbstractMethods() {
-        Set<Method> abstractMethods = new HashSet<Method>();
-        for (Method method : baseClass.getMethods())
-            if (Modifier.isAbstract(method.getModifiers()))
-                abstractMethods.add(method);
+        Set<MethodSpec> abstractMethods = new HashSet<MethodSpec>();
+        for (Class<?> anInterface : baseClass.getInterfaces())
+            addInterfaceMethods(abstractMethods, anInterface);
 
-        return abstractMethods;
+        for (Class<?> aClass : getClassHierarchy(baseClass))
+            updateAbstractMethods(abstractMethods, aClass);
+
+        return toMethodSet(abstractMethods);
     }
+
+    private Set<Method> toMethodSet(Set<MethodSpec> methodSpecs) {
+        Set<Method> methods = new HashSet<Method>();
+        for (MethodSpec methodSpec : methodSpecs)
+            methods.add(methodSpec.getMethod());
+        return methods;
+    }
+
+    private void addInterfaceMethods(Set<MethodSpec> abstractMethods, Class<?> anInterface) {
+        for (Method method : anInterface.getMethods())
+            abstractMethods.add(new MethodSpec(method));
+    }
+
+    private Class<?>[] getClassHierarchy(Class<?> baseClass) {
+        List<Class<?>> hierarchy = new ArrayList<Class<?>>();
+        for (Class<?> aClass = baseClass; aClass != null; aClass = aClass.getSuperclass())
+            hierarchy.add(0, aClass);
+        return hierarchy.toArray(new Class[hierarchy.size()]);
+    }
+
+    private void updateAbstractMethods(Set<MethodSpec> abstractMethods, Class<?> aClass) {
+        for (Method method : aClass.getDeclaredMethods())
+            if (Modifier.isAbstract(method.getModifiers()))
+                abstractMethods.add(new MethodSpec(method));
+            else
+                abstractMethods.remove(new MethodSpec(method));
+    }
+
 
     static String[] toInternalNames(Class<?>[] classes) {
         String[] result = new String[classes.length];
@@ -123,6 +152,33 @@ class AsmStubGenerator extends StubGenerator {
 
     private String getStubName() {
         return baseClass.getName();
+    }
+
+    static class MethodSpec {
+        private Method method;
+
+        MethodSpec(Method method) {
+            this.method = method;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof MethodSpec && equals((MethodSpec) other);
+        }
+
+        private boolean equals(MethodSpec other) {
+            return method.getName().equals(other.method.getName()) &&
+                    Arrays.equals(method.getParameterTypes(), other.method.getParameterTypes());
+        }
+
+        @Override
+        public int hashCode() {
+            return method.getName().hashCode();
+        }
     }
 
 }
