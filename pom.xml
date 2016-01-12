@@ -22,6 +22,11 @@
             <name>CDDL+GPL</name>
             <url>https://glassfish.java.net/public/CDDL+GPL.html</url>
         </license>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
 
     <scm>
