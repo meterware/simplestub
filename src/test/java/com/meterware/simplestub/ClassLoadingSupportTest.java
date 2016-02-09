@@ -1,15 +1,20 @@
 package com.meterware.simplestub;
 
+import com.meterware.simplestub.classes.ClassWithPackagePrivateReference;
+import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import com.meterware.simplestub.classes.PropertyReader;
 import com.meterware.simplestub.classes.PropertyReaderImpl;
 import org.junit.After;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -33,9 +38,30 @@ public class ClassLoadingSupportTest {
 
     @Test
     @SuppressWarnings("all")
-    public void testClassReloading() throws Exception {
+    public void whenReloadClassCalled_classRunsStaticInitialization() throws Exception {
         mementos.add(SystemPropertySupport.install("test.property", "zork"));
         PropertyReader secondReader = (PropertyReader) ClassLoadingSupport.reloadClass(PropertyReaderImpl.class).newInstance();
         assertThat(secondReader.getPropertyValue("test.property"), is("zork"));
+    }
+
+    @Test
+    public void whenClassHasPrivateNestedClass_reloadedClassGetsOwnVersion() throws Exception {
+        Object original = getListenerFromInstance(ClassWithPrivateNestedClass.class);
+        Object reloadedValue = getListenerFromInstance(ClassLoadingSupport.reloadClass(ClassWithPrivateNestedClass.class));
+
+        assertThat(original.getClass().getName(), equalTo(reloadedValue.getClass().getName()));
+        assertThat(original, not(sameInstance(reloadedValue)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object getListenerFromInstance(Class aClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Method getListenerMethod = aClass.getMethod("getListener");
+        return getListenerMethod.invoke(aClass.newInstance());
+    }
+
+    @Test
+    public void whenClassHasPackageReference_reloadIt() throws Exception {
+        Class aClass = ClassLoadingSupport.reloadClass(ClassWithPackagePrivateReference.class);
+        aClass.newInstance();
     }
 }

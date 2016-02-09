@@ -27,6 +27,11 @@ public class NullStubGeneratorFactory implements StubGeneratorFactory {
     }
 
     @Override
+    public ClassReferenceFinder getClassReferenceFinder() {
+        throw new RuntimeException("No class reference finders are available. . Ensure that one of the required libraries (" + libraryList + ") is on the class path");
+    }
+
+    @Override
     public boolean isAvailable() {
         return false;
     }

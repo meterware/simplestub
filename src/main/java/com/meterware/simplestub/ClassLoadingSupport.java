@@ -1,8 +1,14 @@
 package com.meterware.simplestub;
 
+import com.meterware.simplestub.generation.StubGenerator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Supports special classloading as needed by unit tests.
@@ -23,10 +29,37 @@ public class ClassLoadingSupport {
     }
 
     static private class RedefiningClassLoader extends ClassLoader {
+        private Set<Class> definedClasses = new HashSet<Class>();
+
         public RedefiningClassLoader(Class aClass) throws IOException {
             super(aClass.getClassLoader());
+            defineClass(aClass);
+        }
+
+        private void defineClass(Class aClass) throws IOException {
+            definedClasses.add(aClass);
+            for (Class referencedClass : getNonPublicReferencedClasses(aClass))
+                defineClass(referencedClass);
+
             byte[] bytes = createArrayFromStream(getClassResource(aClass));
             defineClass(aClass.getName(), bytes, 0, bytes.length);
+        }
+
+        private Class[] getNonPublicReferencedClasses(Class aClass) throws IOException {
+            Set<Class> result = new HashSet<Class>();
+            for (Class reference : getClassesReferencedBy(aClass))
+                if (isNewNonPublicClass(reference))
+                    result.add(reference);
+
+            return result.toArray(new Class[result.size()]);
+        }
+
+        private Collection<Class> getClassesReferencedBy(Class aClass) throws IOException {
+            return StubGenerator.getStubGeneratorFactory().getClassReferenceFinder().getClassesReferencedBy(aClass);
+        }
+
+        private boolean isNewNonPublicClass(Class reference) {
+            return !definedClasses.contains(reference) && !Modifier.isPublic(reference.getModifiers());
         }
 
         private byte[] createArrayFromStream(InputStream inputStream) throws IOException {

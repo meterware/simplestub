@@ -6,6 +6,8 @@ package com.meterware.simplestub.generation;
 public interface StubGeneratorFactory {
     StubGenerator createStubGenerator(Class<?> baseClass, StubKind kind);
 
+    ClassReferenceFinder getClassReferenceFinder();
+
     boolean isAvailable();
 
     String getLibraryName();

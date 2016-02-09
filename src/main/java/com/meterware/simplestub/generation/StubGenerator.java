@@ -18,7 +18,7 @@ public abstract class StubGenerator {
         return getStubGeneratorFactory().createStubGenerator(baseClass, kind);
     }
 
-    private static StubGeneratorFactory getStubGeneratorFactory() {
+    public static StubGeneratorFactory getStubGeneratorFactory() {
         if (factory == null)
             factory = loadStubGeneratoryFactory();
         return factory;
