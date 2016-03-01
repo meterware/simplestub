@@ -14,7 +14,7 @@ http://maven.apache.org/DECORATION/1.3.0 ">
             <item name="Handling static variables" href="statics.html"/>
             <item name="Handling system properties" href="properties.html"/>
             <item name="Handling class loaders" href="classloaders.html"/>
-            <item name="Testing static initializers" href="initializers.html"/>
+            <!--<item name="Testing static initializers" href="initializers.html"/>-->
             <item name="Using Javassist instead of ASM" href="javassist.html"/>
         </menu>
         <menu ref="reports"/>

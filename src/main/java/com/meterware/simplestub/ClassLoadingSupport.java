@@ -15,6 +15,7 @@ import java.util.Set;
  */
 public class ClassLoadingSupport {
     /**
+     * EXPERIMENTAL!
      * Reloads the specified class from a new classloader, allowing its static initializations to run again.
      * Note that the new classloader will use the original class's classloader as a parent, so that the
      * resultant class will share the original's base class and interfaces.
@@ -29,7 +30,7 @@ public class ClassLoadingSupport {
     }
 
     static private class RedefiningClassLoader extends ClassLoader {
-        private Set<Class> definedClasses = new HashSet<Class>();
+        private Set<String> definedClassNames = new HashSet<String>();
 
         public RedefiningClassLoader(Class aClass) throws IOException {
             super(aClass.getClassLoader());
@@ -37,12 +38,16 @@ public class ClassLoadingSupport {
         }
 
         private void defineClass(Class aClass) throws IOException {
-            definedClasses.add(aClass);
+            if (definedClassNames.contains(aClass.getName())) return;
+            definedClassNames.add(aClass.getName());
+
+            for (Class declaredClass : aClass.getDeclaredClasses())
+                defineClass(declaredClass);
             for (Class referencedClass : getNonPublicReferencedClasses(aClass))
                 defineClass(referencedClass);
 
             byte[] bytes = createArrayFromStream(getClassResource(aClass));
-            defineClass(aClass.getName(), bytes, 0, bytes.length);
+            if (!aClass.isEnum()) defineClass(aClass.getName(), bytes, 0, bytes.length);  // defining enum values defines the class itself
         }
 
         private Class[] getNonPublicReferencedClasses(Class aClass) throws IOException {
@@ -59,7 +64,7 @@ public class ClassLoadingSupport {
         }
 
         private boolean isNewNonPublicClass(Class reference) {
-            return !definedClasses.contains(reference) && !Modifier.isPublic(reference.getModifiers());
+            return !definedClassNames.contains(reference.getName()) && !Modifier.isPublic(reference.getModifiers());
         }
 
         private byte[] createArrayFromStream(InputStream inputStream) throws IOException {

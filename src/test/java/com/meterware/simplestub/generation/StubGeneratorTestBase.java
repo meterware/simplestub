@@ -102,6 +102,13 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
+    public void whenMethodsAreInheritedFromBaseClassInterface_generateStubs() throws Exception {
+        ADerivedClass testObject = createStub(ADerivedClass.class);
+
+        MatcherAssert.assertThat(testObject.getDouble(), is(0.0));
+    }
+
+    @Test
     public void whenBaseClassIsInterface_instantiatedObjectImplementsInterface() throws Exception {
         Class<?> aStubClass = createStubClass(AnInterface.class);
 

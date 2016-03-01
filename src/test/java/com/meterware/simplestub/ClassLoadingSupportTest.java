@@ -1,9 +1,6 @@
 package com.meterware.simplestub;
 
-import com.meterware.simplestub.classes.ClassWithPackagePrivateReference;
-import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
-import com.meterware.simplestub.classes.PropertyReader;
-import com.meterware.simplestub.classes.PropertyReaderImpl;
+import com.meterware.simplestub.classes.*;
 import org.junit.After;
 import org.junit.Test;
 
@@ -63,5 +60,11 @@ public class ClassLoadingSupportTest {
     public void whenClassHasPackageReference_reloadIt() throws Exception {
         Class aClass = ClassLoadingSupport.reloadClass(ClassWithPackagePrivateReference.class);
         aClass.newInstance();
+    }
+
+    @Test
+    public void whenClassIsEnum_realoadingWorks() throws Exception {
+        Class aClass = ClassLoadingSupport.reloadClass(AnEnum.class);
+        assertThat(aClass.getEnumConstants(), arrayWithSize(3));
     }
 }

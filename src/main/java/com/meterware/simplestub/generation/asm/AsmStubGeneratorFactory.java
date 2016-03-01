@@ -10,7 +10,7 @@ import com.meterware.simplestub.generation.StubKind;
  */
 public class AsmStubGeneratorFactory implements StubGeneratorFactory {
 
-    private ClassReferenceFinder classReferenceFinder = new AsmClassReferenceFinder();
+    private ClassReferenceFinder classReferenceFinder;
 
     @Override
     public StubGenerator createStubGenerator(Class<?> baseClass, StubKind kind) {
@@ -19,6 +19,8 @@ public class AsmStubGeneratorFactory implements StubGeneratorFactory {
 
     @Override
     public ClassReferenceFinder getClassReferenceFinder() {
+        if (classReferenceFinder == null)
+            classReferenceFinder = new AsmClassReferenceFinder();
         return classReferenceFinder;
     }
 

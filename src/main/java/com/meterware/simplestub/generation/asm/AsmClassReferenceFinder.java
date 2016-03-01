@@ -97,7 +97,10 @@ public class AsmClassReferenceFinder implements ClassReferenceFinder {
 
         @Override
         public void visitTypeInsn(int opcode, String type) {
-            references.addNamedClass(type);
+            if (type.startsWith("["))
+                addClassReferences(type);
+            else
+                references.addNamedClass(type);
         }
 
         @Override

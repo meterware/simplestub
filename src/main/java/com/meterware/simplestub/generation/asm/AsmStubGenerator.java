@@ -85,10 +85,12 @@ class AsmStubGenerator extends StubGenerator {
 
     private Set<Method> getAbstractMethods() {
         Set<MethodSpec> abstractMethods = new HashSet<MethodSpec>();
-        for (Class<?> anInterface : baseClass.getInterfaces())
-            addInterfaceMethods(abstractMethods, anInterface);
 
-        for (Class<?> aClass : getClassHierarchy(baseClass))
+        for (Class<?> aClass = baseClass; aClass != null; aClass = aClass.getSuperclass())
+            for (Class<?> anInterface : aClass.getInterfaces())
+                addInterfaceMethods(abstractMethods, anInterface);
+
+        for (Class<?> aClass : getClassHierarchy(this.baseClass))
             updateAbstractMethods(abstractMethods, aClass);
 
         return toMethodSet(abstractMethods);
