@@ -46,6 +46,11 @@ class StubLoader {
     enum Type {
         jdkClass {
             @Override
+            ClassLoader getClassLoader(StubKind kind, Class<?> baseClass) {
+                return Thread.currentThread().getContextClassLoader();
+            }
+
+            @Override
             String getPackagePrefix() {
                 return "com.meterware.simplestub.";
             }
@@ -57,6 +62,12 @@ class StubLoader {
         },
         userClass {
             @Override
+            ClassLoader getClassLoader(StubKind kind, Class<?> baseClass) {
+                ClassLoader classLoader = baseClass.getClassLoader();
+                return (kind.isUsableClassLoader(classLoader)) ? classLoader : getClass().getClassLoader();
+            }
+
+            @Override
             String getPackagePrefix() {
                 return "";
             }
@@ -66,6 +77,8 @@ class StubLoader {
                 return classLoader.loadClass(stubClassName);
             }
         };
+
+        abstract ClassLoader getClassLoader(StubKind kind, Class<?> baseClass);
 
         abstract String getPackagePrefix();
 
@@ -213,11 +226,7 @@ class StubLoader {
         if (!isAbstractClass())
             throw new SimpleStubException("Class " + baseClass.getName() + " is not abstract");
 
-        return getStubClass(createStubClassName(baseClass.getName()), getNonNullClassLoader(baseClass.getClassLoader()));
-    }
-
-    private ClassLoader getNonNullClassLoader(ClassLoader classLoader) {
-        return classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader();
+        return getStubClass(createStubClassName(baseClass.getName()), type.getClassLoader(kind, baseClass));
     }
 
     Class<?> getStubClassForThread(String className) {

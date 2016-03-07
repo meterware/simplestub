@@ -19,6 +19,20 @@ public enum StubKind {
         public String getStubClassSuffix() {
             return SIMPLESTUB_STRICT_SUFFIX;
         }
+
+        @Override
+        public boolean isUsableClassLoader(ClassLoader classLoader) {
+            return canLoadClass(classLoader, getClass().getName());
+        }
+
+        private boolean canLoadClass(ClassLoader classLoader, String className) {
+            try {
+                classLoader.loadClass(className);
+                return true;
+            } catch (Throwable t) {
+                return false;
+            }
+        }
     };
 
     private final static String SIMPLESTUB_SUFFIX = "$$_com_meterware_SimpleStub";
@@ -27,4 +41,7 @@ public enum StubKind {
 
     abstract public String getStubClassSuffix();
 
+    public boolean isUsableClassLoader(ClassLoader classLoader) {
+        return true;
+    }
 }
