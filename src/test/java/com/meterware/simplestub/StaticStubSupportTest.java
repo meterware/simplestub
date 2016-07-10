@@ -4,10 +4,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static com.meterware.simplestub.StaticStubSupport.Momento;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -37,27 +34,27 @@ public class StaticStubSupportTest {
     }
 
     @Test
-    public void whenMomentoInvokedAfterInstall_staticValueIsReverted() throws Exception {
+    public void whenMementoInvokedAfterInstall_staticValueIsReverted() throws Exception {
         Statics.setStringValue("original Value");
-        Momento momento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
-        momento.revert();
+        Memento memento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
+        memento.revert();
         assertThat(Statics.getStringValue(), equalTo("original Value"));
     }
 
     @Test
-    public void whenMomentoInvokedAfterInstall_superclassStaticValueIsReverted() throws Exception {
+    public void whenMementoInvokedAfterInstall_superclassStaticValueIsReverted() throws Exception {
         SubStatics.setStringValue("original Value");
-        Momento momento = StaticStubSupport.install(SubStatics.class, "stringValue", "test value");
-        momento.revert();
+        Memento memento = StaticStubSupport.install(SubStatics.class, "stringValue", "test value");
+        memento.revert();
         assertThat(SubStatics.getStringValue(), equalTo("original Value"));
     }
 
     @Test
     public void afterInstall_retrievePreservedValue() throws Exception {
         Statics.setStringValue("original Value");
-        Momento momento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
+        Memento memento = StaticStubSupport.install(Statics.class, "stringValue", "test value");
 
-        String original = momento.getOriginalValue();
+        String original = memento.getOriginalValue();
 
         assertThat(original, is("original Value"));
     }
@@ -72,15 +69,15 @@ public class StaticStubSupportTest {
     @Test
     public void whenMomentoInvokedAfterPreserve_staticValueIsReverted() throws Exception {
         Statics.setStringValue("original Value");
-        Momento momento = StaticStubSupport.preserve(Statics.class, "stringValue");
+        Memento memento = StaticStubSupport.preserve(Statics.class, "stringValue");
         Statics.setStringValue("test value");
-        momento.revert();
+        memento.revert();
         assertThat(Statics.getStringValue(), equalTo("original Value"));
     }
 
     @Test
     public void nullObject_doesNothing() {
-        Memento momento = Momento.NULL;
+        Memento momento = Memento.NULL;
         momento.revert();
     }
 

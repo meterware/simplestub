@@ -133,12 +133,6 @@ public class StubLoaderTest {
     }
 
     @Test(expected = UnexpectedMethodCallException.class)
-    public void whenStrictAnnotationUsed_throwException() {
-        StrictClass strictClass = Stub.createStub(StrictClass.class);
-        strictClass.doIt();
-    }
-
-    @Test(expected = UnexpectedMethodCallException.class)
     public void whenCreateStrictCalled_throwException() {
         ProtectedClass strictClass = Stub.createStrictStub(ProtectedClass.class);
         strictClass.doIt();
@@ -201,17 +195,14 @@ public class StubLoaderTest {
         abstract protected String doIt();
     }
 
-    @SimpleStub
     abstract static class PackagePrivateClass {
         abstract public int doIt();
     }
 
-    @SimpleStub(strict=true)
     abstract protected static class StrictClass {
         abstract public void doIt();
     }
 
-    @SimpleStub
     abstract public static class SimpleAbstractTestClass {
 
         public String getName() { return "name"; }

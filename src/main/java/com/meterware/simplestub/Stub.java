@@ -17,20 +17,11 @@ abstract public class Stub {
      * @return a newly instantiated stub
      */
     public static <T> T createStub(Class<T> aClass, Object... parameters) {
-        return createStub(aClass, getStubKind(isStrict(aClass)), parameters);
-    }
-
-    private static StubKind getStubKind(boolean strict) {
-        return strict ? StubKind.STRICT : StubKind.DEFAULT;
+        return createStub(aClass, StubKind.DEFAULT, parameters);
     }
 
     private static <T> T createStub(Class<T> aClass, StubKind stubKind, Object[] parameters) {
         return new StubLoader(aClass, stubKind).create(parameters);
-    }
-
-    private static boolean isStrict(Class<?> aClass) {
-        SimpleStub annotation = aClass.getAnnotation(SimpleStub.class);
-        return annotation != null && annotation.strict();
     }
 
     /**
@@ -61,16 +52,4 @@ abstract public class Stub {
         return createStub(aClass, StubKind.STRICT, parameters);
     }
 
-    /**
-     * Instantiates a stub from an abstract class
-     * @deprecated as of 1.1 use #createStub
-     * @param aClass the class from which a stub should be generated.
-     * @param parameters any parameters needed for the constructor. If the class is an inner class, the first parameter
-     *                   must be the outer class instance.
-     * @param <T> the abstract class
-     * @return a newly instantiated stub
-     */
-    public static <T> T create(Class<T> aClass, Object... parameters) {
-        return createStub(aClass, parameters);
-    }
 }

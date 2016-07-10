@@ -1,10 +1,7 @@
 package com.meterware.simplestub.classes;
 
-import com.meterware.simplestub.SimpleStub;
-
 import java.util.List;
 
-@SimpleStub
 abstract public class ClassWithConstructorParameters {
 
     private final int size;

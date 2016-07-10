@@ -1,8 +1,5 @@
 package com.meterware.simplestub;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -13,7 +10,7 @@ abstract public class StaticStubSupport {
 
     /**
      * This method assigns the specified value to the named field in the specified class. It returns a
-     * {@link com.meterware.simplestub.StaticStubSupport.Momento} object which can be used to revert that field to
+     * {@link com.meterware.simplestub.Memento} object which can be used to revert that field to
      * its original value.
      *
      * @param containingClass the class on which the static field is defined.
@@ -22,12 +19,12 @@ abstract public class StaticStubSupport {
      * @return an object which holds the information needed to revert the static field.
      * @throws NoSuchFieldException if the named field does not exist.
      */
-    public static Momento install(Class<?> containingClass, String fieldName, Object newValue) throws NoSuchFieldException {
+    public static Memento install(Class<?> containingClass, String fieldName, Object newValue) throws NoSuchFieldException {
         return new StaticMemento(containingClass, fieldName, newValue);
     }
 
     /**
-     * This method returns a {@link com.meterware.simplestub.StaticStubSupport.Momento} object
+     * This method returns a {@link com.meterware.simplestub.Memento} object
      * which can be used to revert the specified field to its current value.
      *
      * @param containingClass the class on which the static field is defined.
@@ -35,23 +32,15 @@ abstract public class StaticStubSupport {
      * @return an object which holds the information needed to revert the static field.
      * @throws NoSuchFieldException if the named field does not exist.
      */
-    public static Momento preserve(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
+    public static Memento preserve(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
         return new StaticMemento(containingClass, fieldName);
     }
 
     private StaticStubSupport() {
     }
 
-    /**
-     * An object which contains all the information needed to revert the static field to its previous value.
-     * @deprecated use {@link com.meterware.simplestub.Memento} instead.
-     */
-    public interface Momento extends Memento {
-        Momento NULL = new NullMemento();
-    }
 
-
-    private static class StaticMemento implements Momento {
+    private static class StaticMemento implements Memento {
 
         private Class<?> containingClass;
         private String fieldName;
@@ -134,17 +123,6 @@ abstract public class StaticStubSupport {
                 else
                     return getPrivateStaticField(aClass.getSuperclass(), fieldName);
             }
-        }
-    }
-
-    static private class NullMemento implements Momento {
-        @Override
-        public void revert() {
-        }
-
-        @Override
-        public <T> T getOriginalValue() {
-            throw new UnsupportedOperationException();
         }
     }
 

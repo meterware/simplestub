@@ -1,6 +1,6 @@
 package com.meterware.simplestub;
 
-class NullMemento implements StaticStubSupport.Momento {
+class NullMemento implements Memento {
     @Override
     public void revert() {}
 
