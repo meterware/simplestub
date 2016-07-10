@@ -23,4 +23,8 @@ interface AnInterface {
     String getString();
 
     void doNothing();
+
+    byte[] getByteArray();
+
+    int[][] getIntArrayArray();
 }

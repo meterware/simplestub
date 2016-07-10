@@ -22,8 +22,8 @@ abstract class MethodGenerator {
     static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<StubKind, MethodGenerator>();
 
     static {
-        methodGenerators.put(StubKind.DEFAULT, new NiceMethodGenerator());
-        methodGenerators.put(StubKind.NICE, new NonNullMethodGenerator());
+        methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
+        methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
         methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 
@@ -33,7 +33,7 @@ abstract class MethodGenerator {
 
     abstract void addMethod(ClassWriter cw, java.lang.reflect.Method method);
 
-    static class NiceMethodGenerator extends MethodGenerator {
+    static class DefaultMethodGenerator extends MethodGenerator {
         private static final List<? extends Class<?>> INTEGER_TYPES = createIntegerTypesList();
 
         @SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ abstract class MethodGenerator {
 
     }
 
-    static class NonNullMethodGenerator extends NiceMethodGenerator {
+    private static class NiceMethodGenerator extends DefaultMethodGenerator {
 
         @Override
         protected void pushObjectReturnType(GeneratorAdapter mg, Class<?> returnType) {
@@ -92,7 +92,30 @@ abstract class MethodGenerator {
 
         private void pushGenerateEmptyArray(GeneratorAdapter mg, Class<?> componentType) {
             mg.visitInsn(Opcodes.ICONST_0);
-            mg.visitTypeInsn(Opcodes.ANEWARRAY, componentType.getName().replace('.','/'));
+            if (componentType.isPrimitive())
+                mg.visitIntInsn(Opcodes.NEWARRAY, getNewArrayType(componentType));
+            else
+                mg.visitTypeInsn(Opcodes.ANEWARRAY, componentType.getName().replace('.','/'));
+        }
+
+        private int getNewArrayType(Class<?> componentType) {
+            if (componentType.equals(boolean.class))
+                return Opcodes.T_BOOLEAN;
+            else if (componentType.equals(char.class))
+                return Opcodes.T_CHAR;
+            else if (componentType.equals(float.class))
+                return Opcodes.T_FLOAT;
+            else if (componentType.equals(double.class))
+                return Opcodes.T_DOUBLE;
+            else if (componentType.equals(byte.class))
+                return Opcodes.T_BYTE;
+            else if (componentType.equals(short.class))
+                return Opcodes.T_SHORT;
+            else if (componentType.equals(int.class))
+                return Opcodes.T_INT;
+            else if (componentType.equals(long.class))
+                return Opcodes.T_LONG;
+            throw new IllegalArgumentException("Unknown array component type " + componentType);
         }
 
         private void pushGenerateStub(GeneratorAdapter mg, Class<?> returnType) {
@@ -109,7 +132,7 @@ abstract class MethodGenerator {
 
     }
 
-    static class StrictMethodGenerator extends MethodGenerator {
+    private static class StrictMethodGenerator extends MethodGenerator {
         @Override
         public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {
 
