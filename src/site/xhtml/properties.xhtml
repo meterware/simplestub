@@ -22,17 +22,17 @@
 
 <div class="source">
     <pre>
-<b>abstract static class</b> ContextStub <b>implements</b> javax.naming.Context
-    <b>private static </b> Map&lt;String, Object&gt; contents = new HashMap&lt;&gt;;
+<b>abstract static class</b> ContextStub <b>implements</b> javax.naming.Context {
+    <b>private static </b> Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
 
-    <b>static void</b> clear() { contents.clear(); }
+    <b>static void</b> clear() { map.clear(); }
 
-    <b>static void</b> defineEntry(String name, Object value) { context.put(name, value); }
+    <b>static void</b> defineEntry(String name, Object value) { map.put(name, value); }
 
     <i>@Override</i>
     <b>public Object</b> lookup(String name) throws NamingException {
         <b>if</b> (!map.containsKey(name)) throw <b>new</b> NamingException("failed in test");
-        <b>return</b> contents.get(name);
+        <b>return</b> map.get(name);
     }
 }</pre>
 </div>
@@ -41,7 +41,7 @@
 </p>
 <div class="source">
     <pre>
-<b>static class</b> InitialContextFactoryStub <b>implements</b> javax.naming.spi.InitialContextFactory
+<b>static class</b> InitialContextFactoryStub <b>implements</b> javax.naming.spi.InitialContextFactory {
     <b>private static </b> Memento memento = Memento.NULL;
 
     <b>static void</b> install() {
@@ -80,14 +80,14 @@
     <b>public void</b> whenJndiValueIsString_reportValue() {
         ContextStub.defineEntry(computer.VALUE_NAME, "zork");
 
-        assertThat(computer.getValue(), is("zork");
+        assertThat(computer.getValue(), is("zork"));
     }
 
     <i>@Test</i>
     <b>public void</b> whenJndiValueIsBoolean_reportValue() {
          ContextStub.defineEntry(computer.VALUE_NAME, Boolean.TRUE);
 
-         assertThat(computer.getValue(), is("asserted");
+         assertThat(computer.getValue(), is("asserted"));
      }</pre>
 </div>
 

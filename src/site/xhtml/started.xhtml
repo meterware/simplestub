@@ -3,20 +3,6 @@
     <title>SimpleStub: Getting Started</title>
 </head>
 <body>
-    <h2>Getting Started</h2>
-
-    <p>Add the following to your Maven project:</p>
-    <pre>
-        &lt;dependency&gt;
-            &lt;group&gt;com.meterware.simplestub&lt;/group&gt;
-            &lt;artifact&gt;simplestub&lt;/artifact&gt;
-            &lt;version&gt;1.2.0&lt;/version&gt;
-            &lt;scope&gt;test&lt;/scope&gt;
-        &lt;/dependency&gt;
-    </pre>
-    <p>Note that this will pull in Javassist. If you prefer to use ASM, use the <a href="asm.html">simplestub-asm dependency</a> instead.</p>
-
-
     <h2>Quickstart</h2>
     <p>The simplest use of a stub in unit test comes when the system under test (SUT) requires an object, but the test
         doesn't cause it to be called, or ignores anything it does. Simplestub handles this very simply.
