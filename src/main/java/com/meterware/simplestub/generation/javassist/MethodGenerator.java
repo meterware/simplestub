@@ -11,11 +11,11 @@ import java.util.Map;
 
 abstract class MethodGenerator {
 
-    static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<StubKind, MethodGenerator>();
+    private static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<StubKind, MethodGenerator>();
 
     static {
-        methodGenerators.put(StubKind.DEFAULT, new NiceMethodGenerator());
-        methodGenerators.put(StubKind.NICE, new NonNullMethodGenerator());
+        methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
+        methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
         methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 
@@ -25,7 +25,7 @@ abstract class MethodGenerator {
 
     abstract String createBody(CtMethod method) throws NotFoundException;
 
-    static class StrictMethodGenerator extends MethodGenerator {
+    private static class StrictMethodGenerator extends MethodGenerator {
         @Override
         String createBody(CtMethod method) throws NotFoundException {
             return "{ throw new com.meterware.simplestub.UnexpectedMethodCallException( \"" +
@@ -47,14 +47,14 @@ abstract class MethodGenerator {
         }
     }
 
-    static class NiceMethodGenerator extends MethodGenerator {
+    static class DefaultMethodGenerator extends MethodGenerator {
         @Override
         String createBody(CtMethod method) throws NotFoundException {
             return null;
         }
     }
 
-    static class NonNullMethodGenerator extends NiceMethodGenerator {
+    private static class NiceMethodGenerator extends DefaultMethodGenerator {
         @Override
         String createBody(CtMethod method) throws NotFoundException {
             CtClass returnType = method.getReturnType();
