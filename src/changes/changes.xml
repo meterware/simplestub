@@ -1,0 +1,69 @@
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+
+    <properties>
+      <title>SimpleStub changes</title>
+      <author email="russ at gold-family dot us">Russell Gold</author>
+    </properties>
+    <body>
+        <release version="1.2.6" date="2016-07-10" description="Minor release">
+            <action dev="russgold" type="remove">
+                Removed deprecated @SimpleStub annotation
+                Removed deprecated Stub.create() method
+                Removed deprecated StaticStubSupport.Momento class
+            </action>
+            <action dev="russgold" type="fix">
+                Fixed bug: ASM createNiceStub generation with abstract method returning array of primitive was failing.
+            </action>
+        </release>
+        <release version="1.2.5" date="2016-03-07" description="bug fix release">
+            <action dev="russgold" type="fix">
+                Fixed bug: system classes in extension loaders were not working
+            </action>
+        </release>
+        <release version="1.2.4" date="2016-03-01" description="bug fix release">
+            <action dev="russgold" type="fix">
+                Fixed bug: stub generation with ASM was not working if the objects implemented interfaces
+            </action>
+        </release>
+        <release version="1.2.3" date="2016-02-09" description="bug fix release">
+            <action dev="russgold" type="add">
+                Added Apache license
+            </action>
+        </release>
+        <release version="1.2.2" date="2016-01-11" description="bug fix release">
+            <action dev="russgold" type="add">
+                Made generation using ASM the default
+            </action>
+            <action dev="russgold" type="add">
+                Added createNiceStub to return non-null values for arrays and interfaces
+            </action>
+            <action dev="russgold" type="fix">
+                Fixed bug: stub generation with ASM was not working for abstract package and protected methods
+            </action>
+        </release>
+        <release version="1.2.1" date="2016-01-06" description="bug fix release">
+            <action dev="russgold" type="fix">
+                Fixed bug: stub generation with ASM was not working for abstract methods returning arrays
+            </action>
+        </release>
+        <release version="1.2.0" date="2015-12-31" description="major release">
+            <action dev="russgold" type="add">
+                Added ability to use ASM for stub generation rather than javassist
+            </action>
+        </release>
+
+        <release version="1.1.0" date="2015-10-20" description="feature release">
+            <action dev="russgold" type="add">
+                Added support for setting and restoring system properties
+            </action>
+            <action dev="russgold" type="add">
+                Added support for setting and restoring thread context class loaders
+            </action>
+            <action dev="russgold" type="fix">
+                Fixed spelling of "memento"
+            </action>
+        </release>
+    </body>
+</document>
