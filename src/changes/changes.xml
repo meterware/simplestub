@@ -116,21 +116,6 @@
 
         <release version="1.0.0" date="2014-01-14" description="major release">
             <action dev="russgold" type="add">
-                Support runtime generation of stubs using Javassist
-            </action>
-            <action dev="russgold" type="add">
-                Support loading from regular classloader
-            </action>
-            <action dev="russgold" type="add">
-                Support stubs from interfaces
-            </action>
-            <action dev="russgold" type="update">
-                Madde @SimpleStub annotation optional
-            </action>
-        </release>
-
-        <release version="1.0.0" date="2014-01-14" description="major release">
-            <action dev="russgold" type="add">
                 Support loading from regular classloader
             </action>
             <action dev="russgold" type="add">
