@@ -1,13 +1,13 @@
 <document xmlns="http://maven.apache.org/changes/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 https://maven.apache.org/plugins/maven-changes-plugin/xsd/changes-1.0.0.xsd">
 
     <properties>
       <title>SimpleStub changes</title>
       <author email="russ at gold-family dot us">Russell Gold</author>
     </properties>
     <body>
-        <release version="1.2.6" date="2016-07-10" description="Minor release">
+        <release version="1.2.6" date="2016-07-10" description="minor release">
             <action dev="russgold" type="remove">
                 Removed deprecated @SimpleStub annotation
                 Removed deprecated Stub.create() method
@@ -63,6 +63,123 @@
             </action>
             <action dev="russgold" type="fix">
                 Fixed spelling of "memento"
+            </action>
+        </release>
+
+        <release version="1.0.5" date="2014-08-06" description="minor release">
+            <action dev="russgold" type="add">
+                Added support for Momento.getOriginalValue()
+            </action>
+            <action dev="russgold" type="fix">
+                Support superclass static values
+            </action>
+        </release>
+
+        <release version="1.0.4" date="2014-05-26" description="bug-fix release">
+            <action dev="russgold" type="fix">
+                Handle case in which an array matches a constructor var args parameter
+            </action>
+        </release>
+
+        <release version="1.0.3" date="2014-05-11" description="documentation release">
+            <action dev="russgold" type="update">
+                Added javadoc comment for Momento.NULL
+            </action>
+            <action dev="russgold" type="update">
+                Upgraded findbugs
+            </action>
+        </release>
+
+        <release version="1.0.2" date="2014-04-09" description="minor feature release">
+            <action dev="russgold" type="add">
+                Added support for base classes that are part of the JDK
+            </action>
+            <action dev="russgold" type="add">
+                Added support static stubs
+            </action>
+            <action dev="russgold" type="add">
+                Enabled Javadoc report
+            </action>
+            <action dev="russgold" type="add">
+                Upgraded Cobertura report
+            </action>
+        </release>
+
+        <release version="1.0.1" date="2014-04-09" description="minor feature release">
+            <action dev="russgold" type="add">
+                Detect non-static inner class
+            </action>
+            <action dev="russgold" type="remove">
+                Removed annotation-based stub generation
+            </action>
+        </release>
+
+        <release version="1.0.0" date="2014-01-14" description="major release">
+            <action dev="russgold" type="add">
+                Support runtime generation of stubs using Javassist
+            </action>
+            <action dev="russgold" type="add">
+                Support loading from regular classloader
+            </action>
+            <action dev="russgold" type="add">
+                Support stubs from interfaces
+            </action>
+            <action dev="russgold" type="update">
+                Madde @SimpleStub annotation optional
+            </action>
+        </release>
+
+        <release version="1.0.0" date="2014-01-14" description="major release">
+            <action dev="russgold" type="add">
+                Support loading from regular classloader
+            </action>
+            <action dev="russgold" type="add">
+                Support stubs from interfaces
+            </action>
+            <action dev="russgold" type="add">
+                Add documentation for @SimpleStub annotation
+            </action>
+            <action dev="russgold" type="update">
+                Madde @SimpleStub annotation optional
+            </action>
+        </release>
+
+        <release version="0.9" date="2014-01-12" description="development release">
+            <action dev="russgold" type="add">
+                Moved to com.meterware package
+            </action>
+            <action dev="russgold" type="add">
+                Support run-time generation of stubs using Javassist rather than annotation processing
+            </action>
+        </release>
+
+        <release version="0.7" date="2013-04-17" description="development release">
+            <action dev="russgold" type="add">
+                Support generic methods
+            </action>
+        </release>
+
+        <release version="0.1.2" date="2012-07-31" description="development release">
+            <action dev="russgold" type="add">
+                Support primitives in constructor parameters
+            </action>
+            <action dev="russgold" type="update">
+                Fix constructor unit tests to be ordering-insensitive
+            </action>
+        </release>
+
+        <release version="0.1.1" date="2012-07-26" description="development release">
+            <action dev="russgold" type="update">
+                Clean up dependencies
+            </action>
+            <action dev="russgold" type="update">
+                Fix constructor parameter name generation
+            </action>
+        </release>
+
+        <release version="0.1" date="2012-05-22" description="initial release">
+            <action dev="russgold" type="add">
+                Generate stubs from abstract classes using compile-time annotation processing
             </action>
         </release>
     </body>
