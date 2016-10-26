@@ -13,6 +13,8 @@ abstract public class StaticStubSupport {
      * {@link com.meterware.simplestub.Memento} object which can be used to revert that field to
      * its original value.
      *
+     * Note: this may not work with fields representing primitives or Strings, as the compiler may optimize them.
+     *
      * @param containingClass the class on which the static field is defined.
      * @param fieldName       the name of the static field.
      * @param newValue        the value to place into the static field.
@@ -41,6 +43,10 @@ abstract public class StaticStubSupport {
 
 
     private static class StaticMemento implements Memento {
+
+        private static final String JIGSAW_INACCESSIBLE_OBJECT_EXCEPTION_NAME = "java.lang.reflect.InaccessibleObjectException";
+        private static final String JIGSAW_INACCESSIBLE_OBJECT_MESSAGE = "Unable to modify final field %s in class %s.%n" +
+                "The module system forbids removing the final qualifier unless the JVM is started with --add-exports-private=java.base/java.lang.reflect=ALL-UNNAMED";
 
         private Class<?> containingClass;
         private String fieldName;
@@ -107,10 +113,24 @@ abstract public class StaticStubSupport {
         private Field getAccessibleField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
             Field field = aClass.getDeclaredField(fieldName);
             field.setAccessible(true);
-            Field modifiers = Field.class.getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            if (isFinal(field)) removeFinalModifier(field);
             return field;
+        }
+
+        private boolean isFinal(Field field) {
+            return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;
+        }
+
+        private void removeFinalModifier(Field field) throws NoSuchFieldException, IllegalAccessException {
+            try {
+                Field modifiers = Field.class.getDeclaredField("modifiers");
+                modifiers.setAccessible(true);
+                modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            } catch (RuntimeException e) {
+                if (e.getClass().getName().equals(JIGSAW_INACCESSIBLE_OBJECT_EXCEPTION_NAME))
+                    throw new SimpleStubException(String.format(JIGSAW_INACCESSIBLE_OBJECT_MESSAGE, field.getName(), field.getDeclaringClass().getName()));
+                throw e;
+            }
         }
 
         private Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
