@@ -7,14 +7,14 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedAction;
 import java.util.*;
 
 /**
@@ -22,22 +22,22 @@ import java.util.*;
  */
 class AsmStubGenerator extends StubGenerator {
 
-    /** The method used to define a class in a classloader. */
-    private static java.lang.reflect.Method defineClassMethod;
-
-    static {
-        try {
-            defineClassMethod = AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
-                public Method run() throws Exception {
-                    Class<?> cl = Class.forName("java.lang.ClassLoader");
-                    return cl.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
-                }
-            });
-        }
-        catch (PrivilegedActionException pae) {
-            throw new RuntimeException("cannot initialize AsmStubGenerator", pae.getException());
-        }
-    }
+    /** Gain access to define class method. */
+    private final Unsafe unsafe = AccessController.doPrivileged(
+                    new PrivilegedAction<Unsafe>() {
+                        public Unsafe run() {
+                            try {
+                                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                                field.setAccessible(true);
+                                return (Unsafe) field.get(null);
+                            } catch (NoSuchFieldException exc) {
+                                throw new Error("Could not access Unsafe", exc);
+                            } catch (IllegalAccessException exc) {
+                                throw new Error("Could not access Unsafe", exc);
+                            }
+                        }
+                    }
+            );
 
     private final Class<?> baseClass;
     private MethodGenerator methodGenerator;
@@ -124,31 +124,26 @@ class AsmStubGenerator extends StubGenerator {
     }
 
 
-    static String[] toInternalNames(Class<?>[] classes) {
+    private static String[] toInternalNames( Class<?>[] classes ) {
         String[] result = new String[classes.length];
         for (int i = 0; i < classes.length; i++)
             result[i] = toInternalName(classes[i]);
         return result;
     }
 
-    static String toInternalName(Class<?> aClass) {
+    private static String toInternalName( Class<?> aClass ) {
         return toInternalName(aClass.getName());
     }
 
-    static String toInternalName(String stubClassName) {
+    private static String toInternalName( String stubClassName ) {
         return stubClassName.replace('.','/');
     }
 
     private Class<?> defineClass(ClassLoader classLoader, String className, byte[] classBytes) {
         try {
-            defineClassMethod.setAccessible(true);
-            return (Class<?>) defineClassMethod.invoke(classLoader, className, classBytes, 0, classBytes.length);
-        } catch (InvocationTargetException e) {
-            throw new SimpleStubException("error creating stub for " + getStubName(), e.getTargetException());
-        } catch (IllegalAccessException e) {
+            return (Class<?>) unsafe.defineClass( className, classBytes, 0, classBytes.length, classLoader, null );
+        } catch (Throwable e) {
             throw new SimpleStubException("error creating stub for " + getStubName(), e);
-        } finally {
-            defineClassMethod.setAccessible(false);
         }
     }
 
