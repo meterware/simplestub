@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub - Dependency Information</title>
+    <title>SimpleStub - 
+    SimpleStub: Testing Static Initialization</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -68,35 +69,9 @@
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                            <li class="expanded">
+                                                                                                                                                                                                  <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-            <strong>Dependency Information</strong>
-          </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                                           <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -110,44 +85,91 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Dependency Information<a name="Dependency_Information"></a></h2><a name="Dependency_Information"></a>
+        
+
+
 <div class="section">
-<h3>Apache Maven<a name="Apache_Maven"></a></h3><a name="Apache_Maven"></a>
+<h2>Testing Static Initialization<a name="Testing_Static_Initialization"></a></h2>
+
+
+<p>Some classes do static initialization based on the environment at startup. This can include system properties, classes
+    on the classpath, the presence of specific files, and so on. These tend to be difficult to unit test, since
+    the computation is done exactly once. Lazy initialization is often a better choice, but not everyone does that.
+    To unit test such initializations, we need to reload the class, allowing it to run its initializations after
+    the test has set up new conditions. The <tt>ClassLoadingSupport</tt> class exists to encapsulate that behavior.
+</p>
+
+<p>
+    The unit test for <tt>ClassLoadingSupport</tt> shows how this works. The following class reads the current
+    system properties when it is initialized.</p>
+
+    
+        
 <div class="source">
-<pre>&lt;dependency&gt;
-  &lt;groupId&gt;com.meterware.simplestub&lt;/groupId&gt;
-  &lt;artifactId&gt;simplestub&lt;/artifactId&gt;
-  &lt;version&gt;1.2.8&lt;/version&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Apache Buildr<a name="Apache_Buildr"></a></h3><a name="Apache_Buildr"></a>
+<pre>
+    <b>public class</b> PropertyReaderImpl <b>implements</b> PropertyReader {
+        <b>private static final</b> Properties initialProperties;
+
+        <b>static</b> {
+            initialProperties = (Properties) System.getProperties().clone();
+        }
+
+        <i>@Override</i>
+        <b>public</b> String getPropertyValue(String propertyName) {
+            <b>return</b> initialProperties.getProperty(propertyName);
+        }
+    }</pre></div>
+    
+
+    
+<p>Note that the <tt>getPropertyValue()</tt> method implements one defined on the interface. When we use this class
+    in a test, it will initialize the <tt>initialProperties</tt> field only once, which limits us in testing it. But
+    if we can reload it during the test, we can set new properties and have the class read them. </p>
+
+
+    
 <div class="source">
-<pre>'com.meterware.simplestub:simplestub:jar:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Apache Ant<a name="Apache_Ant"></a></h3><a name="Apache_Ant"></a>
-<div class="source">
-<pre>&lt;dependency org=&quot;com.meterware.simplestub&quot; name=&quot;simplestub&quot; rev=&quot;1.2.8&quot;&gt;
-  &lt;artifact name=&quot;simplestub&quot; type=&quot;jar&quot; /&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Groovy Grape<a name="Groovy_Grape"></a></h3><a name="Groovy_Grape"></a>
-<div class="source">
-<pre>@Grapes(
-@Grab(group='com.meterware.simplestub', module='simplestub', version='1.2.8')
-)</pre></div></div>
-<div class="section">
-<h3>Grails<a name="Grails"></a></h3><a name="Grails"></a>
-<div class="source">
-<pre>compile 'com.meterware.simplestub:simplestub:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Leiningen<a name="Leiningen"></a></h3><a name="Leiningen"></a>
-<div class="source">
-<pre>[com.meterware.simplestub/simplestub &quot;1.2.8&quot;]</pre></div></div>
-<div class="section">
-<h3>SBT<a name="SBT"></a></h3><a name="SBT"></a>
-<div class="source">
-<pre>libraryDependencies += &quot;com.meterware.simplestub&quot; %% &quot;simplestub&quot; % &quot;1.2.8&quot;</pre></div></div></div>
+<pre>
+    <b>private</b> List&lt;Memento&gt; mementos = <b>new</b> ArrayList&lt;Memento&gt;();
+
+    <i>@After</i>
+    <b>public void</b> tearDown() <b>throws</b> Exception {
+        <b>for</b> (Memento memento : mementos)
+            memento.revert();
+        }
+    }
+
+    <i>@Test
+    @SuppressWarnings(&quot;all&quot;)</i>
+    <b>public void</b> testClassReloading() <b>throws</b> Exception {
+(1)     mementos.add(SystemPropertySupport.install(&quot;test.property&quot;, &quot;zork&quot;));
+(2)     Class reloadedClass = ClassLoadingSupport.reloadClass(PropertyReaderImpl.class);
+(3)     PropertyReader secondReader = (PropertyReader) reloadedClass.newInstance();
+(4)     assertThat(secondReader.getPropertyValue(&quot;test.property&quot;), is(&quot;zork&quot;));
+    }</pre></div>
+    
+
+
+<p>The test will:</p>
+    
+<ol style="list-style-type: decimal">
+    	
+<li>use the <tt>SystemPropertySupport</tt> class to set a system property in our environment (it will be reverted
+    	    by the <tt>tearDown</tt> method after the test completes.</li>
+    	
+<li>reload the <tt>PropertyReaderImpl</tt> class in its own classloader. This causes the static initializers to run.</li>
+    	
+<li>create an instance of the new class. Since its classloader inherits from the original, we can cast it to the interface.</li>
+    	
+<li>verify that the static value set during initialization is based on the new property value.</li>
+    </ol>
+
+
+<p>Our new class is garbage collected when the test is over.</p>
+
+
+</div>
+
       </div>
     </div>
     <div class="clear">

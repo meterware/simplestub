@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub - Dependency Information</title>
+    <title>SimpleStub - 
+    SimpleStub: Using ASM instead of Javassist</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -63,40 +64,14 @@
                           <a href="classloaders.html" title="Handling class loaders">Handling class loaders</a>
             </li>
                   <li class="none">
-                          <a href="javassist.html" title="Using Javassist instead of ASM">Using Javassist instead of ASM</a>
-            </li>
+            <strong>Using Javassist instead of ASM</strong>
+          </li>
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                            <li class="expanded">
+                                                                                                                                                                                                  <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-            <strong>Dependency Information</strong>
-          </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                                           <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -110,44 +85,47 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Dependency Information<a name="Dependency_Information"></a></h2><a name="Dependency_Information"></a>
+        
+
+
 <div class="section">
-<h3>Apache Maven<a name="Apache_Maven"></a></h3><a name="Apache_Maven"></a>
-<div class="source">
-<pre>&lt;dependency&gt;
-  &lt;groupId&gt;com.meterware.simplestub&lt;/groupId&gt;
-  &lt;artifactId&gt;simplestub&lt;/artifactId&gt;
-  &lt;version&gt;1.2.8&lt;/version&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Apache Buildr<a name="Apache_Buildr"></a></h3><a name="Apache_Buildr"></a>
-<div class="source">
-<pre>'com.meterware.simplestub:simplestub:jar:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Apache Ant<a name="Apache_Ant"></a></h3><a name="Apache_Ant"></a>
-<div class="source">
-<pre>&lt;dependency org=&quot;com.meterware.simplestub&quot; name=&quot;simplestub&quot; rev=&quot;1.2.8&quot;&gt;
-  &lt;artifact name=&quot;simplestub&quot; type=&quot;jar&quot; /&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Groovy Grape<a name="Groovy_Grape"></a></h3><a name="Groovy_Grape"></a>
-<div class="source">
-<pre>@Grapes(
-@Grab(group='com.meterware.simplestub', module='simplestub', version='1.2.8')
-)</pre></div></div>
-<div class="section">
-<h3>Grails<a name="Grails"></a></h3><a name="Grails"></a>
-<div class="source">
-<pre>compile 'com.meterware.simplestub:simplestub:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Leiningen<a name="Leiningen"></a></h3><a name="Leiningen"></a>
-<div class="source">
-<pre>[com.meterware.simplestub/simplestub &quot;1.2.8&quot;]</pre></div></div>
-<div class="section">
-<h3>SBT<a name="SBT"></a></h3><a name="SBT"></a>
-<div class="source">
-<pre>libraryDependencies += &quot;com.meterware.simplestub&quot; %% &quot;simplestub&quot; % &quot;1.2.8&quot;</pre></div></div></div>
+<h2>Using Javassist instead of ASM<a name="Using_Javassist_instead_of_ASM"></a></h2>
+
+
+<p>As of 1.2.0, Simplestub is built using the ASM library; it is still possible to use the older Javassist-based
+    implementation simply by having Javassist on the classpath instead of ASM:</p>
+
+
+<p>In Maven, you can accomplish this by using the following to depend on SimpleStub and Javassist:</p>
+
+<div>
+<pre>
+    &lt;dependency&gt;
+        &lt;group&gt;com.meterware.simplestub&lt;/group&gt;
+        &lt;artifact&gt;simplestub&lt;/artifact&gt;
+        &lt;version&gt;(version number)&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.ow2.asm&lt;/groupId&gt;
+                &lt;artifactId&gt;asm&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.ow2.asm&lt;/groupId&gt;
+                &lt;artifactId&gt;asm-commons&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;group&gt;org.javassist&lt;/group&gt;
+        &lt;artifact&gt;javassist&lt;/artifact&gt;
+        &lt;version&gt;3.18.1-GA&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+</pre></div>
+
+</div>
+
       </div>
     </div>
     <div class="clear">

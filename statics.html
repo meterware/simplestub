@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub - Dependency Information</title>
+    <title>SimpleStub - 
+    SimpleStub: Handling Static Variables</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -54,8 +55,8 @@
                           <a href="additional.html" title="Additional Use Cases">Additional Use Cases</a>
             </li>
                   <li class="none">
-                          <a href="statics.html" title="Handling static variables">Handling static variables</a>
-            </li>
+            <strong>Handling static variables</strong>
+          </li>
                   <li class="none">
                           <a href="properties.html" title="Handling system properties">Handling system properties</a>
             </li>
@@ -68,35 +69,9 @@
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                            <li class="expanded">
+                                                                                                                                                                                                  <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-            <strong>Dependency Information</strong>
-          </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                                           <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -110,44 +85,95 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Dependency Information<a name="Dependency_Information"></a></h2><a name="Dependency_Information"></a>
+        
+
+
 <div class="section">
-<h3>Apache Maven<a name="Apache_Maven"></a></h3><a name="Apache_Maven"></a>
+<h2>Handling Static Variables<a name="Handling_Static_Variables"></a></h2>
+
+
+<p>Static variables can represent a bit of a challenge in unit testing. They are effectively global state, which
+   means that we cannot always predict how they will change; in addition, they are typically private, which limits
+   our ability to inject them into the SUT.
+</p>
+
+<p>Ultimately, we want to refactor our code to take any such values as injected dependencies; however, we need to
+    start by testing the code as it exists. Java does allow us to cheat via reflection, and the usage tends to the same
+    from test to test: preserve the old value, and replace it with a test value before the test, and then restore
+    it afterwards. This is a common pattern, and the <tt>StaticStubSupport</tt> class exists to encapsulate that behavior.
+</p>
+
+<p>
+    The following example tests some behavior of the <tt>Light</tt> class. After the system has been running for ten seconds, but not
+    fewer, its <tt>isWarm()</tt> method should return true. Time since startup is determined by calling the <tt>getSecondsSinceStartup()</tt>
+    of the <tt>Timer</tt> interface; however, the implementation of that interface is obtained by calling a static method:
+    <tt>TimeManager.getTimer()</tt> which returns the static variable, <tt><i>timer</i></tt>, created by some other code during system startup.
+</p>
+
+
+<p>The first thing we do is to create an appropriate stub class:</p>
+
+    
+        
 <div class="source">
-<pre>&lt;dependency&gt;
-  &lt;groupId&gt;com.meterware.simplestub&lt;/groupId&gt;
-  &lt;artifactId&gt;simplestub&lt;/artifactId&gt;
-  &lt;version&gt;1.2.8&lt;/version&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Apache Buildr<a name="Apache_Buildr"></a></h3><a name="Apache_Buildr"></a>
+<pre>
+    <b>abstract static class</b> TimerStub <b>implements</b> Timer {
+        <b>private long</b> secondsSinceStartup = 0;
+        <b>private static</b> Memento memento = Memento.NULL;
+
+        <b>static void</b> install() <b>throws</b> NoSuchFieldException {
+            memento = StaticStubSupport.install(TimerManager.<b>class</b>, &quot;timer&quot;, createStub(TimerStub.<b>class</b>));
+        }
+
+        <b>static void</b> uninstall() {
+            memento.revert();
+        }
+
+        <b>static void</b> setSecondsSinceStartup(<b>long</b> seconds) { secondsSinceStartup = seconds; }
+
+        <i>@Override</i>
+        <b>public long</b> getSecondsSinceStartup() { <b>return</b> secondsSinceStartup; }
+    }</pre></div>
+    
+
+    
+<p>In addition to providing a test implementation of our method, and a way to give it a value, we've also created a pair
+       of methods to install and uninstall the stub itself, using StaticStubSupport. Now we can use this in a test:</p>
+
+
+    
 <div class="source">
-<pre>'com.meterware.simplestub:simplestub:jar:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Apache Ant<a name="Apache_Ant"></a></h3><a name="Apache_Ant"></a>
-<div class="source">
-<pre>&lt;dependency org=&quot;com.meterware.simplestub&quot; name=&quot;simplestub&quot; rev=&quot;1.2.8&quot;&gt;
-  &lt;artifact name=&quot;simplestub&quot; type=&quot;jar&quot; /&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Groovy Grape<a name="Groovy_Grape"></a></h3><a name="Groovy_Grape"></a>
-<div class="source">
-<pre>@Grapes(
-@Grab(group='com.meterware.simplestub', module='simplestub', version='1.2.8')
-)</pre></div></div>
-<div class="section">
-<h3>Grails<a name="Grails"></a></h3><a name="Grails"></a>
-<div class="source">
-<pre>compile 'com.meterware.simplestub:simplestub:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Leiningen<a name="Leiningen"></a></h3><a name="Leiningen"></a>
-<div class="source">
-<pre>[com.meterware.simplestub/simplestub &quot;1.2.8&quot;]</pre></div></div>
-<div class="section">
-<h3>SBT<a name="SBT"></a></h3><a name="SBT"></a>
-<div class="source">
-<pre>libraryDependencies += &quot;com.meterware.simplestub&quot; %% &quot;simplestub&quot; % &quot;1.2.8&quot;</pre></div></div></div>
+<pre>
+    <i>@Before</i>
+    <b>public void</b> setUp() <b>throws</b> Exception {
+        TimerStub.install();
+    }
+
+    <i>@After</i>
+    <b>public void</b> tearDown() {
+        TimerStub.uninstall();
+    }
+
+    <i>@Test</i>
+    <b>public void</b> afterNineSeconds_lightNotWarm() {
+        TimerStub.setSecondsSinceStartup(9);
+        assertFalse(light.isWarm());
+    }
+
+    <i>@Test</i>
+    <b>public void</b> afterTenSeconds_lightIsWarm() {
+        TimerStub.setSecondsSinceStartup(10);
+        assertTrue(light.isWarm());
+    }</pre></div>
+    
+
+    
+<p>thus verifying that the <tt>isMature</tt> method is reading the Timer and changing state once ten seconds have elapsed.</p>
+
+
+
+</div>
+
       </div>
     </div>
     <div class="clear">

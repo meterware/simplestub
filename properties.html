@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub - Dependency Information</title>
+    <title>SimpleStub - 
+    SimpleStub: Handling System Properties</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -57,8 +58,8 @@
                           <a href="statics.html" title="Handling static variables">Handling static variables</a>
             </li>
                   <li class="none">
-                          <a href="properties.html" title="Handling system properties">Handling system properties</a>
-            </li>
+            <strong>Handling system properties</strong>
+          </li>
                   <li class="none">
                           <a href="classloaders.html" title="Handling class loaders">Handling class loaders</a>
             </li>
@@ -68,35 +69,9 @@
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
-                                                                                                                                                                                                            <li class="expanded">
+                                                                                                                                                                                                  <li class="collapsed">
                           <a href="project-info.html" title="Project Information">Project Information</a>
-                    <ul>
-                      <li class="none">
-            <strong>Dependency Information</strong>
-          </li>
-                      <li class="none">
-                          <a href="issue-tracking.html" title="Issue Tracking">Issue Tracking</a>
-            </li>
-                      <li class="none">
-                          <a href="source-repository.html" title="Source Repository">Source Repository</a>
-            </li>
-                      <li class="none">
-                          <a href="license.html" title="Project License">Project License</a>
-            </li>
-                      <li class="none">
-                          <a href="distribution-management.html" title="Distribution Management">Distribution Management</a>
-            </li>
-                      <li class="none">
-                          <a href="team-list.html" title="Project Team">Project Team</a>
-            </li>
-                      <li class="none">
-                          <a href="project-summary.html" title="Project Summary">Project Summary</a>
-            </li>
-                      <li class="none">
-                          <a href="mail-lists.html" title="Mailing Lists">Mailing Lists</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                                           <li class="collapsed">
                           <a href="project-reports.html" title="Project Reports">Project Reports</a>
                   </li>
@@ -110,44 +85,115 @@
     </div>
     <div id="bodyColumn">
       <div id="contentBox">
-        <div class="section">
-<h2>Dependency Information<a name="Dependency_Information"></a></h2><a name="Dependency_Information"></a>
+        
+
+
 <div class="section">
-<h3>Apache Maven<a name="Apache_Maven"></a></h3><a name="Apache_Maven"></a>
+<h2>Handling System Properties<a name="Handling_System_Properties"></a></h2>
+
+
+<p>It sometimes happens that a class will manipulate or depend on system properties. Since we always want to restore
+    conditions to what they were before a unit test, SimpleStub provides support for manipulating them in a reversible
+    way.
+</p>
+
+
+<p>
+    One place where this can be useful is JNDI, where the call to <tt>new InitialContext()</tt> uses a factory
+    defined by the property <tt>java.naming.factory.initial</tt>, defined by the constant
+    <a class="externalLink" href="http://docs.oracle.com/javase/8/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY."><tt>javax.naming.Context.INITIAL_CONTEXT_FACTORY</tt></a>.
+    Testing code that uses JNDI can often be simplified is we can substitute a test factory.
+</p>
+
+
+<p>The first thing we do is to define an appropriate Context stub class. In this case, our test will only do lookups, so
+    that is all that we implement:</p>
+
+
+    
 <div class="source">
-<pre>&lt;dependency&gt;
-  &lt;groupId&gt;com.meterware.simplestub&lt;/groupId&gt;
-  &lt;artifactId&gt;simplestub&lt;/artifactId&gt;
-  &lt;version&gt;1.2.8&lt;/version&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Apache Buildr<a name="Apache_Buildr"></a></h3><a name="Apache_Buildr"></a>
+<pre>
+<b>abstract static class</b> ContextStub <b>implements</b> javax.naming.Context {
+    <b>private static </b> Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
+
+    <b>static void</b> clear() { map.clear(); }
+
+    <b>static void</b> defineEntry(String name, Object value) { map.put(name, value); }
+
+    <i>@Override</i>
+    <b>public Object</b> lookup(String name) throws NamingException {
+        <b>if</b> (!map.containsKey(name)) throw <b>new</b> NamingException(&quot;failed in test&quot;);
+        <b>return</b> map.get(name);
+    }
+}</pre></div>
+
+
+<p>
+    Then we define the initial context factory itself, along with methods to activate it and clean up afterwards.
+</p>
+
+    
 <div class="source">
-<pre>'com.meterware.simplestub:simplestub:jar:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Apache Ant<a name="Apache_Ant"></a></h3><a name="Apache_Ant"></a>
+<pre>
+<b>static class</b> InitialContextFactoryStub <b>implements</b> javax.naming.spi.InitialContextFactory {
+    <b>private static </b> Memento memento = Memento.NULL;
+
+    <b>static void</b> install() {
+        ContextStub.clear();
+        memento = SystemPropertySupport.install(Context.INITIAL_CONTEXT_FACTORY, InitialContextFactoryStub<b>.class</b>.getName());
+    }
+
+    <b>static void</b> uninstall() {
+        memento.revert();
+    }
+
+    <i>@Override</i>
+    <b>public</b> Context getInitialContext(Hashtable&lt;?,?&gt; environment) throws NamingException {
+        return createStub(ContextStub<b>.class</b>);
+    }
+
+}</pre></div>
+
+
+
+<p>Note that when we install the factory, we also clear all current definitions. This prevents one test from affecting others.
+    Now we can use this in a test:</p>
+
+
+    
 <div class="source">
-<pre>&lt;dependency org=&quot;com.meterware.simplestub&quot; name=&quot;simplestub&quot; rev=&quot;1.2.8&quot;&gt;
-  &lt;artifact name=&quot;simplestub&quot; type=&quot;jar&quot; /&gt;
-&lt;/dependency&gt;</pre></div></div>
-<div class="section">
-<h3>Groovy Grape<a name="Groovy_Grape"></a></h3><a name="Groovy_Grape"></a>
-<div class="source">
-<pre>@Grapes(
-@Grab(group='com.meterware.simplestub', module='simplestub', version='1.2.8')
-)</pre></div></div>
-<div class="section">
-<h3>Grails<a name="Grails"></a></h3><a name="Grails"></a>
-<div class="source">
-<pre>compile 'com.meterware.simplestub:simplestub:1.2.8'</pre></div></div>
-<div class="section">
-<h3>Leiningen<a name="Leiningen"></a></h3><a name="Leiningen"></a>
-<div class="source">
-<pre>[com.meterware.simplestub/simplestub &quot;1.2.8&quot;]</pre></div></div>
-<div class="section">
-<h3>SBT<a name="SBT"></a></h3><a name="SBT"></a>
-<div class="source">
-<pre>libraryDependencies += &quot;com.meterware.simplestub&quot; %% &quot;simplestub&quot; % &quot;1.2.8&quot;</pre></div></div></div>
+<pre>
+    <i>@Before</i>
+    <b>public void</b> setUp() <b>throws</b> Exception {
+        InitialContextFactoryStub.install();
+    }
+
+    <i>@After</i>
+    <b>public void</b> tearDown() {
+        InitialContextFactoryStub.uninstall();
+    }
+
+    <i>@Test</i>
+    <b>public void</b> whenJndiValueIsString_reportValue() {
+        ContextStub.defineEntry(computer.VALUE_NAME, &quot;zork&quot;);
+
+        assertThat(computer.getValue(), is(&quot;zork&quot;));
+    }
+
+    <i>@Test</i>
+    <b>public void</b> whenJndiValueIsBoolean_reportValue() {
+         ContextStub.defineEntry(computer.VALUE_NAME, Boolean.TRUE);
+
+         assertThat(computer.getValue(), is(&quot;asserted&quot;));
+     }</pre></div>
+
+
+
+<p>thus verifying that the <tt>getValue</tt> method is looking up the value named VALUE_NAME and converting it appropriately.</p>
+
+
+</div>
+
       </div>
     </div>
     <div class="clear">
