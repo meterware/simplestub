@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests the Javassist-based runtime stub-loader.
+ * Tests the runtime stub-loader.
  */
 public class StubLoaderTest {
 
@@ -187,33 +187,30 @@ public class StubLoaderTest {
         assertThat(Stub.createNiceStub(InputStream.class), instanceOf(InputStream.class));
     }
 
-    abstract public static class UnannotatedClass {
-        abstract protected long doIt();
+    abstract static class UnannotatedClass {
+        abstract long doIt();
     }
 
-    abstract protected static class ProtectedClass {
-        abstract protected String doIt();
+    abstract static class ProtectedClass {
+        abstract String doIt();
     }
 
     abstract static class PackagePrivateClass {
-        abstract public int doIt();
+        abstract int doIt();
     }
 
-    abstract protected static class StrictClass {
-        abstract public void doIt();
-    }
+    @SuppressWarnings("SameParameterValue")
+    abstract static class SimpleAbstractTestClass {
 
-    abstract public static class SimpleAbstractTestClass {
+        String getName() { return "name"; }
 
-        public String getName() { return "name"; }
+        abstract int doSomething( int value );
 
-        protected abstract int doSomething(int value);
-
-        protected abstract String multiArgumentMethod(int value1, String value2);
+        abstract String multiArgumentMethod( int value1, String value2 );
 
         abstract boolean packagePrivateMethod(List<BigInteger> list);
 
-        public abstract CookiePolicy getPolicy();
+        abstract CookiePolicy getPolicy();
     }
 
     abstract class ProblemClass {
