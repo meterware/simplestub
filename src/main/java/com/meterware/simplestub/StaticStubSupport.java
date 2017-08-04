@@ -1,12 +1,33 @@
 package com.meterware.simplestub;
 
+import sun.misc.Unsafe;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * A class which simplifies the assignment of stubs to static variables.
  */
 abstract public class StaticStubSupport {
+
+    /** Gain access to define class method. */
+    private final static Unsafe unsafe = AccessController.doPrivileged(
+                    new PrivilegedAction<Unsafe>() {
+                        public Unsafe run() {
+                            //noinspection Duplicates
+                            try {
+                                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                                field.setAccessible(true);
+                                return (Unsafe) field.get(null);
+                            } catch (NoSuchFieldException exc) {
+                                throw new Error("Could not access Unsafe", exc);
+                            } catch (IllegalAccessException exc) {
+                                throw new Error("Could not access Unsafe", exc);
+                            }
+                        }
+                    }
+            );
 
     /**
      * This method assigns the specified value to the named field in the specified class. It returns a
@@ -34,6 +55,7 @@ abstract public class StaticStubSupport {
      * @return an object which holds the information needed to revert the static field.
      * @throws NoSuchFieldException if the named field does not exist.
      */
+    @SuppressWarnings("WeakerAccess")
     public static Memento preserve(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
         return new StaticMemento(containingClass, fieldName);
     }
@@ -96,8 +118,7 @@ abstract public class StaticStubSupport {
 
         private void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
             try {
-                Field field = getAccessibleField(aClass, fieldName);
-                field.set(null, value);
+                setAccessibleField( aClass, fieldName, value );
             } catch (NoSuchFieldException e) {
                 if (aClass.getSuperclass() == null)
                     throw e;
@@ -106,6 +127,21 @@ abstract public class StaticStubSupport {
             }
         }
 
+
+        private void setAccessibleField(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
+            Field field = getAccessibleField(aClass, fieldName);
+            if (!aClass.isPrimitive())
+                unsafe.putObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), value);
+            else
+                setFieldValue(value, field);
+        }
+
+
+        private void setFieldValue(Object value, Field field) throws IllegalAccessException {
+            field.set(null, value);
+        }
+
+
         /**
          * Returns the specified field, ensuring that the code can access it. Note that this will not work
          * with fields representing primitives or Strings, as the compiler may optimize them.
@@ -113,24 +149,7 @@ abstract public class StaticStubSupport {
         private Field getAccessibleField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
             Field field = aClass.getDeclaredField(fieldName);
             field.setAccessible(true);
-            if (isFinal(field)) removeFinalModifier(field);
             return field;
-        }
-
-        private boolean isFinal(Field field) {
-            return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;
-        }
-
-        private void removeFinalModifier(Field field) throws NoSuchFieldException, IllegalAccessException {
-            try {
-                Field modifiers = Field.class.getDeclaredField("modifiers");
-                modifiers.setAccessible(true);
-                modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            } catch (RuntimeException e) {
-                if (e.getClass().getName().equals(JIGSAW_INACCESSIBLE_OBJECT_EXCEPTION_NAME))
-                    throw new SimpleStubException(String.format(JIGSAW_INACCESSIBLE_OBJECT_MESSAGE, field.getName(), field.getDeclaringClass().getName()));
-                throw e;
-            }
         }
 
         private Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
