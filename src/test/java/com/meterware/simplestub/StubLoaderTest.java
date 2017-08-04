@@ -5,8 +5,8 @@ import com.meterware.simplestub.classes.ClassWithConstructorParameters;
 import com.meterware.simplestub.classes.ConcreteClass;
 import com.meterware.simplestub.classes.Interface1;
 import org.junit.Test;
-import org.omg.CORBA.ORB;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.CookiePolicy;
 import java.rmi.Remote;
@@ -174,17 +174,17 @@ public class StubLoaderTest {
 
     @Test
     public void whenBaseClassInJDKExtension_useDefaultClassLoaderForStub() {
-        assertThat(Stub.createStub(ORB.class), instanceOf(ORB.class));
+        assertThat(Stub.createStub(InputStream.class), instanceOf(InputStream.class));
     }
 
     @Test
     public void whenBaseClassInJDKExtension_useApplicationClassLoaderForStrictStub() {
-        assertThat(Stub.createStrictStub(ORB.class), instanceOf(ORB.class));
+        assertThat(Stub.createStrictStub(InputStream.class), instanceOf(InputStream.class));
     }
 
     @Test
     public void whenBaseClassInJDKExtension_useDefaultClassLoaderForNiceStub() {
-        assertThat(Stub.createNiceStub(ORB.class), instanceOf(ORB.class));
+        assertThat(Stub.createNiceStub(InputStream.class), instanceOf(InputStream.class));
     }
 
     abstract public static class UnannotatedClass {
