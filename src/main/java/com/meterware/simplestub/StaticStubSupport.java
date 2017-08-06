@@ -148,7 +148,7 @@ abstract public class StaticStubSupport {
             else if (field.getType().equals(double.class) && value instanceof Number)
                 unsafe.putDouble(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), ((Number) value).doubleValue());
             else
-                throw new IllegalArgumentException(String.format("Unable to field '%s' of type %s to value \"%s\" of type %s", fieldName, field.getType(), value, value.getClass().getName()));
+                throw new IllegalArgumentException(String.format("Can not set final static %s field %s.%s to %s", field.getType(), aClass.getName(), fieldName, value.getClass().getName()));
         }
 
 
