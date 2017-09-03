@@ -21,7 +21,7 @@ public class StaticStubSupportTest {
 
     @Test
     public void whenInstallCalledForFinalObject_staticValueIsChanged() throws Exception {
-        ArrayList<String> testValue = new ArrayList<String>();
+        ArrayList<String> testValue = new ArrayList<>();
         StaticStubSupport.install(Statics.class, "finalValue", testValue);
         assertThat(Statics.getFinalValue(), sameInstance(testValue));
     }
@@ -33,6 +33,69 @@ public class StaticStubSupportTest {
         assertThat(SubStatics.getStringValue(), equalTo("test value"));
     }
 
+    @Test
+    public void whenInstallCalledForBoolean_haveOriginalValue() throws Exception {
+        boolean originalValue = Statics.isaBoolean();
+        Memento memento = StaticStubSupport.install(Statics.class, "aBoolean", true);
+
+        assertThat((boolean) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForChar_haveOriginalValue() throws Exception {
+        char originalValue = Statics.getaChar();
+        Memento memento = StaticStubSupport.install(Statics.class, "aChar", 'x');
+
+        assertThat((char) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForByte_haveOriginalValue() throws Exception {
+        byte originalValue = Statics.getaByte();
+        Memento memento = StaticStubSupport.install(Statics.class, "aByte", (byte) 12);
+
+        assertThat((byte) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForShort_haveOriginalValue() throws Exception {
+        short originalValue = Statics.getaShort();
+        Memento memento = StaticStubSupport.install(Statics.class, "aShort", (short) 123);
+
+        assertThat((short) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForInt_haveOriginalValue() throws Exception {
+        int originalValue = Statics.getAnInt();
+        Memento memento = StaticStubSupport.install(Statics.class, "anInt", 1234);
+
+        assertThat((int) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForLong_haveOriginalValue() throws Exception {
+        long originalValue = Statics.getaLong();
+        Memento memento = StaticStubSupport.install(Statics.class, "aLong", 12345);
+
+        assertThat((long) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForFloat_haveOriginalValue() throws Exception {
+        float originalValue = Statics.getaFloat();
+        Memento memento = StaticStubSupport.install(Statics.class, "aFloat", 123.5F);
+
+        assertThat((float) memento.getOriginalValue(), equalTo(originalValue));
+    }
+
+    @Test
+    public void whenInstallCalledForDouble_haveOriginalValue() throws Exception {
+        double originalValue = Statics.getaDouble();
+        Memento memento = StaticStubSupport.install(Statics.class, "aDouble", 123);
+
+        assertThat((double) memento.getOriginalValue(), equalTo(originalValue));
+    }
     @Test
     public void whenInstallCalledForBoolean_staticValueIsChanged() throws Exception {
         StaticStubSupport.install(Statics.class, "aBoolean", true);
@@ -95,13 +158,13 @@ public class StaticStubSupportTest {
 
     @Test
     public void whenInstallCalledForFinalByte_staticValueIsChanged() throws Exception {
-        StaticStubSupport.install(Statics.class, "finalByte", 12L);
+        StaticStubSupport.install(Statics.class, "finalByte", (byte) 12);
         assertThat(Statics.getFinalByte(), equalTo((byte) 12));
     }
 
     @Test
     public void whenInstallCalledForFinalShort_staticValueIsChanged() throws Exception {
-        StaticStubSupport.install(Statics.class, "finalShort", 123);
+        StaticStubSupport.install(Statics.class, "finalShort", (short) 123);
         assertThat(Statics.getFinalShort(), equalTo((short) 123));
     }
 
@@ -119,7 +182,7 @@ public class StaticStubSupportTest {
 
     @Test
     public void whenInstallCalledForFinalFloat_staticValueIsChanged() throws Exception {
-        StaticStubSupport.install(Statics.class, "finalFloat", 123.5);
+        StaticStubSupport.install(Statics.class, "finalFloat", 123.5F);
         assertThat(Statics.getFinalFloat(), equalTo(123.5F));
     }
 
@@ -196,7 +259,7 @@ public class StaticStubSupportTest {
     static class Statics {
         private static String stringValue;
 
-        private static final ArrayList<String> finalValue = new ArrayList<String>();
+        private static final ArrayList<String> finalValue = new ArrayList<>();
         private static final boolean finalBoolean;
         private static final char finalChar;
         private static final byte finalByte;
@@ -206,15 +269,15 @@ public class StaticStubSupportTest {
         private static final float finalFloat;
         private static final double finalDouble;
 
-        private static String aString;
-        private static boolean aBoolean;
-        private static char aChar;
-        private static byte aByte;
-        private static short aShort;
-        private static int anInt;
-        private static long aLong;
-        private static float aFloat;
-        private static double aDouble;
+        private static String aString = "asdf";
+        private static boolean aBoolean = getRandomBoolean();
+        private static char aChar = (char) getRandom(Character.MAX_VALUE);
+        private static byte aByte = (byte) getRandom(Byte.MAX_VALUE);
+        private static short aShort = (short) getRandom(Short.MAX_VALUE);
+        private static int anInt = (int) getRandom(Integer.MAX_VALUE);
+        private static long aLong = (long) getRandom(Long.MAX_VALUE);
+        private static float aFloat = (float) getRandom(Integer.MAX_VALUE);
+        private static double aDouble = getRandom(Integer.MAX_VALUE);
 
         static {
             finalValue.add("abc");
@@ -226,6 +289,14 @@ public class StaticStubSupportTest {
             finalLong = 0;
             finalFloat = 0.0f;
             finalDouble = 0.0;
+        }
+
+        static boolean getRandomBoolean() {
+            return ((short) getRandom(Short.MAX_VALUE)) %2 == 0;
+        }
+
+        static double getRandom(double max) {
+            return max * Math.random();
         }
 
         static String getStringValue() {
@@ -276,35 +347,35 @@ public class StaticStubSupportTest {
             return aString;
         }
 
-        public static boolean isaBoolean() {
+        static boolean isaBoolean() {
             return aBoolean;
         }
 
-        public static char getaChar() {
+        static char getaChar() {
             return aChar;
         }
 
-        public static byte getaByte() {
+        static byte getaByte() {
             return aByte;
         }
 
-        public static short getaShort() {
+        static short getaShort() {
             return aShort;
         }
 
-        public static int getAnInt() {
+        static int getAnInt() {
             return anInt;
         }
 
-        public static long getaLong() {
+        static long getaLong() {
             return aLong;
         }
 
-        public static float getaFloat() {
+        static float getaFloat() {
             return aFloat;
         }
 
-        public static double getaDouble() {
+        static double getaDouble() {
             return aDouble;
         }
     }
