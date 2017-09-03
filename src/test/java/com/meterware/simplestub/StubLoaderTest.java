@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.CookiePolicy;
-import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,22 +167,17 @@ public class StubLoaderTest {
     }
 
     @Test
-    public void whenBaseClassInJDK_useDefaultClassLoader() {
-        assertThat(Stub.createStub(Remote.class), instanceOf(Remote.class));
-    }
-
-    @Test
-    public void whenBaseClassInJDKExtension_useDefaultClassLoaderForStub() {
+    public void whenBaseClassInJDK_useDefaultClassLoaderForStub() {
         assertThat(Stub.createStub(InputStream.class), instanceOf(InputStream.class));
     }
 
     @Test
-    public void whenBaseClassInJDKExtension_useApplicationClassLoaderForStrictStub() {
+    public void whenBaseClassInJDK_useApplicationClassLoaderForStrictStub() {
         assertThat(Stub.createStrictStub(InputStream.class), instanceOf(InputStream.class));
     }
 
     @Test
-    public void whenBaseClassInJDKExtension_useDefaultClassLoaderForNiceStub() {
+    public void whenBaseClassInJDK_useDefaultClassLoaderForNiceStub() {
         assertThat(Stub.createNiceStub(InputStream.class), instanceOf(InputStream.class));
     }
 

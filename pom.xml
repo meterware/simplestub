@@ -72,7 +72,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.7</java.version>
+        <java.version>9</java.version>
+        <asm.version>6.0_BETA</asm.version>
     </properties>
 
     <dependencies>
@@ -85,12 +86,12 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>5.0.4</version>
+            <version>${asm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>5.0.4</version>
+            <version>${asm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -109,15 +110,15 @@
     <build>
         <plugins>
             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-                 <artifactId>maven-compiler-plugin</artifactId>
-                 <version>3.6.2</version>
-                 <configuration>
-                     <source>${java.version}</source>
-                     <target>${java.version}</target>
-                     <compilerArgument>-proc:none</compilerArgument>
-                 </configuration>
-             </plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.2</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.4</version>
@@ -189,7 +190,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>3.0.0-M1</version>
                 <configuration>
                     <excludePackageNames>com.meterware.simplestub.generation</excludePackageNames>
                 </configuration>
@@ -231,6 +232,41 @@
 
         </plugins>
     </reporting>
+
+    <profiles>
+        <profile>
+            <id>java9</id>
+            <activation>
+                <jdk>[1.7,9)</jdk>
+            </activation>
+            <properties>
+                <java.version>1.7</java.version>
+                <asm.version>5.0.4</asm.version>
+            </properties>
+
+            <!-- exclude module-info -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.6.2</version>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
 
 </project>
 
