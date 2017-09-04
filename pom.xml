@@ -235,7 +235,7 @@
 
     <profiles>
         <profile>
-            <id>java9</id>
+            <id>pre-java9</id>
             <activation>
                 <jdk>[1.7,9)</jdk>
             </activation>
