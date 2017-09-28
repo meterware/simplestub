@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -32,20 +33,20 @@ abstract public class StubGeneratorTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T createStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException {
+    private <T> T createStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createStubClass(baseClass);
         return create(aStubClass);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T createNiceStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException {
+    private <T> T createNiceStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createNiceStubClass(baseClass);
         return create(aStubClass);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T create(Class<?> aStubClass) throws InstantiationException, IllegalAccessException {
-        return (T) aStubClass.newInstance();
+    private <T> T create(Class<?> aStubClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        return (T) aStubClass.getDeclaredConstructor().newInstance();
     }
 
     @Test
@@ -112,7 +113,7 @@ abstract public class StubGeneratorTestBase {
     public void whenBaseClassIsInterface_instantiatedObjectImplementsInterface() throws Exception {
         Class<?> aStubClass = createStubClass(AnInterface.class);
 
-        assertThat(aStubClass.newInstance(), instanceOf(AnInterface.class));
+        assertThat(aStubClass.getDeclaredConstructor().newInstance(), instanceOf(AnInterface.class));
     }
 
     @Test
@@ -201,7 +202,7 @@ abstract public class StubGeneratorTestBase {
     public void whenUndefinedMethodReturnsArray_generatedNiceMethodReturnsEmptyArray() throws Exception {
         ClassWithObjectGetters aClassStub = createNiceStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getAnInterfaceArray(), Matchers.<AnInterface>emptyArray());
+        assertThat(aClassStub.getAnInterfaceArray(), Matchers.emptyArray());
     }
 
     @Test
@@ -216,7 +217,7 @@ abstract public class StubGeneratorTestBase {
     public void whenUndefinedMethodReturnsTwoDArray_generatedNiceMethodReturnsEmptyArray() throws Exception {
         ClassWithObjectGetters aClassStub = createNiceStub(ClassWithObjectGetters.class);
 
-        assertThat(aClassStub.getATwoDArray(), Matchers.<AnInterface[]>emptyArray());
+        assertThat(aClassStub.getATwoDArray(), Matchers.emptyArray());
     }
 
     @Test
@@ -270,7 +271,7 @@ abstract public class StubGeneratorTestBase {
         stub.getByte();
     }
 
-    private <T> T createStrictStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException {
+    private <T> T createStrictStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createStrictStubClass(baseClass);
         return create(aStubClass);
     }

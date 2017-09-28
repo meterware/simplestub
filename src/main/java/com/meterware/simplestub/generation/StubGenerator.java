@@ -40,7 +40,7 @@ public abstract class StubGenerator {
 
     private static StubGeneratorFactory loadCandidate(String factoryName) {
         try {
-            return (StubGeneratorFactory) Class.forName(factoryName).newInstance();
+            return (StubGeneratorFactory) Class.forName(factoryName).getConstructor().newInstance();
         } catch (Exception e) {
             return null;
         }

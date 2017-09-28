@@ -18,7 +18,7 @@ import static org.junit.Assert.assertThat;
  * Tests the class reloading functionality.
  */
 public class ClassLoadingSupportTest {
-    private List<Memento> mementos = new ArrayList<Memento>();
+    private List<Memento> mementos = new ArrayList<>();
 
     @After
     public void tearDown() throws Exception {
@@ -37,7 +37,7 @@ public class ClassLoadingSupportTest {
     @SuppressWarnings("all")
     public void whenReloadClassCalled_classRunsStaticInitialization() throws Exception {
         mementos.add(SystemPropertySupport.install("test.property", "zork"));
-        PropertyReader secondReader = (PropertyReader) ClassLoadingSupport.reloadClass(PropertyReaderImpl.class).newInstance();
+        PropertyReader secondReader = (PropertyReader) ClassLoadingSupport.reloadClass(PropertyReaderImpl.class).getDeclaredConstructor().newInstance();
         assertThat(secondReader.getPropertyValue("test.property"), is("zork"));
     }
 
@@ -53,13 +53,13 @@ public class ClassLoadingSupportTest {
     @SuppressWarnings("unchecked")
     private Object getListenerFromInstance(Class aClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Method getListenerMethod = aClass.getMethod("getListener");
-        return getListenerMethod.invoke(aClass.newInstance());
+        return getListenerMethod.invoke(aClass.getDeclaredConstructor().newInstance());
     }
 
     @Test
     public void whenClassHasPackageReference_reloadIt() throws Exception {
-        Class aClass = ClassLoadingSupport.reloadClass(ClassWithPackagePrivateReference.class);
-        aClass.newInstance();
+        Class<?> aClass = ClassLoadingSupport.reloadClass(ClassWithPackagePrivateReference.class);
+        aClass.getDeclaredConstructor().newInstance();
     }
 
     @Test

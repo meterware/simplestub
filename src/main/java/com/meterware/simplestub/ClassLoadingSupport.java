@@ -24,7 +24,7 @@ public class ClassLoadingSupport {
      * @throws IOException if there is a problem reading the original class definition
      * @throws ClassNotFoundException if there is a problem creating the new definition.
      */
-    public static Class reloadClass(Class<?> aClass) throws IOException, ClassNotFoundException {
+    public static Class<?> reloadClass(Class<?> aClass) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = new RedefiningClassLoader(aClass);
         return classLoader.loadClass(aClass.getName());
     }

@@ -101,7 +101,7 @@ public class ThreadContextClassLoaderSupportTest {
     public void whenClassDefinedFromInterface_instantiateWithNoArgConstructor() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(Interface1.class);
 
-        assertThat(classLoader.loadClass(CREATED_CLASS_NAME).newInstance(), instanceOf(Interface1.class));
+        assertThat(classLoader.loadClass(CREATED_CLASS_NAME).getDeclaredConstructor().newInstance(), instanceOf(Interface1.class));
     }
 
     @Test
