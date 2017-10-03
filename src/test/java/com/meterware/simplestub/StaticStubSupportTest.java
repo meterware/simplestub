@@ -1,9 +1,12 @@
 package com.meterware.simplestub;
 
+import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.EventListener;
 
+import static com.meterware.simplestub.StaticStubSupport.nestedClass;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -254,6 +257,11 @@ public class StaticStubSupportTest {
     @Test(expected = NoSuchFieldException.class)
     public void whenTheFieldNameIsWrong_throwException() throws NoSuchFieldException {
         StaticStubSupport.install(Statics.class, "noSuchValue", "test value");
+    }
+
+    @Test
+    public void canUseStaticMethodToGetInnerClass() throws Exception {
+        assertThat(nestedClass(ClassWithPrivateNestedClass.class, "ListenerImpl"), typeCompatibleWith(EventListener.class));
     }
 
     static class Statics {

@@ -7,6 +7,12 @@
       <author email="russ at gold-family dot us">Russell Gold</author>
     </properties>
     <body>
+        <release version="1.2.10" date="2017-10-03" description="bug fix release">
+            <action dev="russgold" type="fix">
+                Fixed bug: Use Unsafe to read final static fields.
+                Added nestedClass() static method
+            </action>
+        </release>
         <release version="1.2.9" date="2017-08-06" description="bug fix release">
             <action dev="russgold" type="fix">
                 Fixed bug: Use Unsafe to set final static fields.

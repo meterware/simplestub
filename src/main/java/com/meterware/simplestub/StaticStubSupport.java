@@ -3,6 +3,7 @@ package com.meterware.simplestub;
 /**
  * A class which simplifies the assignment of stubs to static variables.
  */
+@SuppressWarnings("WeakerAccess")
 abstract public class StaticStubSupport {
 
     /**
@@ -34,6 +35,23 @@ abstract public class StaticStubSupport {
     }
 
     private StaticStubSupport() {
+    }
+
+    /**
+     * Returns the nested class specified by an outer class and a sequences of class names. If more than one class name
+     * is specified, they will be appended to one another.
+     *
+     * For example, the nested class Foo$Bar$Baz can be retrieved by nestedClass(Foo.class, "Bar", "Baz").
+     * @param aClass the outer class containing the desired nested class
+     * @param nestedClassNames one or more nested class names
+     * @return the desired inner class
+     * @throws ClassNotFoundException if no such nested class exists.
+     */
+    public static Class<?> nestedClass(Class<?> aClass, String... nestedClassNames) throws ClassNotFoundException {
+        Class<?> result = aClass;
+        for (String nestedClassName : nestedClassNames)
+            result = Class.forName(result.getName() + "$" + nestedClassName);
+        return result;
     }
 
 
