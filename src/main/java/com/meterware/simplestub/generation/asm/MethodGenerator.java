@@ -122,7 +122,7 @@ abstract class MethodGenerator {
             mg.visitLdcInsn(Type.getType(returnType));
             mg.visitInsn(Opcodes.ICONST_0);
             mg.newArray(Type.getType(Object.class));
-            mg.visitMethodInsn(Opcodes.INVOKESTATIC, "com/meterware/simplestub/Stub", "createStub", "(Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mg.visitMethodInsn(Opcodes.INVOKESTATIC, "com/meterware/simplestub/Stub", "createNiceStub", "(Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;", false);
             mg.checkCast(Type.getType(returnType));
         }
 

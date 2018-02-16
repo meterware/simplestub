@@ -1,5 +1,7 @@
 package com.meterware.simplestub.generation;
 
+import java.util.List;
+
 /**
  * An interface that returns a variety of types.
  */
@@ -27,4 +29,6 @@ interface AnInterface {
     byte[] getByteArray();
 
     int[][] getIntArrayArray();
+
+    List<Integer> getIntList();
 }

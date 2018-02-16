@@ -23,9 +23,7 @@ public class JavassistStubGenerator extends StubGenerator {
     public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
         try {
             return createStubClass(stubClassName, classLoader);
-        } catch (NotFoundException e) {
-            throw new SimpleStubException("Unable to create stub class", e);
-        } catch (CannotCompileException e) {
+        } catch (NotFoundException | CannotCompileException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         }
     }

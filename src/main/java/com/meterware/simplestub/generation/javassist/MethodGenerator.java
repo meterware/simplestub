@@ -83,7 +83,7 @@ abstract class MethodGenerator {
         }
 
         private String createStubCreationBody(String name) {
-            return "return (" + name + ") " + Stub.class.getName() + ".createStub(" + name + ".class, new java.lang.Object[0]);";
+            return "return (" + name + ") " + Stub.class.getName() + ".createNiceStub(" + name + ".class, new java.lang.Object[0]);";
         }
     }
 }

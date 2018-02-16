@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -138,27 +139,24 @@ abstract public class StubGeneratorTestBase {
 
     @Test
     public void whenUndefinedMethodReturnsStringValueAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
-        enableReturnNulls();
         assertThat(anInterfaceStub.getString(), nullValue());
-    }
-
-    private void enableReturnNulls() throws NoSuchFieldException {
     }
 
     @Test
     public void whenUndefinedMethodReturnsStringValue_generatedNiceStubMethodReturnsEmptyString() throws Exception {
-        disableReturnNulls();
-        anInterfaceStub = createNiceStub(AnInterface.class);
-
-        assertThat(anInterfaceStub.getString(), isEmptyString());
-    }
-
-    private void disableReturnNulls() throws NoSuchFieldException {
+        assertThat(createNiceStub(AnInterface.class).getString(), isEmptyString());
     }
 
     @Test
     public void whenUndefinedMethodReturnsVoid_generatedMethodIsNoOp() throws Exception {
         anInterfaceStub.doNothing();
+    }
+
+    @Test
+    public void whenUndefinedMethodReturnsList_generatedNiceStubMethodIteratorHasNextIsFalse() throws Exception {
+        List<Integer> intList = createNiceStub(AnInterface.class).getIntList();
+
+        assertThat(intList.iterator().hasNext(), is(false));
     }
 
     @Test
@@ -184,7 +182,6 @@ abstract public class StubGeneratorTestBase {
 
     @Test
     public void whenUndefinedMethodReturnsInterfaceAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
-        enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getAnInterface(), nullValue());
@@ -192,7 +189,6 @@ abstract public class StubGeneratorTestBase {
 
     @Test
     public void whenUndefinedMethodReturnsArrayAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
-        enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getAnInterfaceArray(), nullValue());
@@ -207,7 +203,6 @@ abstract public class StubGeneratorTestBase {
 
     @Test
     public void whenUndefinedMethodReturnsTwoDArrayAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
-        enableReturnNulls();
         ClassWithObjectGetters aClassStub = createStub(ClassWithObjectGetters.class);
 
         assertThat(aClassStub.getATwoDArray(), nullValue());
