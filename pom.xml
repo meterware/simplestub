@@ -236,7 +236,6 @@
             </activation>
             <properties>
                 <java.version>1.7</java.version>
-                <asm.version>5.0.4</asm.version>
             </properties>
 
             <!-- exclude module-info -->
