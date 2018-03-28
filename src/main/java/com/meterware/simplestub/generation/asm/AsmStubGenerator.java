@@ -22,6 +22,14 @@ import java.util.*;
  */
 class AsmStubGenerator extends StubGenerator {
 
+    private static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<>();
+
+    static {
+        methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
+        methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
+        methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
+    }
+
     /** Gain access to define class method. */
     private final Unsafe unsafe = AccessController.doPrivileged(
                     new PrivilegedAction<Unsafe>() {
@@ -30,9 +38,7 @@ class AsmStubGenerator extends StubGenerator {
                                 Field field = Unsafe.class.getDeclaredField("theUnsafe");
                                 field.setAccessible(true);
                                 return (Unsafe) field.get(null);
-                            } catch (NoSuchFieldException exc) {
-                                throw new Error("Could not access Unsafe", exc);
-                            } catch (IllegalAccessException exc) {
+                            } catch (NoSuchFieldException | IllegalAccessException exc) {
                                 throw new Error("Could not access Unsafe", exc);
                             }
                         }
@@ -44,7 +50,7 @@ class AsmStubGenerator extends StubGenerator {
 
     AsmStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
-        methodGenerator = MethodGenerator.getMethodGenerator(kind);
+        methodGenerator = methodGenerators.get(kind);
     }
 
     @Override
@@ -84,7 +90,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private Set<Method> getAbstractMethods() {
-        Set<MethodSpec> abstractMethods = new HashSet<MethodSpec>();
+        Set<MethodSpec> abstractMethods = new HashSet<>();
 
         for (Class<?> aClass = baseClass; aClass != null; aClass = aClass.getSuperclass())
             for (Class<?> anInterface : aClass.getInterfaces())
@@ -97,7 +103,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private Set<Method> toMethodSet(Set<MethodSpec> methodSpecs) {
-        Set<Method> methods = new HashSet<Method>();
+        Set<Method> methods = new HashSet<>();
         for (MethodSpec methodSpec : methodSpecs)
             methods.add(methodSpec.getMethod());
         return methods;
@@ -109,10 +115,10 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private Class<?>[] getClassHierarchy(Class<?> baseClass) {
-        List<Class<?>> hierarchy = new ArrayList<Class<?>>();
+        List<Class<?>> hierarchy = new ArrayList<>();
         for (Class<?> aClass = baseClass; aClass != null; aClass = aClass.getSuperclass())
             hierarchy.add(0, aClass);
-        return hierarchy.toArray(new Class[hierarchy.size()]);
+        return hierarchy.toArray(new Class[0]);
     }
 
     private void updateAbstractMethods(Set<MethodSpec> abstractMethods, Class<?> aClass) {

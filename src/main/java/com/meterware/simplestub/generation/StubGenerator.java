@@ -25,7 +25,7 @@ public abstract class StubGenerator {
     }
 
     private static StubGeneratorFactory loadStubGeneratoryFactory() {
-        List<String> libraries = new ArrayList<String>();
+        List<String> libraries = new ArrayList<>();
 
         for (String factoryName : FACTORY_NAMES) {
             StubGeneratorFactory candidate = loadCandidate(factoryName);

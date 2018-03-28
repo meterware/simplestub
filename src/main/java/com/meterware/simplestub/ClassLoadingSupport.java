@@ -13,6 +13,7 @@ import java.util.Set;
 /**
  * Supports special classloading as needed by unit tests.
  */
+@SuppressWarnings("WeakerAccess")
 public class ClassLoadingSupport {
     /**
      * EXPERIMENTAL!
@@ -30,9 +31,9 @@ public class ClassLoadingSupport {
     }
 
     static private class RedefiningClassLoader extends ClassLoader {
-        private Set<String> definedClassNames = new HashSet<String>();
+        private Set<String> definedClassNames = new HashSet<>();
 
-        public RedefiningClassLoader(Class aClass) throws IOException {
+        RedefiningClassLoader(Class aClass) throws IOException {
             super(aClass.getClassLoader());
             defineClass(aClass);
         }
@@ -51,12 +52,12 @@ public class ClassLoadingSupport {
         }
 
         private Class[] getNonPublicReferencedClasses(Class aClass) throws IOException {
-            Set<Class> result = new HashSet<Class>();
+            Set<Class> result = new HashSet<>();
             for (Class reference : getClassesReferencedBy(aClass))
                 if (isNewNonPublicClass(reference))
                     result.add(reference);
 
-            return result.toArray(new Class[result.size()]);
+            return result.toArray(new Class[0]);
         }
 
         private Collection<Class> getClassesReferencedBy(Class aClass) throws IOException {

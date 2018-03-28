@@ -19,7 +19,7 @@ class StubLoader {
     private final static Map<Class<?>, Class<?>> PRIMITIVE_TYPES;
 
     static {
-        PRIMITIVE_TYPES = new HashMap<Class<?>, Class<?>>();
+        PRIMITIVE_TYPES = new HashMap<>();
         PRIMITIVE_TYPES.put(Void.TYPE,      Void.class);
         PRIMITIVE_TYPES.put(Character.TYPE, Character.class);
         PRIMITIVE_TYPES.put(Byte.TYPE,      Byte.class);
@@ -102,13 +102,7 @@ class StubLoader {
                 return (T) constructor.newInstance(toVarArgList(constructor, parameters));
             else
                 return (T) constructor.newInstance(parameters);
-        } catch (InstantiationException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
-        } catch (IllegalAccessException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
-        } catch (NoSuchMethodException e) {
-            throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
-        } catch (InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new SimpleStubException("Unable to instantiate stub for " + baseClass.getName(), e);
         }
     }
@@ -150,7 +144,7 @@ class StubLoader {
         return result;
     }
 
-    Constructor<?> getConstructor(Class<?> stubClass, Object... parameters) throws NoSuchMethodException {
+    private Constructor<?> getConstructor(Class<?> stubClass, Object... parameters) throws NoSuchMethodException {
         Constructor<?> constructor = findConstructor(stubClass, parameters);
         if (constructor != null) return constructor;
 
@@ -222,21 +216,21 @@ class StubLoader {
                 constructorParameterType.isPrimitive() && PRIMITIVE_TYPES.get(constructorParameterType).isAssignableFrom(actualParameter.getClass());
     }
 
-    Class<?> getStubClass() {
+    private Class<?> getStubClass() {
         if (!isAbstractClass())
             throw new SimpleStubException("Class " + baseClass.getName() + " is not abstract");
 
         return getStubClass(createStubClassName(baseClass.getName()), type.getClassLoader(kind, baseClass));
     }
 
-    Class<?> getStubClassForThread(String className) {
+    void createStubClassForThread(String className) {
         try {
             if (!baseClass.isInterface())
                 baseClass.getConstructor();
         } catch (NoSuchMethodException e) {
             throw new SimpleStubException("Base class " + baseClass.getName() + " lacks a public no-arg constructor");
         }
-        return getStubClass(className, Thread.currentThread().getContextClassLoader());
+        getStubClass(className, Thread.currentThread().getContextClassLoader());
     }
 
     private Class<?> getStubClass(String stubClassName, ClassLoader classLoader) {

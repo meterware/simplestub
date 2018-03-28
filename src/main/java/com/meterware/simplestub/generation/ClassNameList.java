@@ -8,7 +8,7 @@ import java.util.List;
  * An iterable list of internal class names, created from a type description.
  */
 public class ClassNameList implements Iterable<String> {
-    private List<String> classNames = new ArrayList<String>();
+    private List<String> classNames = new ArrayList<>();
 
     public ClassNameList(String spec) {
         parseTypeSpec(spec);

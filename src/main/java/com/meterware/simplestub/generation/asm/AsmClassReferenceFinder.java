@@ -23,7 +23,7 @@ public class AsmClassReferenceFinder implements ClassReferenceFinder {
     }
 
     static class ClassReferences {
-        private Set<Class> classes = new HashSet<Class>();
+        private Set<Class> classes = new HashSet<>();
 
         void addNamedClass(String internalName) {
             Class aClass = getApplicationClass(internalName);
@@ -51,7 +51,7 @@ public class AsmClassReferenceFinder implements ClassReferenceFinder {
     static class ReferenceClassVisitor extends ClassVisitor {
         private final ClassReferences references;
 
-        public ReferenceClassVisitor(ClassReferences references) {
+        ReferenceClassVisitor(ClassReferences references) {
             super(Opcodes.ASM4);
             this.references = references;
         }
@@ -71,7 +71,7 @@ public class AsmClassReferenceFinder implements ClassReferenceFinder {
     static class ReferenceMethodVisitor extends MethodVisitor {
         private final ClassReferences references;
 
-        public ReferenceMethodVisitor(ClassReferences references) {
+        ReferenceMethodVisitor(ClassReferences references) {
             super(Opcodes.ASM4);
             this.references = references;
         }

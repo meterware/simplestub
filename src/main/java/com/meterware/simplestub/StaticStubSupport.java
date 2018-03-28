@@ -70,8 +70,6 @@ abstract public class StaticStubSupport {
                 FieldUtils.setPrivateStaticField(containingClass, fieldName, originalValue);
             } catch (NoSuchFieldException e) {
                 throw new SimpleStubException("Somehow managed to lose the field name", e);
-            } catch (IllegalAccessException e) {
-                throw new SimpleStubException("Somehow managed to lose access to the field", e);
             }
         }
 
@@ -85,22 +83,14 @@ abstract public class StaticStubSupport {
         }
 
         private StaticMemento(Class<?> containingClass, String fieldName) throws NoSuchFieldException {
-            try {
-                this.containingClass = containingClass;
-                this.fieldName = fieldName;
-                originalValue = FieldUtils.getPrivateStaticField(containingClass, fieldName);
-            } catch (IllegalAccessException e) {
-                throw new SimpleStubException("Unable to gain access to field '" + fieldName + "'", e);
-            }
+            this.containingClass = containingClass;
+            this.fieldName = fieldName;
+            originalValue = FieldUtils.getPrivateStaticField(containingClass, fieldName);
         }
 
         private StaticMemento(Class<?> containingClass, String fieldName, Object stubValue) throws NoSuchFieldException {
             this(containingClass, fieldName);
-            try {
-                FieldUtils.setPrivateStaticField(containingClass, fieldName, stubValue);
-            } catch (IllegalAccessException e) {
-                throw new SimpleStubException("Unable to gain access to field '" + fieldName + "'", e);
-            }
+            FieldUtils.setPrivateStaticField(containingClass, fieldName, stubValue);
         }
 
     }

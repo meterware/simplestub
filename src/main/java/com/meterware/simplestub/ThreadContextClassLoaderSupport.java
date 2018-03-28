@@ -5,6 +5,7 @@ import com.meterware.simplestub.generation.StubKind;
 /**
  * Support for manipulating the thread context class-loader in a unit test.
  */
+@SuppressWarnings("WeakerAccess")
 public class ThreadContextClassLoaderSupport {
 
     /**
@@ -35,13 +36,13 @@ public class ThreadContextClassLoaderSupport {
      * @param aClass a base class or interface to use as a parent for the specified class.
      */
     public static void createStubInThreadContextClassLoader(String className, Class<?> aClass) {
-        new StubLoader(aClass, StubKind.DEFAULT).getStubClassForThread(className);
+        new StubLoader(aClass, StubKind.DEFAULT).createStubClassForThread(className);
     }
 
     static private class ThreadContextClassLoaderMemento implements Memento {
         private ClassLoader originalValue;
 
-        public ThreadContextClassLoaderMemento() {
+        ThreadContextClassLoaderMemento() {
             originalValue = Thread.currentThread().getContextClassLoader();
         }
 

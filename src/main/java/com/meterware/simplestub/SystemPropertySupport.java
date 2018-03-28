@@ -3,6 +3,7 @@ package com.meterware.simplestub;
 /**
  * A class which simplifies setting system properties in unit tests.
  */
+@SuppressWarnings("WeakerAccess")
 public class SystemPropertySupport {
 
     /**
@@ -22,6 +23,7 @@ public class SystemPropertySupport {
      * @param propertyName the name of the property to preserve
      * @return an object which holds the information needed to revert the system property.
      */
+    @SuppressWarnings("SameParameterValue")
     public static Memento preserve(String propertyName) {
         return new PropertyMemento(propertyName);
     }
@@ -30,7 +32,7 @@ public class SystemPropertySupport {
         private final String originalValue;
         private String propertyName;
 
-        public PropertyMemento(String propertyName) {
+        PropertyMemento(String propertyName) {
             this.propertyName = propertyName;
             this.originalValue = System.getProperty(propertyName);
         }

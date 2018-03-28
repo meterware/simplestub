@@ -5,10 +5,21 @@ import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubKind;
 import javassist.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Javassist implementation of a stub generator.
  */
 public class JavassistStubGenerator extends StubGenerator {
+
+    private static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<>();
+
+    static {
+        JavassistStubGenerator.methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
+        JavassistStubGenerator.methodGenerators.put(StubKind.NICE, new NiceMethodGenerator());
+        JavassistStubGenerator.methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
+    }
 
     private ClassPool pool = new ClassPool(ClassPool.getDefault());
     private Class<?> baseClass;
@@ -16,7 +27,7 @@ public class JavassistStubGenerator extends StubGenerator {
 
     public JavassistStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
-        methodGenerator = MethodGenerator.getMethodGenerator(kind);
+        methodGenerator = methodGenerators.get(kind);
     }
 
     @Override

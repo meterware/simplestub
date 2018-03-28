@@ -5,6 +5,7 @@ import com.meterware.simplestub.generation.StubKind;
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes.
  */
+@SuppressWarnings("WeakerAccess")
 abstract public class Stub {
 
     /**

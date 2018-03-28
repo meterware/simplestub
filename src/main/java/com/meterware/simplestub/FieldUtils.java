@@ -7,7 +7,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 /**
- * A Java 9 version of the FieldUtils class, which bypasses Java module restrictions on access to fields.
+ * A class which bypasses Java module restrictions on access to fields.
  */
 class FieldUtils {
 
@@ -34,9 +34,8 @@ class FieldUtils {
      * @param fieldName the name of the field.
      * @return the value of the field.
      * @throws NoSuchFieldException if the specified class does not contain a static field with the specified name
-     * @throws IllegalAccessException if the attempt to make it accessible fails
      */
-    static Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    static Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException {
         try {
             return getFieldValue(aClass, fieldName);
         } catch (NoSuchFieldException e) {
@@ -47,7 +46,7 @@ class FieldUtils {
         }
     }
 
-    private static Object getFieldValue(Class aClass, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    private static Object getFieldValue(Class aClass, String fieldName) throws NoSuchFieldException {
         unsafe.ensureClassInitialized(aClass);
         Field field = aClass.getDeclaredField(fieldName);
         if (!field.getType().isPrimitive())
@@ -79,9 +78,8 @@ class FieldUtils {
      * @param fieldName the name of the field.
      * @param value the new value to apply.
      * @throws NoSuchFieldException if the specified class does not contain a static field with the specified name
-     * @throws IllegalAccessException if the attempt to make it accessible fails
      */
-    static void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
+    static void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException {
         try {
             setFieldValue( aClass, fieldName, value );
         } catch (NoSuchFieldException e) {
@@ -92,7 +90,7 @@ class FieldUtils {
         }
     }
 
-    private static void setFieldValue(Class aClass, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
+    private static void setFieldValue(Class aClass, String fieldName, Object value) throws NoSuchFieldException {
         unsafe.ensureClassInitialized(aClass);
         Field field = aClass.getDeclaredField(fieldName);
         if (!field.getType().isPrimitive())

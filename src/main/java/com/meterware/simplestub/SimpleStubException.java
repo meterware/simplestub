@@ -1,7 +1,5 @@
 package com.meterware.simplestub;
 
-import javassist.NotFoundException;
-
 /**
  * An exception thrown when the simplestub library detects a problem in a stub definition.
  */
