@@ -1,5 +1,9 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2015-2017 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.classes.*;
 import org.junit.After;
 import org.junit.Test;
@@ -16,6 +20,8 @@ import static org.junit.Assert.assertThat;
 
 /**
  * Tests the class reloading functionality.
+ *
+ * @author Russell Gold
  */
 public class ClassLoadingSupportTest {
     private List<Memento> mementos = new ArrayList<>();

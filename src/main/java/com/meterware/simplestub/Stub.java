@@ -1,9 +1,15 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.generation.StubKind;
 
 /**
  * This class allows for the instantiation of auto-generated simple stubs from abstract classes.
+ *
+ * @author Russell Gold
  */
 @SuppressWarnings("WeakerAccess")
 abstract public class Stub {

@@ -1,7 +1,13 @@
 package com.meterware.simplestub.generation;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 /**
  * A class with both a default and non-default constructor. Used for testing auto-creation of returned classes.
+ *
+ * @author Russell Gold
  */
 @SuppressWarnings("unused")
 abstract class ABaseClass implements AnInterface {

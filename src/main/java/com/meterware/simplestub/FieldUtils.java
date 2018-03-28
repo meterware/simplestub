@@ -1,5 +1,9 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2017 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -8,6 +12,8 @@ import java.security.PrivilegedAction;
 
 /**
  * A class which bypasses Java module restrictions on access to fields.
+ *
+ * @author Russell Gold
  */
 class FieldUtils {
 

@@ -1,9 +1,15 @@
 package com.meterware.simplestub.generation;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import java.util.List;
 
 /**
  * The stub generator factory selected to report that none of the supporting libraries is available.
+ *
+ * @author Russell Gold
  */
 public class NullStubGeneratorFactory implements StubGeneratorFactory {
     private String libraryList;

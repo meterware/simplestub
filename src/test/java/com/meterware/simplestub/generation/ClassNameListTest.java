@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation;
-
+/*
+ * Copyright (c) 2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -8,6 +12,8 @@ import static org.hamcrest.Matchers.emptyIterable;
 
 /**
  * A test of the ClassNameList
+ *
+ * @author Russell Gold
  */
 public class ClassNameListTest {
 

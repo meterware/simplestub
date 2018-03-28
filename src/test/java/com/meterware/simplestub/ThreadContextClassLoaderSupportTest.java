@@ -1,5 +1,9 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2015-2017 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.classes.ClassWithConstructorParameters;
 import com.meterware.simplestub.classes.ConcreteClass;
 import com.meterware.simplestub.classes.Interface1;
@@ -18,6 +22,8 @@ import static org.hamcrest.Matchers.typeCompatibleWith;
 
 /**
  * Tests support for context class loaders.
+ *
+ * @author Russell Gold
  */
 public class ThreadContextClassLoaderSupportTest {
     private static final String CREATED_CLASS_NAME = "a.b.C";

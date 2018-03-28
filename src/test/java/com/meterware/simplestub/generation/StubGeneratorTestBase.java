@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation;
-
+/*
+ * Copyright (c) 2015-2018 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
 import org.hamcrest.MatcherAssert;
@@ -15,6 +19,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 
+/**
+ * @author Russell Gold
+ */
 abstract public class StubGeneratorTestBase {
 
     private static int stubNum = 0;

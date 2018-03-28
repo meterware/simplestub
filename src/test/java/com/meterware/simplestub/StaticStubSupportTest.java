@@ -1,5 +1,9 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2014-2017 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import org.junit.Test;
 
@@ -12,6 +16,8 @@ import static org.junit.Assert.assertThat;
 
 /**
  * Verifies support for static stubs.
+ *
+ * @author Russell Gold
  */
 public class StaticStubSupportTest {
 

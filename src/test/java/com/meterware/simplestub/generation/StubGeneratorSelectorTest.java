@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.Memento;
 import com.meterware.simplestub.StaticStubSupport;
 import com.meterware.simplestub.classes.Interface1;
@@ -18,6 +22,8 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  * A test of the stub generator factory selection. The tests work by manipulating the list of factory names.
  * It would be better to tamper with the classloader in some fashion to hide the expected classes.
+ *
+ * @author Russell Gold
  */
 public class StubGeneratorSelectorTest {
 

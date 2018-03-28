@@ -1,9 +1,16 @@
 package com.meterware.simplestub.generation.asm;
-
+/*
+ * Copyright (c) 2016-2018 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+/**
+ * @author Russell Gold
+ */
 class NiceMethodGenerator extends DefaultMethodGenerator {
 
     @Override

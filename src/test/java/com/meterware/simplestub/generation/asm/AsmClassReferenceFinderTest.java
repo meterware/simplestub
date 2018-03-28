@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation.asm;
-
+/*
+ * Copyright (c) 2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import com.meterware.simplestub.classes.ConcreteClass;
@@ -15,7 +19,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.objectweb.asm.Opcodes.ASM4;
 
 /**
- * Created by russgold on 2/7/16.
+ * @author Russell Gold
  */
 public class AsmClassReferenceFinderTest {
 

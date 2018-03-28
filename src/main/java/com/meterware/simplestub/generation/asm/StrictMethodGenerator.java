@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation.asm;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.UnexpectedMethodCallException;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -7,6 +11,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+/**
+ * @author Russell Gold
+ */
 class StrictMethodGenerator implements MethodGenerator {
     @Override
     public void addMethod(ClassWriter cw, java.lang.reflect.Method method) {

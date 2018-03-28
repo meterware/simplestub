@@ -1,5 +1,9 @@
 package com.meterware.simplestub;
-
+/*
+ * Copyright (c) 2015 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +13,8 @@ import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Tests behavior for setting and restoring system properties.
+ *
+ * @author Russell Gold
  */
 public class SystemPropertySupportTest {
 

@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation.asm;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -9,6 +13,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Russell Gold
+ */
 class DefaultMethodGenerator implements MethodGenerator {
     private static final List<? extends Class<?>> INTEGER_TYPES = createIntegerTypesList();
 

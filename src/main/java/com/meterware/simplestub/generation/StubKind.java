@@ -1,7 +1,14 @@
 package com.meterware.simplestub.generation;
+/*
+ * Copyright (c) 2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 
 /**
  * The kinds of stubs to generate.
+ *
+ * @author Russell Gold
  */
 public enum StubKind {
     DEFAULT {

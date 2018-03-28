@@ -1,5 +1,9 @@
 package com.meterware.simplestub.generation.asm;
-
+/*
+ * Copyright (c) 2015-2016 Russell Gold
+ *
+ * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
+ */
 import com.meterware.simplestub.generation.ClassReferenceFinder;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubGeneratorFactory;
@@ -7,6 +11,8 @@ import com.meterware.simplestub.generation.StubKind;
 
 /**
  * A factory to create a stub generator using the ASM library.
+ *
+ * @author Russell Gold
  */
 public class AsmStubGeneratorFactory implements StubGeneratorFactory {
 
