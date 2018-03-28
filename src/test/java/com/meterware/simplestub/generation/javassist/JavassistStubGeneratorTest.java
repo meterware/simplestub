@@ -14,15 +14,32 @@ public class JavassistStubGeneratorTest extends StubGeneratorTestBase {
         super(STUB_GENERATOR_FACTORY);
     }
 
-
     @BeforeClass
-    public static void skipUnderJdk9() throws Exception {
-        Assume.assumeTrue( isBeforeJdk9() );
+    public static void skipUnderJdk11() throws Exception {
+        Assume.assumeTrue( isBeforeJdk11() );
     }
 
+    private static boolean isBeforeJdk11() {
+        return getJavaVersion() < 11;
+    }
 
-    private static boolean isBeforeJdk9() {
-        return System.getProperty( "java.version" ).startsWith( "1." );
+    private static int getJavaVersion() {
+        String versionString = System.getProperty("java.version");
+        if (versionString.startsWith("1."))
+            return toVersionNum(versionString.substring(2));
+        else
+            return toVersionNum(versionString);
+    }
+
+    private static int toVersionNum(String versionString) {
+        StringBuilder sb = new StringBuilder(  );
+        for (char c : versionString.toCharArray())
+            if (Character.isDigit( c ))
+                sb.append( c );
+            else
+                break;
+
+        return Integer.parseInt( sb.toString() );
     }
 
 

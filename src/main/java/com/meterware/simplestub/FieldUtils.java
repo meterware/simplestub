@@ -11,7 +11,7 @@ import java.security.PrivilegedAction;
  */
 class FieldUtils {
 
-    /** Gain access to define class method. */
+    /** Gain access to get/set field methods. */
     private final static Unsafe unsafe = AccessController.doPrivileged(
             new PrivilegedAction<Unsafe>() {
                 @Override
