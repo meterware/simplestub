@@ -38,11 +38,14 @@ public class ThreadContextClassLoaderSupport {
      * Creates a test implementation or subclass of a given class with a specified name in the current thread context
      * class-loader. Note that the base class must be accessible from the context class-loader, and if not an interface,
      * must have a public no-arg constructor.
+     * Note: As of JDK9, only the class name portion of the name will be used; the package will be computed by SimpleStub,
+     * due to JDK restrictions.
      * @param className the name to use for the created class.
      * @param aClass a base class or interface to use as a parent for the specified class.
+     * @return the created stub.
      */
-    public static void createStubInThreadContextClassLoader(String className, Class<?> aClass) {
-        new StubLoader(aClass, StubKind.DEFAULT).createStubClassForThread(className);
+    public static Class<?> createStubInThreadContextClassLoader(String className, Class<?> aClass) {
+        return new StubLoader(aClass, StubKind.DEFAULT).getStubClassForThread(className);
     }
 
     static private class ThreadContextClassLoaderMemento implements Memento {

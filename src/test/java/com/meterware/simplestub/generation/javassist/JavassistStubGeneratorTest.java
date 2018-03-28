@@ -4,6 +4,7 @@ package com.meterware.simplestub.generation.javassist;
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+import com.meterware.simplestub.TestUtils;
 import com.meterware.simplestub.generation.StubGeneratorTestBase;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -26,26 +27,7 @@ public class JavassistStubGeneratorTest extends StubGeneratorTestBase {
     }
 
     private static boolean isBeforeJdk11() {
-        return getJavaVersion() < 11;
-    }
-
-    private static int getJavaVersion() {
-        String versionString = System.getProperty("java.version");
-        if (versionString.startsWith("1."))
-            return toVersionNum(versionString.substring(2));
-        else
-            return toVersionNum(versionString);
-    }
-
-    private static int toVersionNum(String versionString) {
-        StringBuilder sb = new StringBuilder(  );
-        for (char c : versionString.toCharArray())
-            if (Character.isDigit( c ))
-                sb.append( c );
-            else
-                break;
-
-        return Integer.parseInt( sb.toString() );
+        return TestUtils.getJavaVersion() < 11;
     }
 
 

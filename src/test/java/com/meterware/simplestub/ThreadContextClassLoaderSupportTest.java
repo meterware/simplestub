@@ -26,7 +26,8 @@ import static org.hamcrest.Matchers.typeCompatibleWith;
  * @author Russell Gold
  */
 public class ThreadContextClassLoaderSupportTest {
-    private static final String CREATED_CLASS_NAME = "a.b.C";
+    private static final String PROPOSED_CLASS_NAME = "a.b.C";
+    private String createdClassName;
     private ClassLoader savedClassLoader;
 
     @Before
@@ -93,13 +94,18 @@ public class ThreadContextClassLoaderSupportTest {
     public void whenClassDefinedFromInterface_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(Interface1.class);
 
-        assertThat(classLoader.loadClass(CREATED_CLASS_NAME), typeCompatibleWith(Interface1.class));
+        assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(Interface1.class));
+    }
+
+    private String getStubClassName() {
+        return TestUtils.getJavaVersion() < 9 ? PROPOSED_CLASS_NAME : createdClassName;
     }
 
     private ClassLoader createStubInThreadContextClassLoader(Class<?> baseClass) {
         ClassLoader classLoader = new URLClassLoader(new URL[0], baseClass.getClassLoader());
         ThreadContextClassLoaderSupport.install(classLoader);
-        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(CREATED_CLASS_NAME, baseClass);
+        Class<?> stub = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(PROPOSED_CLASS_NAME, baseClass);
+        createdClassName = stub.getName();
         return classLoader;
     }
 
@@ -107,23 +113,24 @@ public class ThreadContextClassLoaderSupportTest {
     public void whenClassDefinedFromInterface_instantiateWithNoArgConstructor() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(Interface1.class);
 
-        assertThat(classLoader.loadClass(CREATED_CLASS_NAME).getDeclaredConstructor().newInstance(), instanceOf(Interface1.class));
+        assertThat(classLoader.loadClass(getStubClassName()).getDeclaredConstructor().newInstance(), instanceOf(Interface1.class));
     }
 
     @Test
     public void whenClassDefinedFromJDKInterface_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
         ThreadContextClassLoaderSupport.install(classLoader);
-        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(CREATED_CLASS_NAME, EventListener.class);
+        Class<?> stub = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(PROPOSED_CLASS_NAME, EventListener.class);
+        createdClassName = stub.getName();
 
-        assertThat(classLoader.loadClass(CREATED_CLASS_NAME), typeCompatibleWith(EventListener.class));
+        assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(EventListener.class));
     }
 
     @Test
     public void whenClassDefinedFromTestClass_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(ConcreteClass.class);
 
-        assertThat(classLoader.loadClass(CREATED_CLASS_NAME), typeCompatibleWith(ConcreteClass.class));
+        assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(ConcreteClass.class));
     }
 
     @Test(expected = SimpleStubException.class)
@@ -136,7 +143,7 @@ public class ThreadContextClassLoaderSupportTest {
         ClassLoader classLoader = createStubInThreadContextClassLoader(ConcreteClass.class);
 
         ThreadContextClassLoaderSupport.install(new URLClassLoader(new URL[0]));
-        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader("new.Subclass", classLoader.loadClass(CREATED_CLASS_NAME));
+        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader("new.Subclass", classLoader.loadClass(getStubClassName()));
     }
 
     // todo non-public base class in different package

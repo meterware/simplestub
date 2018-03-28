@@ -84,6 +84,10 @@ class StubLoader {
             }
         };
 
+        private String createStubClassBaseName(String className) {
+            return getPackagePrefix() + className;
+        }
+
         abstract ClassLoader getClassLoader(StubKind kind, Class<?> baseClass);
 
         abstract String getPackagePrefix();
@@ -229,16 +233,6 @@ class StubLoader {
         return getStubClass(createStubClassName(baseClass.getName()), type.getClassLoader(kind, baseClass));
     }
 
-    void createStubClassForThread(String className) {
-        try {
-            if (!baseClass.isInterface())
-                baseClass.getConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new SimpleStubException("Base class " + baseClass.getName() + " lacks a public no-arg constructor");
-        }
-        getStubClass(className, Thread.currentThread().getContextClassLoader());
-    }
-
     private Class<?> getStubClass(String stubClassName, ClassLoader classLoader) {
         try {
             return type.loadClass(stubClassName, classLoader);
@@ -256,11 +250,21 @@ class StubLoader {
     }
 
     private String createStubClassName(String className) {
-        return type.getPackagePrefix() + className + getStubClassSuffix();
+        return type.createStubClassBaseName(className) + getStubClassSuffix();
     }
 
     private String getStubClassSuffix() {
         return kind.getStubClassSuffix();
     }
 
+
+    Class<?> getStubClassForThread(String proposedClassName) {
+        try {
+            if (!baseClass.isInterface())
+                baseClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new SimpleStubException("Base class " + baseClass.getName() + " lacks a public no-arg constructor");
+        }
+        return getStubClass(proposedClassName, Thread.currentThread().getContextClassLoader());
+    }
 }
