@@ -250,7 +250,15 @@ class StubLoader {
         verifyDefaultConstructor(baseClass);
         verifyClassLoadable(type.getAnchorClass(baseClass));
 
-        return getStubClass(createStubClassNameForThread(proposedClassName), type.getAnchorClass(baseClass));
+        String stubClassName = createStubClassNameForThread(proposedClassName);
+        try {
+            Class<?> stub = Thread.currentThread().getContextClassLoader().loadClass(stubClassName);
+            if (!baseClass.isAssignableFrom(stub))
+                throw new SimpleStubException("Incompatible stub exists with the same name");
+            return stub;
+        } catch (ClassNotFoundException e) {
+            return getStubClass(stubClassName, type.getAnchorClass(baseClass));
+        }
     }
 
     private String createStubClassNameForThread(String proposedClassName) {

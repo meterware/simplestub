@@ -19,6 +19,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.Matchers.typeCompatibleWith;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 /**
  * Tests support for context class loaders.
@@ -117,8 +119,6 @@ public class ThreadContextClassLoaderSupportTest {
         assertThat(classLoader.loadClass(getStubClassName()).getDeclaredConstructor().newInstance(), instanceOf(Interface1.class));
     }
 
-    // Unit tests are probably finding the class already defined, once we are defining it in the base class loader rather
-    // than the newly created thread context class loader. Need unique name each time.
     @Test
     public void whenClassDefinedFromJDKInterface_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
@@ -134,6 +134,37 @@ public class ThreadContextClassLoaderSupportTest {
         ClassLoader classLoader = createStubInThreadContextClassLoader(ConcreteClass.class);
 
         assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(ConcreteClass.class));
+    }
+
+    @Test
+    public void whenTwoClassesDefinedWithSameNameAndBase_useFirstClass() throws Exception {
+        ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
+        ThreadContextClassLoaderSupport.install(classLoader);
+
+        Class<?> stub1 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
+        Class<?> stub2 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
+
+        assertSame(stub1, stub2);
+    }
+
+    @Test
+    public void whenTwoClassesDefinedWithSameNameAndDifferentBasePackages_createSeparateClasses() {
+        ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
+        ThreadContextClassLoaderSupport.install(classLoader);
+
+        Class<?> stub1 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
+        Class<?> stub2 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, EventListener.class);
+
+        assertNotSame(stub1, stub2);
+    }
+
+    @Test(expected = SimpleStubException.class)
+    public void whenTwoClassesDefinedWithSameNameAndBasePackagesButDifferentClasses_fail() {
+        ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
+        ThreadContextClassLoaderSupport.install(classLoader);
+
+        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
+        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, Interface1.class);
     }
 
     @Test(expected = SimpleStubException.class)
