@@ -1,9 +1,10 @@
 package com.meterware.simplestub.generation.asm;
 /*
- * Copyright (c) 2015-2017 Russell Gold
+ * Copyright (c) 2015-2018 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+import com.meterware.simplestub.ClassUtils;
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubKind;
@@ -11,14 +12,10 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 
 /**
@@ -36,21 +33,6 @@ class AsmStubGenerator extends StubGenerator {
         methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 
-    /** Gain access to define class method. */
-    private final Unsafe unsafe = AccessController.doPrivileged(
-                    new PrivilegedAction<Unsafe>() {
-                        public Unsafe run() {
-                            try {
-                                Field field = Unsafe.class.getDeclaredField("theUnsafe");
-                                field.setAccessible(true);
-                                return (Unsafe) field.get(null);
-                            } catch (NoSuchFieldException | IllegalAccessException exc) {
-                                throw new Error("Could not access Unsafe", exc);
-                            }
-                        }
-                    }
-            );
-
     private final Class<?> baseClass;
     private MethodGenerator methodGenerator;
 
@@ -60,7 +42,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     @Override
-    public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
+    public Class<?> generateStubClass(String stubClassName, Class<?> anchorClass) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         defineClass(stubClassName, cw);
 
@@ -68,7 +50,7 @@ class AsmStubGenerator extends StubGenerator {
             methodGenerator.addMethod(cw, method);
 
         cw.visitEnd();
-        return defineClass(classLoader, stubClassName, cw.toByteArray());
+        return defineClass(anchorClass, stubClassName, cw.toByteArray());
     }
 
     private void defineClass(String stubClassName, ClassWriter cw) {
@@ -102,7 +84,7 @@ class AsmStubGenerator extends StubGenerator {
             for (Class<?> anInterface : aClass.getInterfaces())
                 addInterfaceMethods(abstractMethods, anInterface);
 
-        for (Class<?> aClass : getClassHierarchy(this.baseClass))
+        for (Class<?> aClass : getClassHierarchy(baseClass))
             updateAbstractMethods(abstractMethods, aClass);
 
         return toMethodSet(abstractMethods);
@@ -151,11 +133,11 @@ class AsmStubGenerator extends StubGenerator {
         return stubClassName.replace('.','/');
     }
 
-    private Class<?> defineClass(ClassLoader classLoader, String className, byte[] classBytes) {
+    private Class<?> defineClass(Class<?> anchorClass, String className, byte[] classBytes) {
         try {
-            return (Class<?>) unsafe.defineClass( className, classBytes, 0, classBytes.length, classLoader, null );
+            return ClassUtils.defineClass(anchorClass, className, classBytes);
         } catch (Throwable e) {
-            throw new SimpleStubException("error creating stub for " + getStubName(), e);
+            throw new SimpleStubException("error creating stub for %s", e, getStubName());
         }
     }
 

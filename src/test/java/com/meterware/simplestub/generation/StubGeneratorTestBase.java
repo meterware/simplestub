@@ -58,7 +58,7 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenBaseClassIsInterface_stubImplementsInterface() throws Exception {
+    public void whenBaseClassIsInterface_stubImplementsInterface() {
         Class<?> aStub = createStubClass(AnInterface.class);
 
         assertThat(aStub, typeCompatibleWith(AnInterface.class));
@@ -82,7 +82,7 @@ abstract public class StubGeneratorTestBase {
     private <T> Class<T> createStubClass(Class<T> baseClass, String stubClassName, StubKind kind) {
         StubGenerator generator = factory.createStubGenerator(baseClass, kind);
 
-        return (Class<T>) generator.loadStubClass(stubClassName, getClass().getClassLoader());
+        return (Class<T>) generator.generateStubClass(stubClassName, baseClass);
     }
 
     private String getStubClassName(Class<?> baseClass) {
@@ -90,14 +90,14 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenBaseClassIsAbstractClass_stubExtendsAbstractClass() throws Exception {
+    public void whenBaseClassIsAbstractClass_stubExtendsAbstractClass() {
         Class<?> aStub = createStubClass(ABaseClass.class);
 
         assertThat(aStub, typeCompatibleWith(ABaseClass.class));
     }
 
     @Test
-    public void whenBaseClassImplementsInterface_stubImplementsInterface() throws Exception {
+    public void whenBaseClassImplementsInterface_stubImplementsInterface() {
         Class<?> aStub = createStubClass(AbstractImplementation.class);
 
         assertThat(aStub, typeCompatibleWith(AbstractImplementation.class));
@@ -125,12 +125,12 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsBoolean_generatedMethodReturnsFalse() throws Exception {
+    public void whenUndefinedMethodReturnsBoolean_generatedMethodReturnsFalse() {
         assertThat(anInterfaceStub.isTrue(), is(false));
     }
 
     @Test
-    public void whenUndefinedMethodReturnsIntegerValue_generatedMethodReturnsZero() throws Exception {
+    public void whenUndefinedMethodReturnsIntegerValue_generatedMethodReturnsZero() {
         assertThat(anInterfaceStub.getByte(), is((byte)0));
         assertThat(anInterfaceStub.getChar(), is((char)0));
         assertThat(anInterfaceStub.getShort(), is((short)0));
@@ -139,13 +139,13 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsFloatingPointValue_generatedMethodReturnsZero() throws Exception {
+    public void whenUndefinedMethodReturnsFloatingPointValue_generatedMethodReturnsZero() {
         assertThat(anInterfaceStub.getFloat(), is(0F));
         assertThat(anInterfaceStub.getDouble(), is(0D));
     }
 
     @Test
-    public void whenUndefinedMethodReturnsStringValueAndReturnNullsEnabled_generatedMethodReturnsNull() throws Exception {
+    public void whenUndefinedMethodReturnsStringValueAndReturnNullsEnabled_generatedMethodReturnsNull() {
         assertThat(anInterfaceStub.getString(), nullValue());
     }
 
@@ -155,7 +155,7 @@ abstract public class StubGeneratorTestBase {
     }
 
     @Test
-    public void whenUndefinedMethodReturnsVoid_generatedMethodIsNoOp() throws Exception {
+    public void whenUndefinedMethodReturnsVoid_generatedMethodIsNoOp() {
         anInterfaceStub.doNothing();
     }
 
@@ -273,6 +273,7 @@ abstract public class StubGeneratorTestBase {
         stub.getByte();
     }
 
+    @SuppressWarnings("SameParameterValue")
     private <T> T createStrictStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createStrictStubClass(baseClass);
         return create(aStubClass);
@@ -282,6 +283,6 @@ abstract public class StubGeneratorTestBase {
     private <T> Class<T> createStrictStubClass(Class<T> baseClass) {
         StubGenerator generator = factory.createStubGenerator(baseClass, StubKind.STRICT);
 
-        return (Class<T>) generator.loadStubClass(getStubClassName(baseClass), getClass().getClassLoader());
+        return (Class<T>) generator.generateStubClass(getStubClassName(baseClass), baseClass);
     }
 }

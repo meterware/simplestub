@@ -1,11 +1,12 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2016 Russell Gold
+ * Copyright (c) 2015-2018 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubKind;
+import com.meterware.simplestub.stubs.StubAnchor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -52,47 +53,34 @@ class StubLoader {
     enum Type {
         jdkClass {
             @Override
-            ClassLoader getClassLoader(StubKind kind, Class<?> baseClass) {
-                return Thread.currentThread().getContextClassLoader();
+            Class<?> getAnchorClass(Class<?> baseClass) {
+                return StubAnchor.class;
             }
 
-            @Override
-            String getPackagePrefix() {
-                return "com.meterware.simplestub.";
-            }
-
-            @Override
-            Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException {
-                return Class.forName(stubClassName);
-            }
         },
         userClass {
             @Override
-            ClassLoader getClassLoader(StubKind kind, Class<?> baseClass) {
-                ClassLoader classLoader = baseClass.getClassLoader();
-                return (kind.isUsableClassLoader(classLoader)) ? classLoader : getClass().getClassLoader();
+            Class<?> getAnchorClass(Class<?> baseClass) {
+                return baseClass;
             }
 
-            @Override
-            String getPackagePrefix() {
-                return "";
-            }
-
-            @Override
-            Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException {
-                return classLoader.loadClass(stubClassName);
-            }
         };
 
-        private String createStubClassBaseName(String className) {
-            return getPackagePrefix() + className;
+        private String createStubClassName(Class<?> baseClass, String className) {
+            return getPackagePrefix(getAnchorClass(baseClass)) + getSimpleName(className);
         }
 
-        abstract ClassLoader getClassLoader(StubKind kind, Class<?> baseClass);
+        private String getPackagePrefix(Class<?> baseClass) {
+            String name = baseClass.getName();
+            return name.substring(0, name.lastIndexOf('.'));
+        }
 
-        abstract String getPackagePrefix();
+        private String getSimpleName(String className) {
+            return !className.contains(".") ? '.' + className : className.substring(className.lastIndexOf('.'));
+        }
 
-        abstract Class<?> loadClass(String stubClassName, ClassLoader classLoader) throws ClassNotFoundException;
+        abstract Class<?> getAnchorClass(Class<?> baseClass);
+
     }
 
     /**
@@ -230,27 +218,27 @@ class StubLoader {
         if (!isAbstractClass())
             throw new SimpleStubException("Class " + baseClass.getName() + " is not abstract");
 
-        return getStubClass(createStubClassName(baseClass.getName()), type.getClassLoader(kind, baseClass));
-    }
-
-    private Class<?> getStubClass(String stubClassName, ClassLoader classLoader) {
-        try {
-            return type.loadClass(stubClassName, classLoader);
-        } catch (ClassNotFoundException e) { // class has not already been created; create it now
-            return loadStubClass(stubClassName, classLoader);
-        }
+        return getStubClass(createStubClassName(baseClass.getName(), baseClass), type.getAnchorClass(baseClass));
     }
 
     private boolean isAbstractClass() {
         return Modifier.isAbstract(baseClass.getModifiers());
     }
 
-    private Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
-        return generator.loadStubClass(stubClassName, classLoader);
+    private Class<?> getStubClass(String stubClassName, Class<?> anchorClass) {
+        try {
+            return anchorClass.getClassLoader().loadClass(stubClassName);
+        } catch (ClassNotFoundException e) { // class has not already been created; create it now
+            return loadStubClass(stubClassName, anchorClass);
+        }
     }
 
-    private String createStubClassName(String className) {
-        return type.createStubClassBaseName(className) + getStubClassSuffix();
+    private Class<?> loadStubClass(String stubClassName, Class<?> anchorClass) {
+        return generator.generateStubClass(stubClassName, anchorClass);
+    }
+
+    private String createStubClassName(String className, Class<?> baseClass) {
+        return type.createStubClassName(baseClass, className) + getStubClassSuffix();
     }
 
     private String getStubClassSuffix() {
@@ -259,12 +247,31 @@ class StubLoader {
 
 
     Class<?> getStubClassForThread(String proposedClassName) {
+        verifyDefaultConstructor(baseClass);
+        verifyClassLoadable(type.getAnchorClass(baseClass));
+
+        return getStubClass(createStubClassNameForThread(proposedClassName), type.getAnchorClass(baseClass));
+    }
+
+    private String createStubClassNameForThread(String proposedClassName) {
+        return type.createStubClassName(baseClass, proposedClassName);
+    }
+
+    private static void verifyDefaultConstructor(Class<?> baseClass) {
         try {
             if (!baseClass.isInterface())
                 baseClass.getConstructor();
         } catch (NoSuchMethodException e) {
-            throw new SimpleStubException("Base class " + baseClass.getName() + " lacks a public no-arg constructor");
+            throw new SimpleStubException("Base class %s lacks a public no-arg constructor", baseClass.getName());
         }
-        return getStubClass(proposedClassName, Thread.currentThread().getContextClassLoader());
+    }
+
+    private static void verifyClassLoadable(Class<?> baseClass) {
+        try {
+            Thread.currentThread().getContextClassLoader().loadClass(baseClass.getName());
+        } catch (ClassNotFoundException e) {
+            throw new SimpleStubException("Stub class for %s is not loadable from the thread context classloader",
+                                           baseClass.getName());
+        }
     }
 }

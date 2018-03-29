@@ -70,6 +70,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>9</java.version>
         <asm.version>6.1.1</asm.version>
+        <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
+        <java9.build.outputDirectory>${project.build.outputDirectory}</java9.build.outputDirectory>
+        <arguments>-Drelease=true</arguments>
     </properties>
 
     <dependencies>
@@ -108,7 +111,29 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.7.0</version>
+                <executions>
+                    <!-- compile the jdk9 code separately. This will include overwriting the corresponding -->
+                    <!-- classes if we are not building the multi-release jar -->
+                    <execution>
+                        <id>java9</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <source>9</source>
+                            <target>9</target>
+                            <jdkToolchain>
+                                <version>9</version>
+                            </jdkToolchain>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${java9.sourceDirectory}</compileSourceRoot>
+                            </compileSourceRoots>
+                            <outputDirectory>${java9.build.outputDirectory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -229,26 +254,25 @@
             <id>pre-java9</id>
             <activation>
                 <jdk>[1.7,9)</jdk>
+                <property>
+                    <name>!release</name>
+                </property>
             </activation>
             <properties>
                 <java.version>1.7</java.version>
             </properties>
 
-            <!-- exclude module-info -->
+            <!-- disable java9 compilation -->
+            
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.6.2</version>
                         <executions>
                             <execution>
-                                <id>default-compile</id>
-                                <configuration>
-                                    <excludes>
-                                        <exclude>module-info.java</exclude>
-                                    </excludes>
-                                </configuration>
+                                <id>java9</id>
+                                <phase>none</phase>
                             </execution>
                         </executions>
                     </plugin>
@@ -267,6 +291,84 @@
                 </plugins>
             </reporting>
 
+        </profile>
+
+        <profile>
+            <id>multi-jar</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+
+            <properties>
+                <!-- compile the java9 code to its MR directory -->
+                <java9.build.outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</java9.build.outputDirectory>
+                <!-- compile the main code using 1.7 -->
+                <java.version>1.7</java.version>
+            </properties>
+            
+            <build>
+                <plugins>
+                    <!-- Multi-jar requires Java 9 or higher -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.0.0-M1</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-jdk-versions</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[9,)</version>
+                                            <message>Java 9 or higher is required to create the multi-release jar</message>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- compile main portion of jar with JDK 1.7 compiler, using toolchains -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-toolchains-plugin</artifactId>
+                        <version>1.1</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>toolchain</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <toolchains>
+                                <jdk>
+                                    <version>1.7</version>
+                                    <vendor>oracle</vendor>
+                                </jdk>
+                            </toolchains>
+                        </configuration>
+                    </plugin>
+
+                    <!-- add the multi-release:true manifest entry -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <Multi-Release>true</Multi-Release>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
+                    </plugin>
+                 </plugins>
+            </build>
         </profile>
     </profiles>
 

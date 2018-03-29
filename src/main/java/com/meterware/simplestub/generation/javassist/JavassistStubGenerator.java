@@ -1,6 +1,6 @@
 package com.meterware.simplestub.generation.javassist;
 /*
- * Copyright (c) 2017 Russell Gold
+ * Copyright (c) 2017-2018 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
@@ -37,21 +37,21 @@ public class JavassistStubGenerator extends StubGenerator {
     }
 
     @Override
-    public Class<?> loadStubClass(String stubClassName, ClassLoader classLoader) {
+    public Class<?> generateStubClass(String stubClassName, Class<?> anchorClass) {
         try {
-            return createStubClass(stubClassName, classLoader);
+            return createStubClass(stubClassName, anchorClass);
         } catch (NotFoundException | CannotCompileException e) {
             throw new SimpleStubException("Unable to create stub class", e);
         }
     }
 
-    private Class<?> createStubClass(String stubClassName, ClassLoader classLoader) throws NotFoundException, CannotCompileException {
+    private Class<?> createStubClass(String stubClassName, Class<?> anchorClass) throws NotFoundException, CannotCompileException {
         CtClass ctClass = createStubClassBase(stubClassName);
         for (CtMethod method : ctClass.getMethods()) {
             if (isAbstract(method))
                 addStubMethod(ctClass, method);
         }
-        return ctClass.toClass(classLoader, null);
+        return ctClass.toClass(anchorClass.getClassLoader(), null);
     }
 
     private CtClass createStubClassBase(String stubClassName) throws NotFoundException {

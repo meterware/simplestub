@@ -1,6 +1,6 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2016 Russell Gold
+ * Copyright (c) 2015-2018 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
@@ -38,7 +38,7 @@ public class ThreadContextClassLoaderSupport {
      * Creates a test implementation or subclass of a given class with a specified name in the current thread context
      * class-loader. Note that the base class must be accessible from the context class-loader, and if not an interface,
      * must have a public no-arg constructor.
-     * Note: As of JDK9, only the class name portion of the name will be used; the package will be computed by SimpleStub,
+     * Note: Only the class name portion of the name will be used; the package will be computed by SimpleStub,
      * due to JDK restrictions.
      * @param className the name to use for the created class.
      * @param aClass a base class or interface to use as a parent for the specified class.
