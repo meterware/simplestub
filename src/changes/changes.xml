@@ -7,6 +7,16 @@
       <author email="russ at gold-family dot us">Russell Gold</author>
     </properties>
     <body>
+        <release version="1.2.12" date="2018-03-29" description="minor release">
+            <action dev="russgold" type="update">
+                Created multi-release jar to add support for JDK11
+            </action>
+        </release>
+        <release version="1.2.11" date="2018-02-17" description="bug fix release">
+            <action dev="russgold" type="fix">
+                Nice Stub wasn't generating nested nice stubs in certain cases
+            </action>
+        </release>
         <release version="1.2.10" date="2017-10-03" description="bug fix release">
             <action dev="russgold" type="fix">
                 Fixed bug: Use Unsafe to read final static fields.

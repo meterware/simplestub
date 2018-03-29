@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
     </parent>
 
     <groupId>com.meterware.simplestub</groupId>
@@ -67,12 +67,23 @@
     -->
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- the oldest Java version supported by this tool -->
+        <base.java.version>1.7</base.java.version>
+
+        <!-- the target version when a Jigsaw version is available -->
         <java.version>9</java.version>
-        <asm.version>6.1.1</asm.version>
+
+        <!-- the location of the Java9 source files -->
         <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
+
+        <!-- the target for the Java 9 classes during development -->
         <java9.build.outputDirectory>${project.build.outputDirectory}</java9.build.outputDirectory>
+
+        <!-- set the release property when running from the release plugin -->
         <arguments>-Drelease=true</arguments>
+
+        <!-- the supported version of ASM. Required as there are multiple jars which need the same version -->
+        <asm.version>6.1.1</asm.version>
     </properties>
 
     <dependencies>
@@ -112,6 +123,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
                 <executions>
                     <!-- compile the jdk9 code separately. This will include overwriting the corresponding -->
                     <!-- classes if we are not building the multi-release jar -->
@@ -134,15 +149,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-            
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4</version>
             </plugin>
 
             <!-- prevent the site plugin from deploying to the scm url -->
@@ -259,7 +265,7 @@
                 </property>
             </activation>
             <properties>
-                <java.version>1.7</java.version>
+                <java.version>${base.java.version}</java.version>
             </properties>
 
             <!-- disable java9 compilation -->
@@ -273,6 +279,14 @@
                             <execution>
                                 <id>java9</id>
                                 <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -304,8 +318,8 @@
             <properties>
                 <!-- compile the java9 code to its MR directory -->
                 <java9.build.outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</java9.build.outputDirectory>
-                <!-- compile the main code using 1.7 -->
-                <java.version>1.7</java.version>
+                <!-- compile the main code using the oldest supported compiler -->
+                <java.version>${base.java.version}</java.version>
             </properties>
             
             <build>
@@ -333,7 +347,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- compile main portion of jar with JDK 1.7 compiler, using toolchains -->
+                    <!-- compile main portion of jar with the oldest supported compiler, using toolchains -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-toolchains-plugin</artifactId>
@@ -348,7 +362,7 @@
                         <configuration>
                             <toolchains>
                                 <jdk>
-                                    <version>1.7</version>
+                                    <version>${base.java.version}</version>
                                     <vendor>oracle</vendor>
                                 </jdk>
                             </toolchains>
@@ -359,6 +373,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.4</version>
                         <configuration>
                             <archive>
                                 <manifestEntries>
