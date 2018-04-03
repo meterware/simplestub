@@ -6,7 +6,7 @@ jdk:
 # we run the unit tests.
 # We have no integration tests as yet
 install:
-    cp simplestub/src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
+    cp meterware/simplestub/src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
