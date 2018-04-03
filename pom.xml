@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
+        <groupId>com.meterware</groupId>
+        <artifactId>multirelease-parent</artifactId>
+        <version>1.0</version>
     </parent>
 
     <groupId>com.meterware.simplestub</groupId>
@@ -68,16 +68,6 @@
     -->
 
     <properties>
-        <!-- The oldest Java version supported by this tool.               -->
-        <!-- Will control compilation of the main code and the unit tests. -->
-        <base.java.version>1.7</base.java.version>
-
-        <!-- the target for the Java 9 classes during development -->
-        <java9.build.outputDirectory>${project.build.outputDirectory}</java9.build.outputDirectory>
-
-        <!-- set the property when running from the release plugin -->
-        <arguments>-Dmulti_release=true</arguments>
-
         <!-- the supported version of ASM. Required as there are multiple jars which need the same version -->
         <asm.version>6.1.1</asm.version>
     </properties>
@@ -115,59 +105,6 @@
 
     <build>
         <plugins>
-
-            <!-- Use toolchains to select the compilers -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>toolchain</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <toolchains>
-                        <jdk>
-                            <version>${base.java.version}</version>
-                            <vendor>oracle</vendor>
-                        </jdk>
-                    </toolchains>
-                </configuration>
-            </plugin>
-
-            <!-- define the possible compilations -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <configuration>
-                    <source>${base.java.version}</source>
-                    <target>${base.java.version}</target>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>java9</id>
-                        <phase/>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <source>9</source>
-                            <target>9</target>
-                            <jdkToolchain>
-                                <version>9</version>
-                            </jdkToolchain>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
-                            </compileSourceRoots>
-                            <outputDirectory>${java9.build.outputDirectory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!-- prevent the site plugin from deploying to the scm url -->
             <plugin>
@@ -272,100 +209,5 @@
 
         </plugins>
     </reporting>
-
-    <profiles>
-        <profile>
-            <id>compile-java9</id>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
-
-            <!-- enable java9 compilation -->
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>java9</id>
-                                <phase>compile</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>test-toolchains-bypass</id>
-            <activation>
-                <property>
-                    <name>!multi_release</name>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <!-- Run the unit tests with the JVM used to run maven -->
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.21.0</version>
-                        <configuration>
-                            <jvm>${env.JAVA_HOME}/bin/java</jvm>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>multi-jar</id>
-            <activation>
-                <property>
-                    <name>multi_release</name>
-                </property>
-            </activation>
-
-            <properties>
-                <!-- compile the java9 code to its MR directory -->
-                <java9.build.outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</java9.build.outputDirectory>
-            </properties>
-
-            <build>
-                <plugins>
-
-                    <!-- enable java9 compilation -->
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>java9</id>
-                                <phase>compile</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- add the multi-release:true manifest entry -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <archive>
-                                <manifestEntries>
-                                    <Multi-Release>true</Multi-Release>
-                                </manifestEntries>
-                            </archive>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>
 
