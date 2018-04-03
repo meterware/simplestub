@@ -3,11 +3,12 @@ jdk:
   - openjdk7
   - oraclejdk8
   - oraclejdk9
-# We don't need an install before
 # we run the unit tests.
 # We have no integration tests as yet
-install: true
-script: "mvn --show-version --errors --batch-mode clean test"
+install:
+    cp build-tools/src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
+script:
+    "mvn --show-version --errors --batch-mode clean test"
 cache:
     directories:
     - $HOME/.m2
