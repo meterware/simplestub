@@ -4,15 +4,17 @@ package com.meterware.simplestub;
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
-import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
-import org.junit.Test;
+import static com.meterware.simplestub.StaticStubSupport.nestedClass;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.typeCompatibleWith;
+import static org.junit.Assert.assertThat;
 
+import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import java.util.ArrayList;
 import java.util.EventListener;
-
-import static com.meterware.simplestub.StaticStubSupport.nestedClass;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 /**
  * Verifies support for static stubs.
@@ -263,6 +265,11 @@ public class StaticStubSupportTest {
     @Test(expected = NoSuchFieldException.class)
     public void whenTheFieldNameIsWrong_throwException() throws NoSuchFieldException {
         StaticStubSupport.install(Statics.class, "noSuchValue", "test value");
+    }
+
+    @Test(expected = NoSuchFieldException.class)
+    public void whenTheFieldTypeIsWrong_throwException() throws NoSuchFieldException {
+        StaticStubSupport.install(Statics.class, "finalValue", "test value");
     }
 
     @Test

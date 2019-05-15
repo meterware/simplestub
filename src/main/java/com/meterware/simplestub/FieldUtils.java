@@ -100,7 +100,7 @@ class FieldUtils {
         unsafe.ensureClassInitialized(aClass);
         Field field = aClass.getDeclaredField(fieldName);
         if (!field.getType().isPrimitive())
-            unsafe.putObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), value);
+            unsafe.putObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), validFor(value, field));
         else if (field.getType().equals(boolean.class) && value instanceof Boolean)
             unsafe.putBoolean(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), (Boolean) value);
         else if (field.getType().equals(char.class) && value instanceof Character)
@@ -119,6 +119,12 @@ class FieldUtils {
             unsafe.putDouble(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), ((Number) value).doubleValue());
         else
             throw new IllegalArgumentException(String.format("Can not set final static %s field %s.%s to %s", field.getType(), aClass.getName(), fieldName, value.getClass().getName()));
+    }
+
+    private static Object validFor(Object value, Field field) throws NoSuchFieldException {
+        if (value != null && !field.getType().isAssignableFrom(value.getClass()))
+            throw new NoSuchFieldException("Cannot assign a " + value.getClass() + " to field " + field.getName());
+        return value;
     }
 
 }
