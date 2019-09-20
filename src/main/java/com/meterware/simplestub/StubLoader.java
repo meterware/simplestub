@@ -1,13 +1,9 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2019 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
-import com.meterware.simplestub.generation.StubGenerator;
-import com.meterware.simplestub.generation.StubKind;
-import com.meterware.simplestub.stubs.StubAnchor;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +11,10 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.meterware.simplestub.generation.StubGenerator;
+import com.meterware.simplestub.generation.StubKind;
+import com.meterware.simplestub.generation.stubs.StubAnchor;
 
 /**
  * A class to load generated simple stubs.
