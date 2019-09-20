@@ -69,7 +69,10 @@
 
     <properties>
         <!-- the supported version of ASM. Required as there are multiple jars which need the same version -->
-        <asm.version>6.1.1</asm.version>
+        <asm.version>7.1</asm.version>
+        <!-- require 1.8 or higher, to use streams -->
+        <base.java.version>1.8</base.java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>

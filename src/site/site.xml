@@ -5,7 +5,7 @@
 http://maven.apache.org/DECORATION/1.3.0 ">
     <body>
         <links>
-            <item name="SimpleStub" position="right" href="http://simplestub.java.net"/>
+            <item name="SimpleStub" position="right" href="http://simplestub.meterware.com"/>
         </links>
         <menu name="Description">
             <item name="Overview" href="index.html"/>
@@ -14,12 +14,11 @@ http://maven.apache.org/DECORATION/1.3.0 ">
             <item name="Handling static variables" href="statics.html"/>
             <item name="Handling system properties" href="properties.html"/>
             <item name="Handling class loaders" href="classloaders.html"/>
-            <!--<item name="Testing static initializers" href="initializers.html"/>-->
-            <item name="Using Javassist instead of ASM" href="javassist.html"/>
+            <item name="Simulating files in memory" href="filesystem.html"/>
         </menu>
         <menu ref="reports"/>
 
-        <footer>Copyright &copy; 2012-2017, Russell Gold. All Rights Reserved.</footer>
+        <footer>Copyright &amp;copy; 2012-2019, Russell Gold. All Rights Reserved.</footer>
     </body>
 
 </project>

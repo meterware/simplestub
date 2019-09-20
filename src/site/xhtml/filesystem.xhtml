@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>SimpleStub: Simulating file I/O</title>
+</head>
+<body>
+<h2>Simulating file I/O</h2>
+
+<p>File I/O in a unit test has a number of issues, including performance and platform-specific
+    behavior. One common approach when there are a small number of predefined files to read is to
+    store them as a resources in a project and then use relative paths to locate them, but that can
+    tricky in multi-module projects, which might be run either from the top-level directory or the
+    module-directory. It's also possible to create temporary files for the code to read, but that
+    doesn't help when there is some reason that a program must read from a particular path.
+    The <a href="/apidocs/com/meterware/simplestub/stubs/InMemoryFileSystem.html">InMemoryFileSystem</a>
+    class provides an alternate approach.
+</p>
+
+
+
+</body>
+</html>
