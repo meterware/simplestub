@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>SimpleStub &#x2013; SimpleStub: Handling System Properties</title>
+    <title>SimpleStub &#x2013; SimpleStub: Simulating file I/O</title>
     <style type="text/css" media="all">
       @import url("./css/maven-base.css");
       @import url("./css/maven-theme.css");
@@ -57,14 +57,14 @@
                           <a href="statics.html" title="Handling static variables">Handling static variables</a>
             </li>
                   <li class="none">
-            <strong>Handling system properties</strong>
-          </li>
+                          <a href="properties.html" title="Handling system properties">Handling system properties</a>
+            </li>
                   <li class="none">
                           <a href="classloaders.html" title="Handling class loaders">Handling class loaders</a>
             </li>
                   <li class="none">
-                          <a href="filesystem.html" title="Simulating files in memory">Simulating files in memory</a>
-            </li>
+            <strong>Simulating files in memory</strong>
+          </li>
           </ul>
                        <h5>Project Documentation</h5>
                   <ul>
@@ -88,107 +88,19 @@
 
 
 <div class="section">
-<h2><a name="Handling_System_Properties"></a>Handling System Properties</h2>
+<h2><a name="Simulating_file_IO"></a>Simulating file I/O</h2>
 
 
-<p>It sometimes happens that a class will manipulate or depend on system properties. Since we always want to restore
-    conditions to what they were before a unit test, SimpleStub provides support for manipulating them in a reversible
-    way.
+<p>File I/O in a unit test has a number of issues, including performance and platform-specific
+    behavior. One common approach when there are a small number of predefined files to read is to
+    store them as a resources in a project and then use relative paths to locate them, but that can
+    tricky in multi-module projects, which might be run either from the top-level directory or the
+    module-directory. It's also possible to create temporary files for the code to read, but that
+    doesn't help when there is some reason that a program must read from a particular path.
+    The <a href="/apidocs/com/meterware/simplestub/stubs/InMemoryFileSystem.html">InMemoryFileSystem</a>
+    class provides an alternate approach.
 </p>
 
-
-<p>
-    One place where this can be useful is JNDI, where the call to <tt>new InitialContext()</tt> uses a factory
-    defined by the property <tt>java.naming.factory.initial</tt>, defined by the constant
-    <a class="externalLink" href="http://docs.oracle.com/javase/8/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY."><tt>javax.naming.Context.INITIAL_CONTEXT_FACTORY</tt></a>.
-    Testing code that uses JNDI can often be simplified is we can substitute a test factory.
-</p>
-
-
-<p>The first thing we do is to define an appropriate Context stub class. In this case, our test will only do lookups, so
-    that is all that we implement:</p>
-
-
-    
-<div class="source">
-<pre>
-<b>abstract static class</b> ContextStub <b>implements</b> javax.naming.Context {
-    <b>private static </b> Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
-
-    <b>static void</b> clear() { map.clear(); }
-
-    <b>static void</b> defineEntry(String name, Object value) { map.put(name, value); }
-
-    <i>@Override</i>
-    <b>public Object</b> lookup(String name) throws NamingException {
-        <b>if</b> (!map.containsKey(name)) throw <b>new</b> NamingException(&quot;failed in test&quot;);
-        <b>return</b> map.get(name);
-    }
-}</pre></div>
-
-
-<p>
-    Then we define the initial context factory itself, along with methods to activate it and clean up afterwards.
-</p>
-
-    
-<div class="source">
-<pre>
-<b>static class</b> InitialContextFactoryStub <b>implements</b> javax.naming.spi.InitialContextFactory {
-    <b>private static </b> Memento memento = Memento.NULL;
-
-    <b>static void</b> install() {
-        ContextStub.clear();
-        memento = SystemPropertySupport.install(Context.INITIAL_CONTEXT_FACTORY, InitialContextFactoryStub<b>.class</b>.getName());
-    }
-
-    <b>static void</b> uninstall() {
-        memento.revert();
-    }
-
-    <i>@Override</i>
-    <b>public</b> Context getInitialContext(Hashtable&lt;?,?&gt; environment) throws NamingException {
-        return createStub(ContextStub<b>.class</b>);
-    }
-
-}</pre></div>
-
-
-
-<p>Note that when we install the factory, we also clear all current definitions. This prevents one test from affecting others.
-    Now we can use this in a test:</p>
-
-
-    
-<div class="source">
-<pre>
-    <i>@Before</i>
-    <b>public void</b> setUp() <b>throws</b> Exception {
-        InitialContextFactoryStub.install();
-    }
-
-    <i>@After</i>
-    <b>public void</b> tearDown() {
-        InitialContextFactoryStub.uninstall();
-    }
-
-    <i>@Test</i>
-    <b>public void</b> whenJndiValueIsString_reportValue() {
-        ContextStub.defineEntry(computer.VALUE_NAME, &quot;zork&quot;);
-
-        assertThat(computer.getValue(), is(&quot;zork&quot;));
-    }
-
-    <i>@Test</i>
-    <b>public void</b> whenJndiValueIsBoolean_reportValue() {
-         ContextStub.defineEntry(computer.VALUE_NAME, Boolean.TRUE);
-
-         assertThat(computer.getValue(), is(&quot;asserted&quot;));
-     }</pre></div>
-
-
-
-<p>thus verifying that the <tt>getValue</tt> method is looking up the value named VALUE_NAME and converting it appropriately.</p>
 
 
 </div>
