@@ -9,7 +9,11 @@ jdk:
 # We have no integration tests as yet
 
 install:
+  - export SAVED_JAVA_HOME=$JAVA_HOME
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
+  - source ./install-jdk.sh -e --feature 9
+  - export JAVA_HOME=$SAVED_JAVA_HOME
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
