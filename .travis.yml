@@ -12,9 +12,6 @@ install:
   - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
   -  echo $HOME
-  - mkdir -pv $HOME/openjdk9
-  - mkdir -pv $HOME/oraclejdk11
-  - mkdir -pv $HOME/openjdk12
   - source ./install-jdk.sh --emit-java-home --feature 9 --target $HOME/openjdk9
   - source ./install-jdk.sh --emit-java-home --feature 12 --target $HOME/openjdk12
 script:
