@@ -30,6 +30,7 @@
             <jdkHome>/usr/local/lib/jvm/openjdk10</jdkHome>
         </configuration>
     </toolchain>
+<!--
     <toolchain>
         <type>jdk</type>
         <provides>
@@ -40,6 +41,7 @@
             <jdkHome>/usr/local/lib/jvm/oraclejdk11</jdkHome>
         </configuration>
     </toolchain>
+-->
     <toolchain>
         <type>jdk</type>
         <provides>
