@@ -27,7 +27,7 @@
             <version>9</version>
         </provides>
         <configuration>
-            <jdkHome>/home/travis/openjdk9</jdkHome>
+            <jdkHome>/home/travis/jdk-9.0.4</jdkHome>
         </configuration>
     </toolchain>
     <toolchain>
