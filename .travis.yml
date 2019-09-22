@@ -7,15 +7,19 @@ jdk:
   - openjdk11
 # we run the unit tests.
 # We have no integration tests as yet
+
+before_script:
+- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+
 install:
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
   -  echo $HOME
   - mkdir $HOME/openjdk9
   - mkdir $HOME/oraclejdk11
   - mkdir $HOME/openjdk12
-  - ~/bin/install-jdk.sh --install openjdk9 --target $HOME/openjdk9
-  - ~/bin/install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
-  - ~/bin/install-jdk.sh --install openjdk12 --target $HOME/openjdk12
+  - source ./install-jdk.sh --install openjdk9 --target $HOME/openjdk9
+  - source ./install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
+  - source ./install-jdk.sh --install openjdk12 --target $HOME/openjdk12
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
