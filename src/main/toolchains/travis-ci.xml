@@ -37,7 +37,7 @@
             <vendor>oracle</vendor>
         </provides>
         <configuration>
-            <jdkHome>/home/travis/oraclejdk11</jdkHome>
+            <jdkHome>/usr/local/lib/jvm/oraclejdk11</jdkHome>
         </configuration>
     </toolchain>
     <toolchain>
