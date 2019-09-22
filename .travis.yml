@@ -11,8 +11,8 @@ jdk:
 install:
   - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
-  - source ./install-jdk.sh --feature 9 --target $HOME/openjdk9
-  - source ./install-jdk.sh --feature 12 --target $HOME/openjdk12
+  - source ./install-jdk.sh --feature 9 --target $HOME/jdk9
+  - source ./install-jdk.sh --feature 12 --target $HOME/jdk12
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
