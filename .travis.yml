@@ -15,9 +15,8 @@ install:
   - mkdir $HOME/openjdk9
   - mkdir $HOME/oraclejdk11
   - mkdir $HOME/openjdk12
-  - source ./install-jdk.sh --install openjdk9 --target $HOME/openjdk9
-  - source ./install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
-  - source ./install-jdk.sh --install openjdk12 --target $HOME/openjdk12
+  - source ./install-jdk.sh -e -feature 9 --target $HOME/openjdk9
+  - source ./install-jdk.sh -e -feature 12 --target $HOME/openjdk12
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
