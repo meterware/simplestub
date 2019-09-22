@@ -8,10 +8,8 @@ jdk:
 # we run the unit tests.
 # We have no integration tests as yet
 
-before_script:
-- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-
 install:
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
   -  echo $HOME
   - mkdir $HOME/openjdk9
