@@ -8,11 +8,11 @@ jdk:
 # we run the unit tests.
 # We have no integration tests as yet
 install:
-    cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
-    echo $HOME
-  $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk9 --target $HOME/openjdk9
-  $TRAVIS_BUILD_DIR/install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
-  $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk12 --target $HOME/openjdk12
+  - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
+  -  echo $HOME
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk9 --target $HOME/openjdk9
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk12 --target $HOME/openjdk12
 script:
     "mvn --show-version --errors --batch-mode clean test"
 cache:
