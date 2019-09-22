@@ -10,6 +10,9 @@ jdk:
 install:
   - cp src/main/toolchains/travis-ci.xml $HOME/.m2/toolchains.xml
   -  echo $HOME
+  - mkdir $HOME/openjdk9
+  - mkdir $HOME/oraclejdk11
+  - mkdir $HOME/openjdk12
   - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk9 --target $HOME/openjdk9
   - $TRAVIS_BUILD_DIR/install-jdk.sh --install oraclejdk11 --target $HOME/oraclejdk11
   - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk12 --target $HOME/openjdk12
