@@ -24,6 +24,15 @@
     <toolchain>
         <type>jdk</type>
         <provides>
+            <version>9</version>
+        </provides>
+        <configuration>
+            <jdkHome>/usr/local/lib/jvm/openjdk9</jdkHome>
+        </configuration>
+    </toolchain>
+    <toolchain>
+        <type>jdk</type>
+        <provides>
             <version>10</version>
         </provides>
         <configuration>
