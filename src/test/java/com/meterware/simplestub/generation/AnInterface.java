@@ -1,9 +1,10 @@
 package com.meterware.simplestub.generation;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -32,7 +33,9 @@ interface AnInterface {
 
     void doNothing();
 
-    byte[] getByteArray();
+    default byte[] getByteArray() {
+        return "Result".getBytes(StandardCharsets.UTF_8);
+    }
 
     int[][] getIntArrayArray();
 

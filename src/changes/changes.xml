@@ -7,6 +7,11 @@
       <author email="russ at gold-family dot us">Russell Gold</author>
     </properties>
     <body>
+        <release version="1.3.1" date="2022-07-20" description="minor release">
+            <action dev="russgold" type="update">
+                Support use of default methods in parent interface when generating stubs
+            </action>
+        </release>
         <release version="1.2.12" date="2018-03-29" description="minor release">
             <action dev="russgold" type="update">
                 Created multi-release jar to add support for JDK11

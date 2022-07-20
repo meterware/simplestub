@@ -1,6 +1,6 @@
 package com.meterware.simplestub.generation;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
@@ -13,7 +13,7 @@ import java.util.List;
  * @author Russell Gold
  */
 public abstract class StubGenerator {
-    private static String[] FACTORY_NAMES = {
+    private static final String[] FACTORY_NAMES = {
             "com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory",
             "com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory"
     };
@@ -52,6 +52,6 @@ public abstract class StubGenerator {
         }
     }
 
-    abstract public Class<?> generateStubClass(String stubClassName, Class<?> anchorClass);
+    public abstract Class<?> generateStubClass(String stubClassName, Class<?> anchorClass);
 
 }

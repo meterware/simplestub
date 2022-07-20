@@ -1,9 +1,21 @@
 package com.meterware.simplestub.generation.asm;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.meterware.simplestub.ClassUtils;
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.generation.StubGenerator;
@@ -13,11 +25,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
 /**
  * A stub generator which uses the ASM library.
  *
@@ -25,7 +32,7 @@ import java.util.*;
  */
 class AsmStubGenerator extends StubGenerator {
 
-    private static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<>();
+    private static final Map<StubKind, MethodGenerator> methodGenerators = new EnumMap<>(StubKind.class);
 
     static {
         methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
@@ -34,7 +41,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     private final Class<?> baseClass;
-    private MethodGenerator methodGenerator;
+    private final MethodGenerator methodGenerator;
 
     AsmStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
@@ -63,11 +70,11 @@ class AsmStubGenerator extends StubGenerator {
     private void defineClass(String stubClassName, ClassWriter cw, Class<?> baseClass, Class<?>... interfaces) {
         cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, toInternalName(stubClassName), null, toInternalName(baseClass), toInternalNames(interfaces));
 
-        for (Constructor constructor : baseClass.getDeclaredConstructors())
+        for (Constructor<?> constructor : baseClass.getDeclaredConstructors())
             addConstructor(cw, constructor);
     }
 
-    private void addConstructor(ClassWriter cw, Constructor constructor) {
+    private void addConstructor(ClassWriter cw, Constructor<?> constructor) {
         org.objectweb.asm.commons.Method m = org.objectweb.asm.commons.Method.getMethod(constructor);
         GeneratorAdapter mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
         mg.loadThis();
@@ -99,7 +106,8 @@ class AsmStubGenerator extends StubGenerator {
 
     private void addInterfaceMethods(Set<MethodSpec> abstractMethods, Class<?> anInterface) {
         for (Method method : anInterface.getMethods())
-            abstractMethods.add(new MethodSpec(method));
+            if (!method.isDefault())
+                abstractMethods.add(new MethodSpec(method));
     }
 
     private Class<?>[] getClassHierarchy(Class<?> baseClass) {
@@ -136,7 +144,7 @@ class AsmStubGenerator extends StubGenerator {
     private Class<?> defineClass(Class<?> anchorClass, String className, byte[] classBytes) {
         try {
             return ClassUtils.defineClass(anchorClass, className, classBytes);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new SimpleStubException("error creating stub for %s", e, getStubName());
         }
     }
@@ -146,7 +154,7 @@ class AsmStubGenerator extends StubGenerator {
     }
 
     static class MethodSpec {
-        private Method method;
+        private final Method method;
 
         MethodSpec(Method method) {
             this.method = method;

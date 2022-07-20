@@ -1,9 +1,15 @@
 package com.meterware.simplestub.generation;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
 import org.hamcrest.MatcherAssert;
@@ -11,12 +17,12 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.typeCompatibleWith;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -25,7 +31,7 @@ import static org.hamcrest.core.Is.is;
 abstract public class StubGeneratorTestBase {
 
     private static int stubNum = 0;
-    private StubGeneratorFactory factory;
+    private final StubGeneratorFactory factory;
 
     private AnInterface anInterfaceStub;
 
@@ -40,13 +46,11 @@ abstract public class StubGeneratorTestBase {
         anInterfaceStub = createStub(AnInterface.class);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> T createStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createStubClass(baseClass);
         return create(aStubClass);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> T createNiceStub(Class<T> baseClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<T> aStubClass = createNiceStubClass(baseClass);
         return create(aStubClass);
@@ -64,12 +68,10 @@ abstract public class StubGeneratorTestBase {
         assertThat(aStub, typeCompatibleWith(AnInterface.class));
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Class<T> createStubClass(Class<T> baseClass) {
         return createStubClass(baseClass, StubKind.DEFAULT);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Class<T> createNiceStubClass(Class<T> baseClass) {
         return createStubClass(baseClass, StubKind.NICE);
     }
@@ -115,6 +117,13 @@ abstract public class StubGeneratorTestBase {
         ADerivedClass testObject = createStub(ADerivedClass.class);
 
         MatcherAssert.assertThat(testObject.getDouble(), is(0.0));
+    }
+
+    @Test
+    public void whenMethodsAreDefaultedBaseClassInterface_generateStubs() throws Exception {
+        ADerivedClass testObject = createStub(ADerivedClass.class);
+
+        MatcherAssert.assertThat(testObject.getByteArray(), equalTo("Result".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
