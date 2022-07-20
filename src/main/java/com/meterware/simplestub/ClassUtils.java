@@ -41,13 +41,21 @@ public class ClassUtils {
      * @param anchorClass the class from which the package and classloader of the new class are to be taken.
      * @param className the name of the class to define
      * @param classBytes the bytes used to define the class
+     * @throws ClassFormatError if the bytecode doesn't properly define a class.
+     * @throws IllegalAccessException if unable to get access to the defineClassMethod.
      * @return a new instantiable class, in the package and classloader of the anchor class.
      */
-    public static Class<?> defineClass(Class<?> anchorClass, String className, byte[] classBytes) throws Throwable {
+    public static Class<?> defineClass(Class<?> anchorClass, String className, byte[] classBytes)
+            throws ClassFormatError, IllegalAccessException {
         try {
             return (Class<?>) defineClassMethod.invoke(anchorClass.getClassLoader(), className, classBytes, 0, classBytes.length);
         } catch (InvocationTargetException e) {
-            throw e.getTargetException();
+            final Throwable targetException = e.getTargetException();
+            if (targetException instanceof ClassFormatError) {
+                throw (ClassFormatError) targetException;
+            } else {
+                throw new RuntimeException("Unexpected exception", targetException);
+            }
         }
     }
 }

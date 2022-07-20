@@ -111,7 +111,7 @@
             <!-- prevent the site plugin from deploying to the scm url -->
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.4</version>
+                <version>3.7.1</version>
                 <executions>
                     <execution>
                         <id>stage-for-scm-publish</id>
@@ -153,18 +153,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.9</version>
+                <version>3.1.2</version>
                 <reportSets>
                     <reportSet>
                         <reports>
                             <report>dependency-info</report>
-                            <report>issue-tracking</report>
+                            <report>issue-management</report>
                             <report>scm</report>
-                            <report>license</report>
+                            <report>licenses</report>
                             <report>distribution-management</report>
-                            <report>project-team</report>
+                            <report>team</report>
                             <report>summary</report>
-                            <report>mailing-list</report>
                         </reports>
                     </reportSet>
                 </reportSets>
@@ -188,18 +187,28 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.7.0.0</version>
                 <configuration>
-                    <excludeFilterFile>src/main/findbugs/findbugs-excludes.xml</excludeFilterFile>
+<!--
+                    <includeFilterFile>spotbugs-security-include.xml</includeFilterFile>
+                    <excludeFilterFile>spotbugs-security-exclude.xml</excludeFilterFile>
+-->
+                    <plugins>
+                        <plugin>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
+                            <artifactId>findsecbugs-plugin</artifactId>
+                            <version>1.12.0</version>
+                        </plugin>
+                    </plugins>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changes-plugin</artifactId>
-                <version>2.12</version>
+                <version>2.12.1</version>
                 <reportSets>
                     <reportSet>
                         <reports>
