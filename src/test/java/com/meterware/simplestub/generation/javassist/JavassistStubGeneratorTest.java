@@ -5,10 +5,7 @@ package com.meterware.simplestub.generation.javassist;
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
 
-import com.meterware.simplestub.TestUtils;
 import com.meterware.simplestub.generation.StubGeneratorTestBase;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 
 /**
  * Tests for creating stubs using Javassist.
@@ -21,16 +18,6 @@ public class JavassistStubGeneratorTest extends StubGeneratorTestBase {
     public JavassistStubGeneratorTest() {
         super(STUB_GENERATOR_FACTORY);
     }
-
-    @BeforeAll
-    public static void skipUnderJdk11() throws Exception {
-        Assumptions.assumeTrue( isBeforeJdk11() );
-    }
-
-    private static boolean isBeforeJdk11() {
-        return TestUtils.getJavaVersion() < 11;
-    }
-
 
     @Override
     protected String getImplementationType() {

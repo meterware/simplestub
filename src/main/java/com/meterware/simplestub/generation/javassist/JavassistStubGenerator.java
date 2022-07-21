@@ -1,16 +1,24 @@
 package com.meterware.simplestub.generation.javassist;
 /*
- * Copyright (c) 2017-2018 Russell Gold
+ * Copyright (c) 2017-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.meterware.simplestub.SimpleStubException;
+import com.meterware.simplestub.SystemUtils;
 import com.meterware.simplestub.generation.StubGenerator;
 import com.meterware.simplestub.generation.StubKind;
-import javassist.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
+import javassist.Modifier;
+import javassist.NotFoundException;
 
 /**
  * The Javassist implementation of a stub generator.
@@ -19,7 +27,7 @@ import java.util.Map;
  */
 public class JavassistStubGenerator extends StubGenerator {
 
-    private static final Map<StubKind,MethodGenerator> methodGenerators = new HashMap<>();
+    private static final Map<StubKind,MethodGenerator> methodGenerators = new EnumMap<>(StubKind.class);
 
     static {
         JavassistStubGenerator.methodGenerators.put(StubKind.DEFAULT, new DefaultMethodGenerator());
@@ -27,9 +35,9 @@ public class JavassistStubGenerator extends StubGenerator {
         JavassistStubGenerator.methodGenerators.put(StubKind.STRICT, new StrictMethodGenerator());
     }
 
-    private ClassPool pool = new ClassPool(ClassPool.getDefault());
-    private Class<?> baseClass;
-    private MethodGenerator methodGenerator;
+    private final ClassPool pool = new ClassPool(ClassPool.getDefault());
+    private final Class<?> baseClass;
+    private final MethodGenerator methodGenerator;
 
     public JavassistStubGenerator(Class<?> baseClass, StubKind kind) {
         this.baseClass = baseClass;
@@ -51,7 +59,10 @@ public class JavassistStubGenerator extends StubGenerator {
             if (isAbstract(method))
                 addStubMethod(ctClass, method);
         }
-        return ctClass.toClass(anchorClass.getClassLoader(), null);
+        if (SystemUtils.getJavaVersion() < 11)
+            return ctClass.toClass(anchorClass.getClassLoader(), null);
+        else
+            return ctClass.toClass(anchorClass);
     }
 
     private CtClass createStubClassBase(String stubClassName) throws NotFoundException {
@@ -84,5 +95,6 @@ public class JavassistStubGenerator extends StubGenerator {
     private CtClass createStubClassFromAbstractClass(String stubClassName) throws NotFoundException {
         return pool.makeClass(stubClassName, pool.get(baseClass.getName()));
     }
+
 
 }

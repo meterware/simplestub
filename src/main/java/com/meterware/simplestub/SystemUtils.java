@@ -1,16 +1,24 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2017 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
 
 /**
- * Some common utilities for the unit tests.
+ * Some common utilities.
  *
  * @author Russell Gold
  */
-public class TestUtils {
+public class SystemUtils {
+
+    private SystemUtils() {
+    }
+
+    /**
+     * Returns the integer representing the major version of the JDK. For JDK 1.8, returns 8; for JDK 11, returns 11
+     * and so on.
+     */
     public static int getJavaVersion() {
         String versionString = System.getProperty("java.version");
         if (versionString.startsWith("1."))
