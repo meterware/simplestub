@@ -1,6 +1,6 @@
 package com.meterware.simplestub.stubs;
 /*
- * Copyright (c) 2019 Russell Gold
+ * Copyright (c) 2019-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
@@ -14,23 +14,24 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class InMemoryFileSystemTest {
-  private InMemoryFileSystem fileSystem = InMemoryFileSystem.createInstance();
+class InMemoryFileSystemTest {
+  private final InMemoryFileSystem fileSystem = InMemoryFileSystem.createInstance();
 
-  @Test(expected = NoSuchFileException.class)
-  public void whenFileNotDefined_linesThrowsException() throws IOException {
-    Files.lines(toPath("/no/such/file"));
+  @Test
+  void whenFileNotDefined_linesThrowsException() {
+    assertThrows(NoSuchFileException.class, ()-> Files.lines(toPath("/no/such/file")));
   }
 
   @Test
-  public void detectFileExistence() {
+  void detectFileExistence() {
     fileSystem.defineFile("/my/file", "data");
 
     assertThat(Files.exists(toPath("/no/such/file")), is(false));
@@ -44,7 +45,7 @@ public class InMemoryFileSystemTest {
   }
 
   @Test
-  public void whenFileDefined_accessViaBufferedReader() throws IOException {
+  void whenFileDefined_accessViaBufferedReader() throws IOException {
     fileSystem.defineFile("/my/file", "line1\nline2\nline3");
 
     BufferedReader br = Files.newBufferedReader(toPath("/my/file"));
@@ -53,7 +54,7 @@ public class InMemoryFileSystemTest {
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
-  public void whenFileDefined_accessViaInputStream() throws IOException {
+  void whenFileDefined_accessViaInputStream() throws IOException {
     byte[] expectedContents = {0, 1, 2, 3, 4, 5};
     fileSystem.defineFile("/my/file", expectedContents);
 
@@ -65,7 +66,7 @@ public class InMemoryFileSystemTest {
   }
 
   @Test
-  public void whenFileDefined_readLinesAsStream() throws IOException {
+  void whenFileDefined_readLinesAsStream() throws IOException {
     fileSystem.defineFile("/my/file", "line1\nline2\nline3");
 
     List<String> contents = Files.lines(toPath("/my/file")).collect(Collectors.toList());
@@ -74,7 +75,7 @@ public class InMemoryFileSystemTest {
   }
 
   @Test
-  public void whenFileDefined_readLinesAsList() throws IOException {
+  void whenFileDefined_readLinesAsList() throws IOException {
     fileSystem.defineFile("/my/file", "line1\nline2\nline3");
 
     List<String> contents = Files.readAllLines(toPath("/my/file"));
@@ -83,7 +84,7 @@ public class InMemoryFileSystemTest {
   }
 
   @Test
-  public void whenFileDefined_readBytesAsStream() throws IOException {
+  void whenFileDefined_readBytesAsStream() throws IOException {
     byte[] expectedContents = {0, 1, 2, 3, 4, 5};
     fileSystem.defineFile("/my/file", expectedContents);
 

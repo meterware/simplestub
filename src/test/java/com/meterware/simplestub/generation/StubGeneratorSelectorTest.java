@@ -1,23 +1,26 @@
 package com.meterware.simplestub.generation;
 /*
- * Copyright (c) 2015-2016 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.meterware.simplestub.Memento;
 import com.meterware.simplestub.StaticStubSupport;
 import com.meterware.simplestub.classes.Interface1;
 import com.meterware.simplestub.generation.asm.AsmStubGeneratorFactory;
 import com.meterware.simplestub.generation.javassist.JavassistStubGeneratorFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * A test of the stub generator factory selection. The tests work by manipulating the list of factory names.
@@ -25,31 +28,31 @@ import static org.hamcrest.Matchers.equalTo;
  *
  * @author Russell Gold
  */
-public class StubGeneratorSelectorTest {
+class StubGeneratorSelectorTest {
 
-    private List<Memento> mementos = new ArrayList<Memento>();
+    private final List<Memento> mementos = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mementos.add(StaticStubSupport.install(StubGenerator.class, "factory", null));
     }
 
-    @After
-    public void tearDown() throws Exception {
-        for (Memento memento : mementos)
-            memento.revert();
+    @AfterEach
+    public void tearDown() {
+        mementos.forEach(Memento::revert);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     @SuppressWarnings("unchecked")
-    public void whenNoFactoriesFound_throwException() throws Exception {
+    void whenNoFactoriesFound_throwException() throws Exception {
         setUpFactories();
 
-        createStubGenerator();
+        assertThrows(RuntimeException.class, this::createStubGenerator);
     }
 
-    private boolean setUpFactories(Class<? extends StubGeneratorFactory>... knownFactories) throws NoSuchFieldException {
-        return mementos.add(StaticStubSupport.install(StubGenerator.class, "FACTORY_NAMES", createFactoryNameList(knownFactories)));
+    @SuppressWarnings("unchecked")
+    private void setUpFactories(Class<? extends StubGeneratorFactory>... knownFactories) throws NoSuchFieldException {
+        mementos.add(StaticStubSupport.install(StubGenerator.class, "FACTORY_NAMES", createFactoryNameList(knownFactories)));
     }
 
     private StubGenerator createStubGenerator() {
@@ -57,15 +60,12 @@ public class StubGeneratorSelectorTest {
     }
 
     private String[] createFactoryNameList(Class<? extends StubGeneratorFactory>[] knownFactories) {
-        List<String> factoryNames = new ArrayList<String>();
-        for (Class<? extends StubGeneratorFactory> factoryClass : knownFactories)
-            factoryNames.add(factoryClass.getName());
-        return factoryNames.toArray(new String[factoryNames.size()]);
+        return Arrays.stream(knownFactories).map(Class::getName).toArray(String[]::new);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void whenOnlyJavassistFactoryFound_createStubGenerator() throws Exception {
+    void whenOnlyJavassistFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(JavassistStubGeneratorFactory.class);
 
         assertThat(createStubGenerator().getClass().getSimpleName(), equalTo("JavassistStubGenerator"));
@@ -73,7 +73,7 @@ public class StubGeneratorSelectorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void whenOnlyAsmFactoryFound_createStubGenerator() throws Exception {
+    void whenOnlyAsmFactoryFound_createStubGenerator() throws Exception {
         setUpFactories(AsmStubGeneratorFactory.class);
 
         assertThat(createStubGenerator().getClass().getSimpleName(), equalTo("AsmStubGenerator"));

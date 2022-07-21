@@ -1,39 +1,47 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2017 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
-import com.meterware.simplestub.classes.*;
-import org.junit.After;
-import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meterware.simplestub.classes.AnEnum;
+import com.meterware.simplestub.classes.ClassWithPackagePrivateReference;
+import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
+import com.meterware.simplestub.classes.PropertyReader;
+import com.meterware.simplestub.classes.PropertyReaderImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * Tests the class reloading functionality.
  *
  * @author Russell Gold
  */
-public class ClassLoadingSupportTest {
-    private List<Memento> mementos = new ArrayList<>();
+class ClassLoadingSupportTest {
+    private final List<Memento> mementos = new ArrayList<>();
 
-    @After
-    public void tearDown() throws Exception {
-        for (Memento memento : mementos)
-            memento.revert();
+    @AfterEach
+    void tearDown() {
+        mementos.forEach(Memento::revert);
     }
 
     @Test
-    public void byDefaultStaticClassIgnoresPropertyChange() throws Exception {
+    void byDefaultStaticClassIgnoresPropertyChange() {
         PropertyReader defaultReader = new PropertyReaderImpl();
         mementos.add(SystemPropertySupport.install("test.property", "zork"));
         assertThat(defaultReader.getPropertyValue("test.property"), nullValue());
@@ -41,14 +49,14 @@ public class ClassLoadingSupportTest {
 
     @Test
     @SuppressWarnings("all")
-    public void whenReloadClassCalled_classRunsStaticInitialization() throws Exception {
+    void whenReloadClassCalled_classRunsStaticInitialization() throws Exception {
         mementos.add(SystemPropertySupport.install("test.property", "zork"));
         PropertyReader secondReader = (PropertyReader) ClassLoadingSupport.reloadClass(PropertyReaderImpl.class).getDeclaredConstructor().newInstance();
         assertThat(secondReader.getPropertyValue("test.property"), is("zork"));
     }
 
     @Test
-    public void whenClassHasPrivateNestedClass_reloadedClassGetsOwnVersion() throws Exception {
+    void whenClassHasPrivateNestedClass_reloadedClassGetsOwnVersion() throws Exception {
         Object original = getListenerFromInstance(ClassWithPrivateNestedClass.class);
         Object reloadedValue = getListenerFromInstance(ClassLoadingSupport.reloadClass(ClassWithPrivateNestedClass.class));
 
@@ -56,21 +64,22 @@ public class ClassLoadingSupportTest {
         assertThat(original, not(sameInstance(reloadedValue)));
     }
 
-    @SuppressWarnings("unchecked")
-    private Object getListenerFromInstance(Class aClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private Object getListenerFromInstance(Class<?> aClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Method getListenerMethod = aClass.getMethod("getListener");
         return getListenerMethod.invoke(aClass.getDeclaredConstructor().newInstance());
     }
 
     @Test
-    public void whenClassHasPackageReference_reloadIt() throws Exception {
+    void whenClassHasPackageReference_reloadIt() throws Exception {
         Class<?> aClass = ClassLoadingSupport.reloadClass(ClassWithPackagePrivateReference.class);
-        aClass.getDeclaredConstructor().newInstance();
+        
+        assertDoesNotThrow(() -> aClass.getDeclaredConstructor().newInstance());
     }
 
     @Test
-    public void whenClassIsEnum_realoadingWorks() throws Exception {
-        Class aClass = ClassLoadingSupport.reloadClass(AnEnum.class);
+    void whenClassIsEnum_reloadingWorks() throws Exception {
+        Class<?> aClass = ClassLoadingSupport.reloadClass(AnEnum.class);
+
         assertThat(aClass.getEnumConstants(), arrayWithSize(3));
     }
 }

@@ -1,50 +1,51 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2015-2018 Russell Gold
+ * Copyright (c) 2015-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
-import com.meterware.simplestub.classes.ClassWithConstructorParameters;
-import com.meterware.simplestub.classes.ConcreteClass;
-import com.meterware.simplestub.classes.Interface1;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.EventListener;
 
+import com.meterware.simplestub.classes.ClassWithConstructorParameters;
+import com.meterware.simplestub.classes.ConcreteClass;
+import com.meterware.simplestub.classes.Interface1;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.Matchers.typeCompatibleWith;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 /**
  * Tests support for context class loaders.
  *
  * @author Russell Gold
  */
-public class ThreadContextClassLoaderSupportTest {
+class ThreadContextClassLoaderSupportTest {
     private static int testNum = 0;
-    private String proposedClassName = "a.b.C" + (++testNum);
+    private final String proposedClassName = "a.b.C" + (++testNum);
     private String createdClassName;
     private ClassLoader savedClassLoader;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         savedClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         Thread.currentThread().setContextClassLoader(savedClassLoader);
     }
 
     @Test
-    public void whenInstalled_classLoaderIsSetForThread() {
+    void whenInstalled_classLoaderIsSetForThread() {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
         ThreadContextClassLoaderSupport.install(classLoader);
 
@@ -52,15 +53,15 @@ public class ThreadContextClassLoaderSupportTest {
     }
 
     @Test
-    public void afterInstalled_retrieveOriginalValue() {
+    void afterInstalled_retrieveOriginalValue() {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
         Memento memento = ThreadContextClassLoaderSupport.install(classLoader);
 
-        assertThat((ClassLoader) memento.getOriginalValue(), sameInstance(savedClassLoader));
+        assertThat(memento.getOriginalValue(), sameInstance(savedClassLoader));
     }
 
     @Test
-    public void whenMementoReverted_originalValueIsRestored() {
+    void whenMementoReverted_originalValueIsRestored() {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
         Memento memento = ThreadContextClassLoaderSupport.install(classLoader);
 
@@ -70,22 +71,22 @@ public class ThreadContextClassLoaderSupportTest {
     }
 
     @Test
-    public void whenPreserved_originalValueIsUnchanged() {
+    void whenPreserved_originalValueIsUnchanged() {
         ThreadContextClassLoaderSupport.preserve();
 
         assertThat(Thread.currentThread().getContextClassLoader(), sameInstance(savedClassLoader));
     }
 
     @Test
-    public void afterPreservedAndSet_retrieveOriginalClassLoader() {
+    void afterPreservedAndSet_retrieveOriginalClassLoader() {
         Memento memento = ThreadContextClassLoaderSupport.preserve();
         Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
 
-        assertThat((ClassLoader) memento.getOriginalValue(), sameInstance(savedClassLoader));
+        assertThat(memento.getOriginalValue(), sameInstance(savedClassLoader));
     }
 
     @Test
-    public void whenMementoRevertedAfterPreserve_originalClassLoaderIsRestored() {
+    void whenMementoRevertedAfterPreserve_originalClassLoaderIsRestored() {
         Memento memento = ThreadContextClassLoaderSupport.preserve();
         Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
 
@@ -94,7 +95,7 @@ public class ThreadContextClassLoaderSupportTest {
     }
 
     @Test
-    public void whenClassDefinedFromInterface_retrieveFromClassLoader() throws Exception {
+    void whenClassDefinedFromInterface_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(Interface1.class);
 
         assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(Interface1.class));
@@ -113,14 +114,14 @@ public class ThreadContextClassLoaderSupportTest {
     }
 
     @Test
-    public void whenClassDefinedFromInterface_instantiateWithNoArgConstructor() throws Exception {
+    void whenClassDefinedFromInterface_instantiateWithNoArgConstructor() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(Interface1.class);
 
         assertThat(classLoader.loadClass(getStubClassName()).getDeclaredConstructor().newInstance(), instanceOf(Interface1.class));
     }
 
     @Test
-    public void whenClassDefinedFromJDKInterface_retrieveFromClassLoader() throws Exception {
+    void whenClassDefinedFromJDKInterface_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = new URLClassLoader(new URL[0]);
         ThreadContextClassLoaderSupport.install(classLoader);
         Class<?> stub = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, EventListener.class);
@@ -130,46 +131,49 @@ public class ThreadContextClassLoaderSupportTest {
     }
 
     @Test
-    public void whenClassDefinedFromTestClass_retrieveFromClassLoader() throws Exception {
+    void whenClassDefinedFromTestClass_retrieveFromClassLoader() throws Exception {
         ClassLoader classLoader = createStubInThreadContextClassLoader(ConcreteClass.class);
 
         assertThat(classLoader.loadClass(getStubClassName()), typeCompatibleWith(ConcreteClass.class));
     }
 
     @Test
-    public void whenTwoClassesDefinedWithSameNameAndBase_useFirstClass() throws Exception {
+    void whenTwoClassesDefinedWithSameNameAndBase_useFirstClass() {
         ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
         ThreadContextClassLoaderSupport.install(classLoader);
 
         Class<?> stub1 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
         Class<?> stub2 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
 
-        assertSame(stub1, stub2);
+        assertThat(stub1, sameInstance(stub2));
     }
 
     @Test
-    public void whenTwoClassesDefinedWithSameNameAndDifferentBasePackages_createSeparateClasses() {
+    void whenTwoClassesDefinedWithSameNameAndDifferentBasePackages_createSeparateClasses() {
         ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
         ThreadContextClassLoaderSupport.install(classLoader);
 
         Class<?> stub1 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
         Class<?> stub2 = ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, EventListener.class);
 
-        assertNotSame(stub1, stub2);
+        assertThat(stub1, not(sameInstance(stub2)));
     }
 
-    @Test(expected = SimpleStubException.class)
-    public void whenTwoClassesDefinedWithSameNameAndBasePackagesButDifferentClasses_fail() {
+    @Test
+    void whenTwoClassesDefinedWithSameNameAndBasePackagesButDifferentClasses_fail() {
         ClassLoader classLoader = new URLClassLoader(new URL[0], ConcreteClass.class.getClassLoader());
         ThreadContextClassLoaderSupport.install(classLoader);
 
         ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, ConcreteClass.class);
-        ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, Interface1.class);
+
+        Assertions.assertThrows(SimpleStubException.class,
+                () -> ThreadContextClassLoaderSupport.createStubInThreadContextClassLoader(proposedClassName, Interface1.class));
     }
 
-    @Test(expected = SimpleStubException.class)
-    public void whenBaseClassLacksNoArgContructor_throwException() {
-        createStubInThreadContextClassLoader(ClassWithConstructorParameters.class);
+    @Test
+    void whenBaseClassLacksNoArgContructor_throwException() {
+        Assertions.assertThrows(SimpleStubException.class,
+                        () -> createStubInThreadContextClassLoader(ClassWithConstructorParameters.class));
     }
 
     // todo non-public base class in different package

@@ -14,8 +14,8 @@ import com.meterware.simplestub.SimpleStubException;
 import com.meterware.simplestub.classes.AbstractImplementation;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.typeCompatibleWith;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Russell Gold
@@ -41,7 +42,7 @@ abstract public class StubGeneratorTestBase {
 
     protected abstract String getImplementationType();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         anInterfaceStub = createStub(AnInterface.class);
     }
@@ -276,10 +277,11 @@ abstract public class StubGeneratorTestBase {
         assertThat(string, is("Test Value"));
     }
 
-    @Test(expected = SimpleStubException.class)
+    @Test
     public void whenStrictStubGenerated_throwSimpleStubException() throws Exception {
         AnInterface stub = createStrictStub(AnInterface.class);
-        stub.getByte();
+
+        assertThrows(SimpleStubException.class, stub::getByte);
     }
 
     @SuppressWarnings("SameParameterValue")

@@ -1,16 +1,22 @@
 package com.meterware.simplestub.generation.asm;
 /*
- * Copyright (c) 2016 Russell Gold
+ * Copyright (c) 2016-2022 Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
+
 import com.meterware.simplestub.classes.AbstractImplementation;
 import com.meterware.simplestub.classes.ClassWithPrivateNestedClass;
 import com.meterware.simplestub.classes.ConcreteClass;
 import com.meterware.simplestub.classes.Interface1;
 import com.meterware.simplestub.generation.ClassReferenceFinder;
-import org.junit.Test;
-import org.objectweb.asm.*;
+import org.junit.jupiter.api.Test;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.TypePath;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -26,23 +32,23 @@ public class AsmClassReferenceFinderTest {
     ClassReferenceFinder finder = new AsmClassReferenceFinder();
 
     @Test
-    public void whenClassReferencesNoClass_returnEmptyCollection() throws Exception {
+    void whenClassReferencesNoClass_returnEmptyCollection() throws Exception {
         assertThat(finder.getClassesReferencedBy(ConcreteClass.class), empty());
     }
 
     @Test
-    public void implementation_referencesItsInterface() throws Exception {
-        assertThat(finder.getClassesReferencedBy(AbstractImplementation.class), contains((Class) Interface1.class));
+    void implementation_referencesItsInterface() throws Exception {
+        assertThat(finder.getClassesReferencedBy(AbstractImplementation.class), contains(Interface1.class));
     }
 
     @Test
-    public void whenClassHasInnerClass_returnManufacturedAccessClass() throws Exception {
-        assertThat(finder.getClassesReferencedBy(ClassWithPrivateNestedClass.class), hasItem((Class) Class.forName(ClassWithPrivateNestedClass.class.getName() + "$1")));
+    void whenClassHasInnerClass_returnManufacturedAccessClass() throws Exception {
+        assertThat(finder.getClassesReferencedBy(ClassWithPrivateNestedClass.class), hasItem((Class<?>) Class.forName(ClassWithPrivateNestedClass.class.getName() + "$1")));
     }
 
     @Test
-    public void whenClassInstantiatesNewClass_returnInstantiatedClass() throws Exception {
-        assertThat(finder.getClassesReferencedBy(ClassWithPrivateNestedClass.class), hasItem((Class) Class.forName(ClassWithPrivateNestedClass.class.getName() + "$ListenerImpl")));
+    void whenClassInstantiatesNewClass_returnInstantiatedClass() throws Exception {
+        assertThat(finder.getClassesReferencedBy(ClassWithPrivateNestedClass.class), hasItem((Class<?>) Class.forName(ClassWithPrivateNestedClass.class.getName() + "$ListenerImpl")));
     }
 
 

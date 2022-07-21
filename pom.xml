@@ -54,24 +54,15 @@
         <url>https://github.com/meterware/simplestub/issues</url>
     </issueManagement>
 
-    <!--
-    <mailingLists>
-        <mailingList>
-            <name>SimpleStub Users List</name>
-            <archive>http://java.net/projects/simplestub/lists/users/archive</archive>
-            <post>users at simplestub dot java dot net</post>
-            <subscribe>sympa@simplestub.java.net?subject=subscribe users</subscribe>
-            <unsubscribe>sympa@simplestub.java.net?subject=unsubscribe users</unsubscribe>
-        </mailingList>
-    </mailingLists>
-    -->
-
     <properties>
         <!-- the supported version of ASM. Required as there are multiple jars which need the same version -->
         <asm.version>7.1</asm.version>
+        <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <!-- require 1.8 or higher, to use streams -->
         <base.java.version>1.8</base.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -98,9 +89,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.7</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -144,6 +141,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>3.0.0-M7</version>
             </plugin>
         </plugins>
     </build>
