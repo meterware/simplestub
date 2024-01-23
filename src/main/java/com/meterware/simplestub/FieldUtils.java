@@ -1,14 +1,15 @@
 package com.meterware.simplestub;
 /*
- * Copyright (c) 2017 Russell Gold
+ * Copyright (c) 2017, 2024, Russell Gold
  *
  * Licensed under the Apache License v 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0.txt.
  */
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+
+import sun.misc.Unsafe;
 
 /**
  * A class which bypasses Java module restrictions on access to fields.
@@ -18,21 +19,22 @@ import java.security.PrivilegedAction;
 class FieldUtils {
 
     /** Gain access to get/set field methods. */
-    private final static Unsafe unsafe = AccessController.doPrivileged(
-            new PrivilegedAction<Unsafe>() {
-                @Override
-                public Unsafe run() {
-                    //noinspection Duplicates
-                    try {
-                        Field field = Unsafe.class.getDeclaredField("theUnsafe");
-                        field.setAccessible(true);
-                        return (Unsafe) field.get(null);
-                    } catch (NoSuchFieldException | IllegalAccessException exc) {
-                        throw new Error("Could not access Unsafe", exc);
-                    }
-                }
+    private static final Unsafe unsafe = AccessController.doPrivileged(
+        (PrivilegedAction<Unsafe>) () -> {
+            //noinspection Duplicates
+            try {
+                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                field.setAccessible(true);
+                return (Unsafe) field.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException exc) {
+                throw new Error("Could not access Unsafe", exc);
             }
+        }
     );
+
+    private FieldUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns the value in the specified static field, even if it is private.
@@ -41,7 +43,7 @@ class FieldUtils {
      * @return the value of the field.
      * @throws NoSuchFieldException if the specified class does not contain a static field with the specified name
      */
-    static Object getPrivateStaticField(Class aClass, String fieldName) throws NoSuchFieldException {
+    static Object getPrivateStaticField(Class<?> aClass, String fieldName) throws NoSuchFieldException {
         try {
             return getFieldValue(aClass, fieldName);
         } catch (NoSuchFieldException e) {
@@ -52,8 +54,8 @@ class FieldUtils {
         }
     }
 
-    private static Object getFieldValue(Class aClass, String fieldName) throws NoSuchFieldException {
-        unsafe.ensureClassInitialized(aClass);
+    private static Object getFieldValue(Class<?> aClass, String fieldName) throws NoSuchFieldException {
+        ensureClassInitialized(aClass);
         Field field = aClass.getDeclaredField(fieldName);
         if (!field.getType().isPrimitive())
             return unsafe.getObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field));
@@ -77,6 +79,14 @@ class FieldUtils {
             throw new IllegalArgumentException(String.format("Can not get value for static %s field %s.%s", field.getType(), aClass.getName(), fieldName));
     }
 
+    private static void ensureClassInitialized(Class<?> cl) {
+        try {
+            Class.forName(cl.getName(), true, cl.getClassLoader());
+        } catch (ClassNotFoundException ignored) {
+            // do nothing
+        }
+    }
+
 
     /**
      * Sets the value of the specified static field, even if it is private and final.
@@ -85,7 +95,7 @@ class FieldUtils {
      * @param value the new value to apply.
      * @throws NoSuchFieldException if the specified class does not contain a static field with the specified name
      */
-    static void setPrivateStaticField(Class aClass, String fieldName, Object value) throws NoSuchFieldException {
+    static void setPrivateStaticField(Class<?> aClass, String fieldName, Object value) throws NoSuchFieldException {
         try {
             setFieldValue( aClass, fieldName, value );
         } catch (NoSuchFieldException e) {
@@ -96,8 +106,8 @@ class FieldUtils {
         }
     }
 
-    private static void setFieldValue(Class aClass, String fieldName, Object value) throws NoSuchFieldException {
-        unsafe.ensureClassInitialized(aClass);
+    private static void setFieldValue(Class<?> aClass, String fieldName, Object value) throws NoSuchFieldException {
+        ensureClassInitialized(aClass);
         Field field = aClass.getDeclaredField(fieldName);
         if (!field.getType().isPrimitive())
             unsafe.putObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field), validFor(value, field));
